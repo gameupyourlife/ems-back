@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ems-back", "ems-back\ems-back.csproj", "{72B9BCE0-C51E-4FC7-9740-DF489C5C7B0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ems_back.Repo", "ems-back.Repo\ems_back.Repo.csproj", "{7ECFCD38-B667-4818-900C-D5B4E27D0DB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{72B9BCE0-C51E-4FC7-9740-DF489C5C7B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72B9BCE0-C51E-4FC7-9740-DF489C5C7B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72B9BCE0-C51E-4FC7-9740-DF489C5C7B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ECFCD38-B667-4818-900C-D5B4E27D0DB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ECFCD38-B667-4818-900C-D5B4E27D0DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ECFCD38-B667-4818-900C-D5B4E27D0DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ECFCD38-B667-4818-900C-D5B4E27D0DB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
