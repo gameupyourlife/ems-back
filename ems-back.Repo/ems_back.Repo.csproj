@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="Services\" />
     <Folder Include="DTOs\" />
     <Folder Include="Migrations\" />
+    <Folder Include="DTOs\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
