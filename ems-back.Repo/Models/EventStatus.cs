@@ -2,8 +2,13 @@
 
 public enum EventStatus
 {
-	Upcoming,
-	Ongoing,
+	Draft,
+
+	Scheduled,
+
+	InProgress,
+
 	Completed,
-	Canceled
+
+	Canceled,
 }

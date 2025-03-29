@@ -1,44 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ems_back.Repo.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ems_back.Repo.Models
+[Table("Events")]
+public class Event
 {
-	public class Event
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+	[Key]
+	public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
-		[MaxLength(200)]
-		public string Name { get; set; }
+	[Required]
+	[MaxLength(255)]
+	public string Title { get; set; }
 
-		[Required]
-		public DateTime StartDate { get; set; }
+	public DateTime? Date { get; set; }
 
-		[Required]
-		public DateTime EndDate { get; set; }
+	[Column(TypeName = "text")]
+	public string? Description { get; set; }
 
-		[MaxLength(500)]
-		public string Description { get; set; }
+	[MaxLength(255)]
+	public string? Location { get; set; }
 
-		[Required]
-		public int OrganizationId { get; set; }
+	[Required]
+	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-		[Required]
-		public int MaxParticipants { get; set; }  // Capacity management
+	[Required]
+	public Guid CreatedBy { get; set; }
 
-		[ForeignKey("OrganizationId")]
-		public Organization Organization { get; set; }
+	[MaxLength(255)]
+	public string? Image { get; set; }
 
-		public ICollection<User> Participants { get; set; } = new List<User>();
-		[Required]
-		public EventStatus Status { get; set; } = EventStatus.Upcoming; // Default: Upcoming
-		public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
-	} 
+	public EventCategory? Category { get; set; }
+
+	public EventStatus? Status { get; set; }	
+
+	[Required]
+	public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+	[Required]
+	public Guid UpdatedBy { get; set; }
+
+	public DateTime? Start { get; set; }
+	public DateTime? End { get; set; }
+
+	// Navigation properties
+	[ForeignKey("CreatedBy")]
+	public virtual User? Creator { get; set; }
+
+	[ForeignKey("UpdatedBy")]
+	public virtual User Updater { get; set; }
+
+	public virtual ICollection<EventAttendee> Attendees { get; set; }
+	public virtual ICollection<AgendaEntry> AgendaItems { get; set; }
 }

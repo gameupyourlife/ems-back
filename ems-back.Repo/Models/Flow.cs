@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ems_back.Repo.Models
 {
-	[Table("Organizations")]
-	public class Organization
+	[Table("Flows")]
+	public class Flow
 	{
 		[Key]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required]
-		[MaxLength(255)]
-		public string Name { get; set; }
+		[MaxLength(100)]
+		public string Name { get; set; } // Removed nullable (`?`)
+
+		public string? Description { get; set; }
+
+		[Required]
+		public bool IsActive { get; set; } = true;
 
 		[Required]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -30,18 +35,6 @@ namespace ems_back.Repo.Models
 		[Required]
 		public Guid UpdatedBy { get; set; }
 
-		[MaxLength(500)]
-		public string Address { get; set; }
-
-		[Column(TypeName = "text")]
-		public string Description { get; set; }
-
-		[MaxLength(255)]
-		public string ProfilePicture { get; set; }
-
-		[MaxLength(255)]
-		public string Website { get; set; }
-
 		// Navigation properties
 		[ForeignKey("CreatedBy")]
 		public virtual User Creator { get; set; }
@@ -49,6 +42,7 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-		public virtual ICollection<User> Members { get; set; }
+		public virtual List<Trigger> Triggers { get; set; } = new();
+		public virtual List<Action> Actions { get; set; } = new();
 	}
 }

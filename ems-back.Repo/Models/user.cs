@@ -5,42 +5,48 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Repo.Models
 {
 
-	public class User
+	public class User : IdentityUser<Guid>
 	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		
 
 		[Required]
 		[MaxLength(100)]
-		public string FirstName { get; set; }
+		public string? FirstName { get; set; }
 
 		[Required]
 		[MaxLength(100)]
-		public string LastName { get; set; }
+		public string? LastName { get; set; }
+
+		// Changed to Guid to match UML
+		public Guid OrganizationId { get; set; }
 
 		[Required]
-		[EmailAddress]
-		public string Email { get; set; }
+		public UserRole Role { get; set; } = UserRole.Participant;
 
-		[Required]
-		public string PasswordHash { get; set; } // Store hashed passwords
+		public bool IsEmailConfirmed { get; set; } = false;
 
-		public int OrganizationId { get; set; }
+		[MaxLength(100)]  
+		public string? EmailConfirmationToken { get; set; }
 
-		[Required]
-		public UserRole Role { get; set; } = UserRole.Participant; // Default role
-
-		public bool IsEmailConfirmed { get; set; } = false;  // Email verification
-		public string EmailConfirmationToken { get; set; }
-
-
+	
+		[MaxLength(255)]
+		public string? ProfilePicture { get; set; }
 		[ForeignKey("OrganizationId")]
-		public Organization Organization { get; set; }
+		public virtual Organization? Organization { get; set; }
+
+		// From UML relationships
+		public virtual ICollection<Organization>? CreatedOrganizations { get; set; }
+		public virtual ICollection<Event>? CreatedEvents { get; set; }
+		public virtual ICollection<EventAttendee>? AttendedEvents { get; set; }
+
+		// Computed property for full name
+		[NotMapped]
+		public string? FullName => $"{FirstName} {LastName}";
 	}
 
 }
