@@ -1,6 +1,6 @@
 ﻿using ems_back.Repo.Models;
 
-namespace ems_back.Repo.Repositories;
+namespace ems_back.Repo.Interfaces;
 
 public interface IEventRepository
 {

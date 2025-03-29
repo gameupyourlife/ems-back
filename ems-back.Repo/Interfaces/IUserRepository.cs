@@ -1,6 +1,6 @@
 ﻿using ems_back.Repo.Models;
 
-namespace ems_back.Repo.Repositories;
+namespace ems_back.Repo.Interfaces;
 
 public interface IUserRepository
 {
@@ -15,5 +15,9 @@ public interface IUserRepository
 	Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);
 	Task<IEnumerable<User>> GetUsersByOrganizationAsync(Guid organizationId);
 
+
+	Task<IEnumerable<Organization>> GetUserOrganizationsAsync(Guid userId);
+	Task<UserRole> GetUserRoleAsync(Guid userId);
+	Task<IEnumerable<Event>> GetUserEventsAsync(Guid userId);
 
 }

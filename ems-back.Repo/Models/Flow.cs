@@ -11,7 +11,10 @@ namespace ems_back.Repo.Models
 	[Table("Flows")]
 	public class Flow
 	{
+
 		[Key]
+		[Required]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required]
@@ -24,12 +27,14 @@ namespace ems_back.Repo.Models
 		public bool IsActive { get; set; } = true;
 
 		[Required]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
 		[Required]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]

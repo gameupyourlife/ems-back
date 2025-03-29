@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
+using ems_back.Repo.Interfaces;
+using ems_back.Repo.Repository;
 
 namespace ems_back
 {
@@ -14,9 +16,19 @@ namespace ems_back
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+			//add Interfaces
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+            builder.Services.AddScoped<IEventRepository, EventRepository>();
+            
+            builder.Services.AddScoped<IFileRepository, FileRepository>();
+            builder.Services.AddScoped<IActionRepository, ActionRepository>();
+            builder.Services.AddScoped<IAgendaEntryRepository, AgendaEntryRepository>();
+            builder.Services.AddScoped<IFlowRepository, FlowRepository>();
+            builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
+			// Add services to the container.
 
-            builder.Services.AddControllers();
+			builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

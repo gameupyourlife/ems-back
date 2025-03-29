@@ -6,6 +6,9 @@ using System.ComponentModel.DataAnnotations;
 public class Event
 {
 	[Key]
+
+	[Required]
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public Guid Id { get; set; } = Guid.NewGuid();
 
 	[Required]
@@ -21,6 +24,7 @@ public class Event
 	public string? Location { get; set; }
 
 	[Required]
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 	[Required]
@@ -31,9 +35,10 @@ public class Event
 
 	public EventCategory? Category { get; set; }
 
-	public EventStatus? Status { get; set; }	
+	public EventStatus? Status { get; set; }
 
 	[Required]
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 	[Required]

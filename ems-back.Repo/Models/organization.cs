@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ems_back.Repo.Models
 {
@@ -12,6 +9,7 @@ namespace ems_back.Repo.Models
 	public class Organization
 	{
 		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required]
@@ -19,12 +17,14 @@ namespace ems_back.Repo.Models
 		public string Name { get; set; }
 
 		[Required]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
 		[Required]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
@@ -49,6 +49,6 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-		public virtual ICollection<User> Members { get; set; }
+		public virtual ICollection<User> Members { get; set; } = new HashSet<User>();
 	}
 }
