@@ -1,6 +1,8 @@
 ﻿using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
+using ems_back.Repo.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Controllers
 {
@@ -21,7 +23,7 @@ namespace ems_back.Controllers
 
 		// GET: api/users
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
+		public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers()
 		{
 			try
 			{
@@ -37,7 +39,7 @@ namespace ems_back.Controllers
 
 		// GET: api/users/{id}
 		[HttpGet("{id}")]
-		public async Task<ActionResult<User>> GetUserById(Guid id)
+		public async Task<ActionResult<UserResponseDto>> GetUserById(Guid id)
 		{
 			try
 			{
@@ -60,22 +62,18 @@ namespace ems_back.Controllers
 
 		// POST: api/users
 		[HttpPost]
-		public async Task<ActionResult<User>> CreateUser([FromBody] User user)
+		public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] UserCreateDto userDto)
 		{
 			try
 			{
 				// Validate email uniqueness
-				if (!await _userRepository.IsEmailUniqueAsync(user.Email))
+				if (!await _userRepository.IsEmailUniqueAsync(userDto.Email))
 				{
 					return Conflict("Email already exists");
 				}
 
-				await _userRepository.AddUserAsync(user);
-
-				// Assuming you have a SaveChangesAsync in your repository or unit of work
-				// await _userRepository.SaveAsync(); 
-
-				return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+				var createdUser = await _userRepository.CreateUserAsync(userDto);
+				return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
 			}
 			catch (Exception ex)
 			{
@@ -86,28 +84,16 @@ namespace ems_back.Controllers
 
 		// PUT: api/users/{id}
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
+		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto userDto)
 		{
 			try
 			{
-				if (id != user.Id)
-				{
-					return BadRequest("ID mismatch");
-				}
-
-				// Validate email uniqueness (excluding current user)
-				if (!await _userRepository.IsEmailUniqueAsync(user.Email, id))
-				{
-					return Conflict("Email already exists");
-				}
-
-				var existingUser = await _userRepository.GetUserByIdAsync(id);
-				if (existingUser == null)
+				var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
+				if (updatedUser == null)
 				{
 					return NotFound();
 				}
 
-				await _userRepository.UpdateUserAsync(user);
 				return NoContent();
 			}
 			catch (Exception ex)
@@ -123,13 +109,12 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var user = await _userRepository.GetUserByIdAsync(id);
-				if (user == null)
+				var result = await _userRepository.DeleteUserAsync(id);
+				if (!result)
 				{
 					return NotFound();
 				}
 
-				await _userRepository.DeleteUserAsync(id);
 				return NoContent();
 			}
 			catch (Exception ex)
@@ -141,7 +126,7 @@ namespace ems_back.Controllers
 
 		// GET: api/users/by-email?email=test@example.com
 		[HttpGet("by-email")]
-		public async Task<ActionResult<User>> GetUserByEmail([FromQuery] string email)
+		public async Task<ActionResult<UserResponseDto>> GetUserByEmail([FromQuery] string email)
 		{
 			try
 			{
@@ -160,7 +145,7 @@ namespace ems_back.Controllers
 		}
 
 		[HttpGet("{userId}/organizations")]
-		public async Task<ActionResult<IEnumerable<Organization>>> GetUserOrganizations(Guid userId)
+		public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
 		{
 			try
 			{
@@ -169,7 +154,8 @@ namespace ems_back.Controllers
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
+				_logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
+				return StatusCode(500, "Internal server error");
 			}
 		}
 
@@ -183,12 +169,13 @@ namespace ems_back.Controllers
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
+				_logger.LogError(ex, "Error getting role for user {UserId}", userId);
+				return StatusCode(500, "Internal server error");
 			}
 		}
 
 		[HttpGet("{userId}/events")]
-		public async Task<ActionResult<IEnumerable<Event>>> GetUserEvents(Guid userId)
+		public async Task<ActionResult<IEnumerable<EventResponseDto>>> GetUserEvents(Guid userId)
 		{
 			try
 			{
@@ -197,7 +184,38 @@ namespace ems_back.Controllers
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
+				_logger.LogError(ex, "Error getting events for user {UserId}", userId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("by-role/{role}")]
+		public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsersByRole(UserRole role)
+		{
+			try
+			{
+				var users = await _userRepository.GetUsersByRoleAsync(role);
+				return Ok(users);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting users by role {Role}", role);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("by-organization/{organizationId}")]
+		public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsersByOrganization(Guid organizationId)
+		{
+			try
+			{
+				var users = await _userRepository.GetUsersByOrganizationAsync(organizationId);
+				return Ok(users);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting users by organization {OrganizationId}", organizationId);
+				return StatusCode(500, "Internal server error");
 			}
 		}
 	}

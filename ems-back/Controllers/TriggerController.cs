@@ -1,64 +1,119 @@
-﻿using ems_back.Repo.Interfaces;
+﻿using ems_back.Repo.DTOs;
+using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace ems_back.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class TriggersController : ControllerBase
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class TriggersController : ControllerBase
+	private readonly ITriggerRepository _triggerRepository;
+	private readonly ILogger<TriggersController> _logger;
+
+	public TriggersController(
+		ITriggerRepository triggerRepository,
+		ILogger<TriggersController> logger)
 	{
-		private readonly ITriggerRepository _triggerRepository;
+		_triggerRepository = triggerRepository;
+		_logger = logger;
+	}
 
-		public TriggersController(ITriggerRepository triggerRepository)
-		{
-			_triggerRepository = triggerRepository;
-		}
-
-		[HttpGet("{id}")]
-		public async Task<ActionResult<Trigger>> GetTrigger(Guid id)
+	[HttpGet("{id}")]
+	public async Task<ActionResult<TriggerDetailedDto>> GetTrigger(Guid id)
+	{
+		try
 		{
 			var trigger = await _triggerRepository.GetByIdAsync(id);
 			if (trigger == null) return NotFound();
 			return Ok(trigger);
 		}
-
-		[HttpGet("flow/{flowId}")]
-		public async Task<ActionResult<IEnumerable<Trigger>>> GetTriggersByFlow(Guid flowId)
+		catch (Exception ex)
 		{
-			return Ok(await _triggerRepository.GetByFlowAsync(flowId));
+			_logger.LogError(ex, "Error getting trigger with id {TriggerId}", id);
+			return StatusCode(500, "Internal server error");
 		}
+	}
 
-		[HttpGet("type/{type}")]
-		public async Task<ActionResult<IEnumerable<Trigger>>> GetTriggersByType(TriggerType type)
+	[HttpGet("flow/{flowId}")]
+	public async Task<ActionResult<IEnumerable<TriggerDto>>> GetTriggersByFlow(Guid flowId)
+	{
+		try
 		{
-			return Ok(await _triggerRepository.GetByTypeAsync(type));
+			var triggers = await _triggerRepository.GetByFlowAsync(flowId);
+			return Ok(triggers);
 		}
-
-		[HttpPost]
-		public async Task<ActionResult<Trigger>> CreateTrigger([FromBody] Trigger trigger)
+		catch (Exception ex)
 		{
-			trigger.CreatedAt = DateTime.UtcNow;
-			var createdTrigger = await _triggerRepository.AddAsync(trigger);
-			return CreatedAtAction(nameof(GetTrigger), new { id = createdTrigger.Id }, createdTrigger);
+			_logger.LogError(ex, "Error getting triggers for flow {FlowId}", flowId);
+			return StatusCode(500, "Internal server error");
 		}
+	}
 
-		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateTrigger(Guid id, [FromBody] Trigger trigger)
+	[HttpGet("type/{type}")]
+	public async Task<ActionResult<IEnumerable<TriggerDto>>> GetTriggersByType(TriggerType type)
+	{
+		try
 		{
-			if (id != trigger.Id) return BadRequest();
-			await _triggerRepository.UpdateAsync(trigger);
+			var triggers = await _triggerRepository.GetByTypeAsync(type);
+			return Ok(triggers);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting triggers of type {TriggerType}", type);
+			return StatusCode(500, "Internal server error");
+		}
+	}
+
+	[HttpPost]
+	public async Task<ActionResult<TriggerDetailedDto>> CreateTrigger([FromBody] TriggerCreateDto triggerDto)
+	{
+		try
+		{
+			var createdTrigger = await _triggerRepository.AddAsync(triggerDto);
+			return CreatedAtAction(
+				nameof(GetTrigger),
+				new { id = createdTrigger.Id },
+				createdTrigger);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error creating trigger");
+			return StatusCode(500, "Internal server error");
+		}
+	}
+
+	[HttpPut("{id}")]
+	public async Task<IActionResult> UpdateTrigger(Guid id, [FromBody] TriggerUpdateDto triggerDto)
+	{
+		try
+		{
+			if (id != triggerDto.Id) return BadRequest("ID mismatch");
+
+			var updatedTrigger = await _triggerRepository.UpdateAsync(triggerDto);
+			if (updatedTrigger == null) return NotFound();
+
 			return NoContent();
 		}
-
-		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteTrigger(Guid id)
+		catch (Exception ex)
 		{
-			await _triggerRepository.DeleteAsync(id);
+			_logger.LogError(ex, "Error updating trigger with id {TriggerId}", id);
+			return StatusCode(500, "Internal server error");
+		}
+	}
+
+	[HttpDelete("{id}")]
+	public async Task<IActionResult> DeleteTrigger(Guid id)
+	{
+		try
+		{
+			var result = await _triggerRepository.DeleteAsync(id);
+			if (!result) return NotFound();
 			return NoContent();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting trigger with id {TriggerId}", id);
+			return StatusCode(500, "Internal server error");
 		}
 	}
 }

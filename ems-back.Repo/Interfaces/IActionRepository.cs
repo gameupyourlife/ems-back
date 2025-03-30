@@ -1,4 +1,5 @@
 ﻿// IActionRepository.cs
+using ems_back.Repo.DTOs;
 using ems_back.Repo.Models;
 using System;
 using System.Collections.Generic;
@@ -9,11 +10,11 @@ namespace ems_back.Repo.Interfaces
 {
 	public interface IActionRepository
 	{
-		Task<Action> GetByIdAsync(Guid id);
-		Task<IEnumerable<Action>> GetByFlowAsync(Guid flowId);
-		Task<Action> AddAsync(Action action);
-		Task UpdateAsync(Action action);
-		Task DeleteAsync(Guid id);
+		Task<ActionDetailedDto> GetByIdAsync(Guid id);
+		Task<IEnumerable<ActionDto>> GetByFlowAsync(Guid flowId);
+		Task<ActionDetailedDto> AddAsync(ActionCreateDto actionDto);
+		Task<ActionDetailedDto> UpdateAsync(ActionUpdateDto actionDto);
+		Task<bool> DeleteAsync(Guid id);
 		Task<bool> ExistsAsync(Guid id);
 	}
 }

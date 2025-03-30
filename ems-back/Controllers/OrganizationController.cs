@@ -1,5 +1,5 @@
-﻿using ems_back.Repo.Interfaces;
-using ems_back.Repo.Models;
+﻿using ems_back.Repo.DTOs;
+using ems_back.Repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace ems_back.Controllers
 
 		// GET: api/organizations
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizations()
+		public async Task<ActionResult<IEnumerable<OrganizationResponseDto>>> GetOrganizations()
 		{
 			try
 			{
@@ -35,18 +35,12 @@ namespace ems_back.Controllers
 
 		// GET: api/organizations/{id}
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Organization>> GetOrganization(Guid id)
+		public async Task<ActionResult<OrganizationResponseDto>> GetOrganization(Guid id)
 		{
 			try
 			{
 				var organization = await _organizationRepository.GetOrganizationByIdAsync(id);
-
-				if (organization == null)
-				{
-					return NotFound();
-				}
-
-				return Ok(organization);
+				return organization == null ? NotFound() : Ok(organization);
 			}
 			catch (Exception ex)
 			{
@@ -56,7 +50,7 @@ namespace ems_back.Controllers
 
 		// GET: api/organizations/user/{userId}
 		[HttpGet("user/{userId}")]
-		public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizationsByUser(Guid userId)
+		public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetOrganizationsByUser(Guid userId)
 		{
 			try
 			{
@@ -86,7 +80,8 @@ namespace ems_back.Controllers
 
 		// POST: api/organizations
 		[HttpPost]
-		public async Task<ActionResult<Organization>> CreateOrganization([FromBody] Organization organization)
+		public async Task<ActionResult<OrganizationResponseDto>> CreateOrganization(
+			[FromBody] OrganizationCreateDto organizationDto)
 		{
 			try
 			{
@@ -95,15 +90,8 @@ namespace ems_back.Controllers
 					return BadRequest(ModelState);
 				}
 
-				// In production, get these from authenticated user
-				organization.CreatedBy = Guid.Parse("a1b2c3d4-1234-5678-9012-abcdef123456"); // Temp user ID
-				organization.UpdatedBy = organization.CreatedBy;
-				organization.CreatedAt = DateTime.UtcNow;
-				organization.UpdatedAt = DateTime.UtcNow;
-
-				await _organizationRepository.AddOrganizationAsync(organization);
-
-				return CreatedAtAction(nameof(GetOrganization), new { id = organization.Id }, organization);
+				var createdOrg = await _organizationRepository.CreateOrganizationAsync(organizationDto);
+				return CreatedAtAction(nameof(GetOrganization), new { id = createdOrg.Id }, createdOrg);
 			}
 			catch (Exception ex)
 			{
@@ -113,33 +101,14 @@ namespace ems_back.Controllers
 
 		// PUT: api/organizations/{id}
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateOrganization(Guid id, [FromBody] Organization organization)
+		public async Task<IActionResult> UpdateOrganization(
+			Guid id,
+			[FromBody] OrganizationUpdateDto organizationDto)
 		{
 			try
 			{
-				if (id != organization.Id)
-				{
-					return BadRequest("ID mismatch");
-				}
-
-				if (!ModelState.IsValid)
-				{
-					return BadRequest(ModelState);
-				}
-
-				var existingOrg = await _organizationRepository.GetOrganizationByIdAsync(id);
-				if (existingOrg == null)
-				{
-					return NotFound();
-				}
-
-				// In production, get this from authenticated user
-				organization.UpdatedBy = Guid.Parse("a1b2c3d4-1234-5678-9012-abcdef123456"); // Temp user ID
-				organization.UpdatedAt = DateTime.UtcNow;
-
-				await _organizationRepository.UpdateOrganizationAsync(organization);
-
-				return NoContent();
+				var result = await _organizationRepository.UpdateOrganizationAsync(id, organizationDto);
+				return result == null ? NotFound() : NoContent();
 			}
 			catch (Exception ex)
 			{
@@ -153,15 +122,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var organization = await _organizationRepository.GetOrganizationByIdAsync(id);
-				if (organization == null)
-				{
-					return NotFound();
-				}
-
-				await _organizationRepository.DeleteOrganizationAsync(id);
-
-				return NoContent();
+				var success = await _organizationRepository.DeleteOrganizationAsync(id);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{

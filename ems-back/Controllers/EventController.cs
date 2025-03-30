@@ -1,159 +1,291 @@
-﻿using ems_back.Repo.Data;
+﻿using ems_back.Repo.DTOs;
 using ems_back.Repo.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ems_back.Repo.Models;
-using Microsoft.EntityFrameworkCore;
 
-public class EventRepository : IEventRepository
+namespace ems_back.Controllers
 {
-	private readonly ApplicationDbContext _context;
-
-	public EventRepository(ApplicationDbContext context)
+	[Route("api/[controller]")]
+	[ApiController]
+	public class EventsController : ControllerBase
 	{
-		_context = context;
-	}
+		private readonly IEventRepository _eventRepository;
+		private readonly ILogger<EventsController> _logger;
 
-	public async Task<IEnumerable<Event>> GetAllEventsAsync()
-	{
-		return await _context.Events
-			.Include(e => e.Creator)
-			.Include(e => e.Updater)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task<Event> GetEventByIdAsync(Guid id)
-	{
-		return await _context.Events
-			.Include(e => e.Creator)
-			.Include(e => e.Updater)
-			.FirstOrDefaultAsync(e => e.Id == id);
-	}
-
-	public async Task<Event> AddEventAsync(Event eventEntity)
-	{
-		// Ensure timestamps are fresh
-		eventEntity.CreatedAt = DateTime.UtcNow;
-		eventEntity.UpdatedAt = DateTime.UtcNow;
-
-		await _context.Events.AddAsync(eventEntity);
-		await _context.SaveChangesAsync();
-		return eventEntity;
-	}
-
-	public async Task UpdateEventAsync(Event eventEntity)
-	{
-		eventEntity.UpdatedAt = DateTime.UtcNow;
-		_context.Events.Update(eventEntity);
-		await _context.SaveChangesAsync();
-	}
-
-	public async Task DeleteEventAsync(Guid id)
-	{
-		var eventEntity = await _context.Events.FindAsync(id);
-		if (eventEntity != null)
+		public EventsController(
+			IEventRepository eventRepository,
+			ILogger<EventsController> logger)
 		{
-			_context.Events.Remove(eventEntity);
-			await _context.SaveChangesAsync();
+			_eventRepository = eventRepository;
+			_logger = logger;
 		}
-	}
 
-	public async Task<bool> EventExistsAsync(Guid id)
-	{
-		return await _context.Events
-			.AnyAsync(e => e.Id == id);
-	}
-
-	public async Task<IEnumerable<Event>> GetUpcomingEventsAsync(int days = 30)
-	{
-		var cutoffDate = DateTime.UtcNow.AddDays(days);
-		return await _context.Events
-			.Where(e => e.Start >= DateTime.UtcNow && e.Start <= cutoffDate)
-			.OrderBy(e => e.Start)
-			.Include(e => e.Creator)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task<IEnumerable<Event>> GetEventsByOrganizationAsync(Guid organizationId)
-	{
-		return await _context.Events
-			.Where(e => e.Creator.OrganizationId == organizationId)
-			.Include(e => e.Creator)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task<int> GetAttendeeCountAsync(Guid eventId)
-	{
-		return await _context.EventAttendees
-			.CountAsync(ea => ea.EventId == eventId);
-	}
-
-	public async Task<IEnumerable<Event>> GetEventsByCreatorAsync(Guid userId)
-	{
-		return await _context.Events
-			.Where(e => e.CreatedBy == userId)
-			.Include(e => e.Updater)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task<IEnumerable<Event>> GetEventsByCategoryAsync(EventCategory category)
-	{
-		return await _context.Events
-			.Where(e => e.Category == category)
-			.Include(e => e.Creator)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task<Event> GetEventWithAttendeesAsync(Guid eventId)
-	{
-		return await _context.Events
-			.Include(e => e.Attendees)
-				.ThenInclude(a => a.User)
-			.Include(e => e.Creator)
-			.FirstOrDefaultAsync(e => e.Id == eventId);
-	}
-
-	public async Task<Event> GetEventWithAgendaAsync(Guid eventId)
-	{
-		return await _context.Events
-			.Include(e => e.AgendaItems)
-			.Include(e => e.Creator)
-			.FirstOrDefaultAsync(e => e.Id == eventId);
-	}
-
-	public async Task<Event> GetEventWithAllDetailsAsync(Guid eventId)
-	{
-		return await _context.Events
-			.Include(e => e.Creator)
-			.Include(e => e.Updater)
-			.Include(e => e.Attendees)
-				.ThenInclude(a => a.User)
-			.Include(e => e.AgendaItems)
-			.FirstOrDefaultAsync(e => e.Id == eventId);
-	}
-
-	// Additional methods based on your Event class
-	public async Task<IEnumerable<Event>> GetEventsByDateRangeAsync(DateTime start, DateTime end)
-	{
-		return await _context.Events
-			.Where(e => e.Start >= start && e.End <= end)
-			.OrderBy(e => e.Start)
-			.Include(e => e.Creator)
-			.AsNoTracking()
-			.ToListAsync();
-	}
-
-	public async Task UpdateEventStatusAsync(Guid eventId, EventStatus status)
-	{
-		var eventEntity = await _context.Events.FindAsync(eventId);
-		if (eventEntity != null)
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetAllEvents()
 		{
-			eventEntity.Status = status;
-			eventEntity.UpdatedAt = DateTime.UtcNow;
-			await _context.SaveChangesAsync();
+			try
+			{
+				var events = await _eventRepository.GetAllEventsAsync();
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting all events");
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("upcoming")]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetUpcomingEvents([FromQuery] int days = 30)
+		{
+			try
+			{
+				var events = await _eventRepository.GetUpcomingEventsAsync(days);
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting upcoming events");
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("{id}")]
+		public async Task<ActionResult<EventBasicDetailedDto>> GetEvent(Guid id)
+		{
+			try
+			{
+				var eventEntity = await _eventRepository.GetByIdAsync(id);
+				if (eventEntity == null)
+				{
+					_logger.LogWarning("Event with id {EventId} not found", id);
+					return NotFound();
+				}
+				return Ok(eventEntity);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting event with id {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("{id}/attendees")]
+		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAttendees(Guid id)
+		{
+			try
+			{
+				var eventEntity = await _eventRepository.GetEventWithAttendeesAsync(id);
+				if (eventEntity == null)
+				{
+					return NotFound();
+				}
+				return Ok(eventEntity);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting event attendees for event {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("{id}/agenda")]
+		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAgenda(Guid id)
+		{
+			try
+			{
+				var eventEntity = await _eventRepository.GetEventWithAgendaAsync(id);
+				if (eventEntity == null)
+				{
+					return NotFound();
+				}
+				return Ok(eventEntity);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting event agenda for event {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("{id}/details")]
+		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAllDetails(Guid id)
+		{
+			try
+			{
+				var eventEntity = await _eventRepository.GetEventWithAllDetailsAsync(id);
+				if (eventEntity == null)
+				{
+					return NotFound();
+				}
+				return Ok(eventEntity);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting event details for event {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("organization/{organizationId}")]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByOrganization(Guid organizationId)
+		{
+			try
+			{
+				var events = await _eventRepository.GetEventsByOrganizationAsync(organizationId);
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting events for organization {OrganizationId}", organizationId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("creator/{userId}")]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByCreator(Guid userId)
+		{
+			try
+			{
+				var events = await _eventRepository.GetEventsByCreatorAsync(userId);
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting events for creator {UserId}", userId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("category/{category}")]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByCategory(EventCategory category)
+		{
+			try
+			{
+				var events = await _eventRepository.GetEventsByCategoryAsync(category);
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting events for category {Category}", category);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("date-range")]
+		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByDateRange(
+			[FromQuery] DateTime start, [FromQuery] DateTime end)
+		{
+			try
+			{
+				var events = await _eventRepository.GetEventsByDateRangeAsync(start, end);
+				return Ok(events);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting events between {StartDate} and {EndDate}", start, end);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpPost]
+		public async Task<ActionResult<EventBasicDetailedDto>> CreateEvent([FromBody] EventCreateDto eventDto)
+		{
+			try
+			{
+				var createdEvent = await _eventRepository.AddAsync(eventDto);
+				return CreatedAtAction(
+					nameof(GetEvent),
+					new { id = createdEvent.Id },
+					createdEvent);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating event");
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpPut("{id}")]
+		public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventUpdateDto eventDto)
+		{
+			try
+			{
+				if (id != eventDto.Id)
+				{
+					return BadRequest("ID mismatch");
+				}
+
+				var updatedEvent = await _eventRepository.UpdateAsync(eventDto);
+				if (updatedEvent == null)
+				{
+					return NotFound();
+				}
+
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating event with id {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpPatch("{id}/status")]
+		public async Task<ActionResult<EventBasicDetailedDto>> UpdateEventStatus(Guid id, [FromBody] EventStatusDto statusDto)
+		{
+			try
+			{
+				var updatedEvent = await _eventRepository.UpdateStatusAsync(id, statusDto);
+				if (updatedEvent == null)
+				{
+					return NotFound();
+				}
+				return Ok(updatedEvent);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating status for event {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteEvent(Guid id)
+		{
+			try
+			{
+				var result = await _eventRepository.DeleteAsync(id);
+				if (!result)
+				{
+					return NotFound();
+				}
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting event with id {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		[HttpGet("{id}/attendee-count")]
+		public async Task<ActionResult<int>> GetAttendeeCount(Guid id)
+		{
+			try
+			{
+				var count = await _eventRepository.GetAttendeeCountAsync(id);
+				return Ok(count);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting attendee count for event {EventId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 	}
 }

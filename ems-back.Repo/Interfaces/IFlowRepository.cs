@@ -2,18 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ems_back.Repo.DTOs;
 
 namespace ems_back.Repo.Interfaces
 {
 	public interface IFlowRepository
 	{
-		Task<Flow> GetByIdAsync(Guid id);
-		Task<IEnumerable<Flow>> GetAllActiveAsync();
-		Task<Flow> AddAsync(Flow flow);
-		Task UpdateAsync(Flow flow);
-		Task ToggleStatusAsync(Guid id);
-		Task DeleteAsync(Guid id);
+		Task<FlowResponseDto> GetByIdAsync(Guid id);
+		Task<IEnumerable<FlowBasicDto>> GetAllActiveAsync();
+		Task<FlowResponseDto> AddAsync(FlowCreateDto flowDto);
+
+		Task<FlowResponseDto> UpdateAsync(Guid id, FlowUpdateDto flowDto);
+		Task<FlowResponseDto> ToggleStatusAsync(Guid id, FlowStatusDto statusDto);
+		Task<bool> DeleteAsync(Guid id);
 		Task<bool> ExistsAsync(Guid id);
-		Task<Flow> GetWithDetailsAsync(Guid id);
+		Task<FlowDetailedDto> GetWithDetailsAsync(Guid id);
 	}
 }

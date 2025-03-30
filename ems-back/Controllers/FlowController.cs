@@ -1,5 +1,5 @@
-﻿using ems_back.Repo.Interfaces;
-using ems_back.Repo.Models;
+﻿using ems_back.Repo.DTOs;
+using ems_back.Repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,63 +12,150 @@ namespace ems_back.Controllers
 	public class FlowsController : ControllerBase
 	{
 		private readonly IFlowRepository _flowRepository;
+		private readonly ILogger<FlowsController> _logger;
 
-		public FlowsController(IFlowRepository flowRepository)
+		public FlowsController(
+			IFlowRepository flowRepository,
+			ILogger<FlowsController> logger)
 		{
 			_flowRepository = flowRepository;
+			_logger = logger;
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<Flow>>> GetFlows()
+		public async Task<ActionResult<IEnumerable<FlowBasicDto>>> GetAllFlows()
 		{
-			return Ok(await _flowRepository.GetAllActiveAsync());
+			try
+			{
+				var flows = await _flowRepository.GetAllActiveAsync();
+				return Ok(flows);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting all flows");
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Flow>> GetFlow(Guid id)
+		public async Task<ActionResult<FlowResponseDto>> GetFlowById(Guid id)
 		{
-			var flow = await _flowRepository.GetByIdAsync(id);
-			if (flow == null) return NotFound();
-			return Ok(flow);
+			try
+			{
+				var flow = await _flowRepository.GetByIdAsync(id);
+				if (flow == null)
+				{
+					_logger.LogWarning("Flow with id {FlowId} not found", id);
+					return NotFound();
+				}
+				return Ok(flow);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting flow with id {FlowId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpGet("{id}/details")]
-		public async Task<ActionResult<Flow>> GetFlowWithDetails(Guid id)
+		public async Task<ActionResult<FlowDetailedDto>> GetFlowDetails(Guid id)
 		{
-			var flow = await _flowRepository.GetWithDetailsAsync(id);
-			if (flow == null) return NotFound();
-			return Ok(flow);
+			try
+			{
+				var flow = await _flowRepository.GetWithDetailsAsync(id);
+				if (flow == null)
+				{
+					_logger.LogWarning("Detailed flow with id {FlowId} not found", id);
+					return NotFound();
+				}
+				return Ok(flow);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting flow details with id {FlowId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<Flow>> CreateFlow([FromBody] Flow flow)
+		public async Task<ActionResult<FlowResponseDto>> CreateFlow([FromBody] FlowCreateDto flowDto)
 		{
-			flow.CreatedAt = DateTime.UtcNow;
-			flow.UpdatedAt = DateTime.UtcNow;
-			var createdFlow = await _flowRepository.AddAsync(flow);
-			return CreatedAtAction(nameof(GetFlow), new { id = createdFlow.Id }, createdFlow);
+			try
+			{
+				var createdFlow = await _flowRepository.AddAsync(flowDto);
+				return CreatedAtAction(
+					nameof(GetFlowById),
+					new { id = createdFlow.Id },
+					createdFlow);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating flow");
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateFlow(Guid id, [FromBody] Flow flow)
+		public async Task<IActionResult> UpdateFlow(Guid id, [FromBody] FlowUpdateDto flowDto)
 		{
-			if (id != flow.Id) return BadRequest();
-			await _flowRepository.UpdateAsync(flow);
-			return NoContent();
+			try
+			{
+				if (id != flowDto.Id)
+				{
+					return BadRequest("ID mismatch");
+				}
+
+				var updatedFlow = await _flowRepository.UpdateAsync(id, flowDto);
+				if (updatedFlow == null)
+				{
+					return NotFound();
+				}
+
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating flow with id {FlowId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpPatch("{id}/toggle-status")]
-		public async Task<IActionResult> ToggleFlowStatus(Guid id)
+		public async Task<ActionResult<FlowResponseDto>> ToggleFlowStatus(Guid id, [FromBody] FlowStatusDto statusDto)
 		{
-			await _flowRepository.ToggleStatusAsync(id);
-			return NoContent();
+			try
+			{
+				var updatedFlow = await _flowRepository.ToggleStatusAsync(id, statusDto);
+				if (updatedFlow == null)
+				{
+					return NotFound();
+				}
+				return Ok(updatedFlow);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error toggling status for flow with id {FlowId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteFlow(Guid id)
 		{
-			await _flowRepository.DeleteAsync(id);
-			return NoContent();
+			try
+			{
+				var result = await _flowRepository.DeleteAsync(id);
+				if (!result)
+				{
+					return NotFound();
+				}
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting flow with id {FlowId}", id);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 	}
 }

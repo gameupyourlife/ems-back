@@ -1,4 +1,5 @@
 ﻿// IFileRepository.cs
+using ems_back.Repo.DTOs;
 using ems_back.Repo.Models;
 using System;
 using System.Collections.Generic;
@@ -8,13 +9,13 @@ namespace ems_back.Repo.Interfaces
 {
 	public interface IFileRepository
 	{
-		Task<EventFile> GetByIdAsync(Guid id);
-		Task<IEnumerable<EventFile>> GetByUserAsync(Guid userId);
-		Task<IEnumerable<EventFile>> GetByTypeAsync(FileType type);
-		Task<EventFile> AddAsync(EventFile file);
-		Task DeleteAsync(Guid id);
+		Task<FileDetailedDto> GetByIdAsync(Guid id);
+		Task<IEnumerable<FileDto>> GetByUserAsync(Guid userId);
+		Task<IEnumerable<FileDto>> GetByTypeAsync(FileType type);
+		Task<FileDetailedDto> AddAsync(FileCreateDto fileDto);
+		Task<FileDetailedDto> UpdateAsync(FileUpdateDto fileDto);
+		Task<bool> DeleteAsync(Guid id);
 		Task<bool> ExistsAsync(Guid id);
 		Task<int> GetCountByUserAsync(Guid userId);
-		Task UpdateAsync(EventFile file);
 	}
 }
