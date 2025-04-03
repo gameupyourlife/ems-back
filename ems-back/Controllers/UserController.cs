@@ -3,10 +3,11 @@ using ems_back.Repo.Models;
 using ems_back.Repo.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using ems_back.Repo.DTOs.Event;
 
 namespace ems_back.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class UsersController : ControllerBase
 	{

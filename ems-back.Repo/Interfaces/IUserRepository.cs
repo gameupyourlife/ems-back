@@ -1,5 +1,6 @@
 ﻿
 using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces
 {
-	public interface IUserRepository
+    public interface IUserRepository
 	{
 		// Basic CRUD with DTOs
 		Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto);

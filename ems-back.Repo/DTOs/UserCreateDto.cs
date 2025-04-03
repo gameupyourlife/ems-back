@@ -22,9 +22,6 @@ namespace ems_back.Repo.DTOs
 		[StringLength(100)]
 		public string LastName { get; set; }
 
-	
-		public Guid? OrganizationId { get; set; }
-
 		[Required]
 		[StringLength(100, MinimumLength = 6)]
 		public string Password { get; set; } // Only for creation

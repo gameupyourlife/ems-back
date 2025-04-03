@@ -95,7 +95,6 @@ namespace ems_back.Repo.Repository
 			if (organizationUser != null)
 			{
 				organizationUser.UserRole = newRole;
-				organizationUser.IsOrganizationAdmin = newRole == UserRole.Admin;
 				await UpdateAsync(organizationUser);
 			}
 		}

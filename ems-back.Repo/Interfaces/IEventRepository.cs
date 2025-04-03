@@ -1,4 +1,4 @@
-﻿using ems_back.Repo.DTOs;
+﻿using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models;
 
 namespace ems_back.Repo.Interfaces;

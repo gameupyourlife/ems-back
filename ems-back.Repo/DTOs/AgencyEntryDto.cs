@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.DTOs.Event;
 
 namespace ems_back.Repo.DTOs
 {
-	// Response DTO
-	public class AgendaEntryDto
+    // Response DTO
+    public class AgendaEntryDto
 	{
 		public Guid Id { get; set; }
 		public string Title { get; set; }

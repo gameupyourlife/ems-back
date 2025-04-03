@@ -106,7 +106,7 @@ namespace ems_back.Repo.Repository
 
 		public async Task<int> GetMemberCountAsync(Guid organizationId)
 		{
-			return await _context.Users
+			return await _context.OrganizationUsers
 				.CountAsync(u => u.OrganizationId == organizationId);
 		}
 

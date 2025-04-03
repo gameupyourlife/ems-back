@@ -24,9 +24,6 @@ namespace ems_back.Repo.Models
 		[MaxLength(100)]
 		public string LastName { get; set; }
 
-		// Changed to Guid to match UML
-		public Guid? OrganizationId { get; set; }
-
 		[Required]
 		public UserRole Role { get; set; } = UserRole.Participant;
 
@@ -37,9 +34,6 @@ namespace ems_back.Repo.Models
 
 		[MaxLength(255)]
 		public string? ProfilePicture { get; set; }
-
-		[ForeignKey("OrganizationId")]
-		public virtual Organization? Organization { get; set; }
 
 		// Navigation properties
 		public virtual ICollection<Organization> CreatedOrganizations { get; set; } = new List<Organization>();
