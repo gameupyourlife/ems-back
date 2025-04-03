@@ -38,18 +38,29 @@ namespace ems_back.Repo.Repository
 			user.EmailConfirmed = false;
 			user.Role = UserRole.Participant; // Default role
 
+			if (userDto.OrganizationId.HasValue)
+			{
+				var organization = await _context.Organizations.FindAsync(userDto.OrganizationId.Value);
+				if (organization == null)
+				{
+					throw new ApplicationException("Invalid Organization ID provided.");
+				}
+				user.OrganizationId = userDto.OrganizationId;
+			}
+			else
+			{
+				user.OrganizationId = null; // Allow null
+			}
+
 			var result = await _userManager.CreateAsync(user, userDto.Password);
 			if (!result.Succeeded)
 			{
 				throw new ApplicationException(string.Join(", ", result.Errors.Select(e => e.Description)));
 			}
 
-			await _context.Entry(user)
-				.Reference(u => u.Organization)
-				.LoadAsync();
-
 			return _mapper.Map<UserResponseDto>(user);
 		}
+
 
 		public async Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto)
 		{

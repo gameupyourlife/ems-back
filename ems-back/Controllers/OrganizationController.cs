@@ -123,12 +123,16 @@ namespace ems_back.Controllers
 			try
 			{
 				var success = await _organizationRepository.DeleteOrganizationAsync(id);
-				return success ? NoContent() : NotFound();
+				if (!success)
+					return NotFound(new { message = "Organization not found" });
+
+				return Ok(new { message = "Organization deleted successfully" }); // Change from NoContent() to Ok()
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
+				return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
 			}
 		}
+
 	}
 }
