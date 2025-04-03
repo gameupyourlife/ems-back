@@ -46,6 +46,7 @@ namespace ems_back.Repo.Models
 		public virtual ICollection<Event> CreatedEvents { get; set; } = new List<Event>();
 		public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
 
+		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new HashSet<OrganizationUser>();
 		[NotMapped]
 		public string FullName => $"{FirstName} {LastName}";
 	}

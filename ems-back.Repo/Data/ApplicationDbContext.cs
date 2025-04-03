@@ -27,6 +27,7 @@ namespace ems_back.Repo.Data
 		public DbSet<Flow> Flows { get; set; }
 		public DbSet<Trigger> Triggers { get; set; }
 		public DbSet<Models.Action> Actions { get; set; }
+		public DbSet<OrganizationUser> OrganizationUsers { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -107,6 +108,30 @@ namespace ems_back.Repo.Data
 					.OnDelete(DeleteBehavior.Restrict);
 			});
 
+			// Configure OrganizationUser relationships and constraints
+			modelBuilder.Entity<OrganizationUser>(b =>
+			{
+				// Composite unique constraint to prevent duplicate user-org relationships
+				b.HasIndex(ou => new { ou.OrganizationId, ou.UserId }).IsUnique();
+
+				// Indexes for performance
+				b.HasIndex(ou => ou.UserEmail);
+				b.HasIndex(ou => ou.UserRole);
+				b.HasIndex(ou => ou.IsOrganizationAdmin);
+
+				// Relationship with Organization
+				b.HasOne(ou => ou.Organization)
+					.WithMany(o => o.OrganizationUsers)
+					.HasForeignKey(ou => ou.OrganizationId)
+					.OnDelete(DeleteBehavior.Cascade);
+
+				// Relationship with User
+				b.HasOne(ou => ou.User)
+					.WithMany(u => u.OrganizationUsers)
+					.HasForeignKey(ou => ou.UserId)
+					.OnDelete(DeleteBehavior.Cascade);
+			});
+
 			// Configure composite key for EventAttendee
 			modelBuilder.Entity<EventAttendee>()
 				.HasKey(ea => new { ea.EventId, ea.UserId });
@@ -144,7 +169,66 @@ namespace ems_back.Repo.Data
 			{
 				((IHasTimestamps)entry.Entity).UpdatedAt = DateTime.UtcNow;
 			}
-			return base.SaveChanges();
+
+			// Sync OrganizationUser data when User or Organization changes
+			var changedUsers = ChangeTracker.Entries<User>()
+				.Where(e => e.State == EntityState.Modified &&
+				            (e.Property(nameof(User.FirstName)).IsModified ||
+				             e.Property(nameof(User.LastName)).IsModified ||
+				             e.Property(nameof(User.Email)).IsModified ||
+				             e.Property(nameof(User.ProfilePicture)).IsModified ||
+				             e.Property(nameof(User.Role)).IsModified))
+				.Select(e => e.Entity)
+				.ToList();
+			var changedOrganizations = ChangeTracker.Entries<Organization>()
+				.Where(e => e.State == EntityState.Modified &&
+				            (e.Property(nameof(Organization.Name)).IsModified ||
+				             e.Property(nameof(Organization.Address)).IsModified ||
+				             e.Property(nameof(Organization.Description)).IsModified ||
+				             e.Property(nameof(Organization.ProfilePicture)).IsModified ||
+				             e.Property(nameof(Organization.Website)).IsModified))
+				.Select(e => e.Entity)
+				.ToList();
+
+			var result = base.SaveChanges();
+
+			if (changedUsers.Any() || changedOrganizations.Any())
+			{
+				// This could be optimized, but shows the concept
+				foreach (var user in changedUsers)
+				{
+					var orgUsers = this.Set<OrganizationUser>().Where(ou => ou.UserId == user.Id).ToList();
+					foreach (var orgUser in orgUsers)
+					{
+						orgUser.UserFirstName = user.FirstName;
+						orgUser.UserLastName = user.LastName;
+						orgUser.UserEmail = user.Email;
+						orgUser.UserProfilePicture = user.ProfilePicture;
+						orgUser.UserRole = user.Role;
+						orgUser.IsOrganizationAdmin = user.Role == UserRole.Admin;
+					}
+				}
+
+				foreach (var org in changedOrganizations)
+				{
+					var orgUsers = this.Set<OrganizationUser>().Where(ou => ou.OrganizationId == org.Id).ToList();
+					foreach (var orgUser in orgUsers)
+					{
+						orgUser.OrganizationName = org.Name;
+						orgUser.OrganizationAddress = org.Address;
+						orgUser.OrganizationDescription = org.Description;
+						orgUser.OrganizationProfilePicture = org.ProfilePicture;
+						orgUser.OrganizationWebsite = org.Website;
+					}
+				}
+
+				if (changedUsers.Any() || changedOrganizations.Any())
+				{
+					base.SaveChanges();
+				}
+			}
+
+			return result;
 		}
 	}
 
