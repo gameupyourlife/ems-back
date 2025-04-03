@@ -25,7 +25,7 @@ namespace ems_back.Repo.Models
 		public string LastName { get; set; }
 
 		// Changed to Guid to match UML
-		public Guid OrganizationId { get; set; }
+		public Guid? OrganizationId { get; set; }
 
 		[Required]
 		public UserRole Role { get; set; } = UserRole.Participant;

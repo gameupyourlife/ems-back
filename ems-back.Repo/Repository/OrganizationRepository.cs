@@ -29,11 +29,18 @@ namespace ems_back.Repo.Repository
 			organization.UpdatedAt = DateTime.UtcNow;
 			organization.UpdatedBy = organizationDto.CreatedBy;
 
+			// Ensure ProfilePicture is nullable (only set if provided)
+			if (string.IsNullOrWhiteSpace(organizationDto.ProfilePicture))
+			{
+				organization.ProfilePicture = null; // Explicitly set to null
+			}
+
 			await _context.Organizations.AddAsync(organization);
 			await _context.SaveChangesAsync();
 
 			return await GetOrganizationByIdAsync(organization.Id);
 		}
+
 
 		public async Task<OrganizationResponseDto> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto)
 		{

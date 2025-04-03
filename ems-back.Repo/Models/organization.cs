@@ -34,13 +34,13 @@ namespace ems_back.Repo.Models
 		public string Address { get; set; }
 
 		[Column(TypeName = "text")]
-		public string Description { get; set; }
+		public string? Description { get; set; }
 
 		[MaxLength(255)]
-		public string ProfilePicture { get; set; }
+		public string? ProfilePicture { get; set; }
 
 		[MaxLength(255)]
-		public string Website { get; set; }
+		public string? Website { get; set; }
 
 		// Navigation properties
 		[ForeignKey("CreatedBy")]

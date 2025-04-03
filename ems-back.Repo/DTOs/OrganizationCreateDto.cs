@@ -23,6 +23,7 @@ namespace ems_back.Repo.DTOs
 		[StringLength(255)]
 		public string? Website { get; set; }
 
+		public string? ProfilePicture { get; set; }
 		[Required]
 		public Guid CreatedBy { get; set; } // User ID creating the organization
 	}
