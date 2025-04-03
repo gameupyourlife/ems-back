@@ -28,9 +28,12 @@ namespace ems_back
             builder.Services.AddScoped<IAgendaEntryRepository, AgendaEntryRepository>();
             builder.Services.AddScoped<IFlowRepository, FlowRepository>();
             builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
-			// Add services to the container.
+            builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
 
-			builder.Services.AddControllers();
+
+            // Add services to the container.
+
+            builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
