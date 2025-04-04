@@ -14,7 +14,10 @@ namespace ems_back.Repo.Models
 		[Key]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
+        [Required]
+        public Guid OrganizationId { get; set; }
+
+        [Required]
 		[MaxLength(255)]
 		public string? Title { get; set; }
 
@@ -32,5 +35,8 @@ namespace ems_back.Repo.Models
 
 		[ForeignKey("EventId")]
 		public virtual Event Event { get; set; }
-	}
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+    }
 }

@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using ems_back.Repo.Models;
 using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Controllers
 {

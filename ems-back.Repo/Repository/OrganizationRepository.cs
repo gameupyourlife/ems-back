@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,10 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.DTOs.Organization;
 
 namespace ems_back.Repo.Repository
 {
-	public class OrganizationRepository : IOrganizationRepository
+    public class OrganizationRepository : IOrganizationRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;

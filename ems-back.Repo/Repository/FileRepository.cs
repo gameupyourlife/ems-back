@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.File;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using Microsoft.EntityFrameworkCore;
 
 public class FileRepository : IFileRepository

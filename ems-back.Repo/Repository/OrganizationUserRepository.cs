@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Repository
 {
-	public class OrganizationUserRepository : IOrganizationUserRepository
+    public class OrganizationUserRepository : IOrganizationUserRepository
 	{
 		private readonly ApplicationDbContext _context;
 

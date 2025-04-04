@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Models
 {
-	[Table("Flows")]
+    [Table("Flows")]
 	public class Flow
 	{
 
@@ -17,7 +17,10 @@ namespace ems_back.Repo.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
+        [Required]
+        public Guid OrganizationId { get; set; }
+
+        [Required]
 		[MaxLength(100)]
 		public string Name { get; set; } // Removed nullable (`?`)
 
@@ -47,7 +50,10 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-		public virtual List<Trigger> Triggers { get; set; } = new();
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+
+        public virtual List<Trigger> Triggers { get; set; } = new();
 		public virtual List<Action> Actions { get; set; } = new();
 	}
 }

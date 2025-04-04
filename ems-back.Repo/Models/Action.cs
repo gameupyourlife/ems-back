@@ -15,7 +15,10 @@ namespace ems_back.Repo.Models
 		[Key]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
+        [Required]
+        public Guid OrganizationId { get; set; }
+
+        [Required]
 		[MaxLength(100)]
 		public string? Type { get; set; }  // "SendEmail", "CreateTask", etc.
 
@@ -30,6 +33,9 @@ namespace ems_back.Repo.Models
 
 		[ForeignKey("FlowId")]
 		public virtual Flow Flow { get; set; }
-	}
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+    }
 
 }

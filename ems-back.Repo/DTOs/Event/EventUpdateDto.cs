@@ -1,4 +1,4 @@
-﻿using ems_back.Repo.Models;
+﻿using ems_back.Repo.Models.Types;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

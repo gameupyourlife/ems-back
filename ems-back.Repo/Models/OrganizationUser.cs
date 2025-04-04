@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Repo.Models
 {
-	[Table("Organisation_User")]
+    [Table("Organisation_User")]
 	public class OrganizationUser
 	{
 		[Key]

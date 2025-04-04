@@ -1,12 +1,12 @@
-﻿using ems_back.Repo.DTOs;
-using ems_back.Repo.Models;
+﻿using ems_back.Repo.DTOs.Trigger;
+using ems_back.Repo.Models.Types;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces
 {
-	public interface ITriggerRepository
+    public interface ITriggerRepository
 	{
 
 			Task<TriggerDetailedDto> GetByIdAsync(Guid id);

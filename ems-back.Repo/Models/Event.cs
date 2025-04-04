@@ -1,6 +1,7 @@
 ﻿using ems_back.Repo.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using ems_back.Repo.Models.Types;
 
 [Table("Events")]
 public class Event

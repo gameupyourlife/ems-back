@@ -1,4 +1,4 @@
-﻿using ems_back.Repo.DTOs;
+﻿using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class FlowsController : ControllerBase
 	{

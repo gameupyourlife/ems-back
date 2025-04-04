@@ -17,7 +17,10 @@ namespace ems_back.Repo.Models
 		[Key, Column(Order = 1)]
 		public Guid UserId { get; set; }
 
-		public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+        [Required]
+        public Guid OrganizationId { get; set; }
+
+        public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
 		public bool Attended { get; set; } = false;
 
 		// Navigation properties
@@ -26,5 +29,8 @@ namespace ems_back.Repo.Models
 
 		[ForeignKey("UserId")]
 		public virtual User User { get; set; }
-	}
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+    }
 }

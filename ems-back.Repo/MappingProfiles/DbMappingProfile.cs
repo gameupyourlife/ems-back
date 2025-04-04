@@ -4,9 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Action;
+using ems_back.Repo.DTOs.Agency;
+using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.DTOs.File;
+using ems_back.Repo.DTOs.Flow;
+using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.DTOs.Trigger;
+using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using Action = ems_back.Repo.Models.Action;
 
 namespace ems_back.Repo.MappingProfiles

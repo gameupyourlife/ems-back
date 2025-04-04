@@ -1,44 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
 
-	namespace ems_back.Repo.Models
-	{
-		[Table("Files")]
-		public class EventFile
-	{
-			[Key]
-			public Guid Id { get; set; } = Guid.NewGuid();
+namespace ems_back.Repo.Models
+{
+    [Table("Files")]
+    public class EventFile
+    {
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-			[Required]
-			[MaxLength(255)]
-			public string Url { get; set; }
+        [Required]
+        public Guid OrganizationId { get; set; }
 
-			[Required]
-			[MaxLength(50)]
-			public FileType Type { get; set; }  // "image", "document", etc.
+        [Required]
+        [MaxLength(255)]
+        public string Url { get; set; }
 
-			[Required]
-			public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        [Required]
+        [MaxLength(50)]
+        public FileType Type { get; set; }  // "image", "document", etc.
 
-			[Required]
-			public Guid UploadedBy { get; set; }
+        [Required]
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
-			[MaxLength(255)]
-			public string OriginalName { get; set; }
+        [Required]
+        public Guid UploadedBy { get; set; }
 
-			[MaxLength(50)]
-			public string ContentType { get; set; }
+        [MaxLength(255)]
+        public string OriginalName { get; set; }
 
-			public long SizeInBytes { get; set; }
+        [MaxLength(50)]
+        public string ContentType { get; set; }
 
-			// Navigation properties
-			[ForeignKey("UploadedBy")]
-			public virtual User Uploader { get; set; }
-		}
-	}
+        public long SizeInBytes { get; set; }
+
+        // Navigation properties
+        [ForeignKey("UploadedBy")]
+        public virtual User Uploader { get; set; }
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+    }
+}
 

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Models
 {
-	public class User : IdentityUser<Guid>
+    public class User : IdentityUser<Guid>
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
