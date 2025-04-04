@@ -20,7 +20,10 @@ namespace ems_back.Repo.DTOs
 		[Required]
 		public Guid UploadedBy { get; set; }
 
-		[MaxLength(255)]
+        [Required]
+		public string Id { get; set; }
+
+        [MaxLength(255)]
 		public string OriginalName { get; set; }
 
 		[MaxLength(50)]

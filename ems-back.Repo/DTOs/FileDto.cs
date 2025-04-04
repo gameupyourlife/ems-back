@@ -10,7 +10,7 @@ namespace ems_back.Repo.DTOs
 	// Basic response DTO
 	public class FileDto
 	{
-		public Guid Id { get; set; }
+		public string Id { get; set; }
 		public string Url { get; set; }
 		public FileType Type { get; set; }
 		public DateTime UploadedAt { get; set; }

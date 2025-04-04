@@ -9,11 +9,18 @@ using ems_back.Repo.Models;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Repository;
 using ems_back.Repo.MappingProfiles;
+using Minio;
+using Minio.DataModel.Args;
+using Microsoft.OpenApi.Models;
 
 namespace ems_back
 {
     public class Program
     {
+        static string endpoint = "minio.gameup.dev";
+        static string accessKey = "DH4dBhq1H11OUCAq";
+        static string secretKey = "UmGEmOzmhWF1iYxSI0tr8Sgmi8R4DbrQ";
+            
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +58,15 @@ namespace ems_back
 	            .AddDefaultTokenProviders();
 
             builder.Services.AddControllers();
+
+            // Add Minio using the custom endpoint and configure additional settings for default MinioClient initialization
+            builder.Services.AddMinio(configureClient => configureClient
+                .WithEndpoint(endpoint)
+                .WithCredentials(accessKey, secretKey)
+                .WithSSL()
+                .Build());
+
+            
 
             var app = builder.Build();
 			// Configure the HTTP request pipeline.

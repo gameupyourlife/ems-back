@@ -11,7 +11,7 @@ namespace ems_back.Repo.DTOs
 	public class FileUpdateDto
 	{
 		[Required]
-		public Guid Id { get; set; }
+		public string Id { get; set; }
 
 		[MaxLength(255)]
 		public string OriginalName { get; set; }

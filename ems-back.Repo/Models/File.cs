@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 		public class EventFile
 	{
 			[Key]
-			public Guid Id { get; set; } = Guid.NewGuid();
+			public string Id { get; set; }
 
 			[Required]
 			[MaxLength(255)]
