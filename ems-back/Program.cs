@@ -18,8 +18,12 @@ namespace ems_back
         {
             var builder = WebApplication.CreateBuilder(args);
 
-			//add Interfaces
-			builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddSingleton<MailService>();
+
+
+            //add Interfaces
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IEventRepository, EventRepository>();
             
