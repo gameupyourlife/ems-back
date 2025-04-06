@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ems_back.Repo.DTOs
+namespace ems_back.Repo.DTOs.File
 {
-	public class FileUploadDto
+    public class FileUploadDto
     {
         [Required]
         public IFormFile File { get; set; }
