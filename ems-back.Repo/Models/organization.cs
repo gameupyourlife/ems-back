@@ -49,7 +49,7 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-		public virtual ICollection<User> Members { get; set; } = new HashSet<User>();
+		//public virtual ICollection<User> Members { get; set; } = new HashSet<User>();
 		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new HashSet<OrganizationUser>();
 	}
 }

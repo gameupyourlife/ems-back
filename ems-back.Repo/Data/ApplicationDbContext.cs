@@ -83,7 +83,7 @@ namespace ems_back.Repo.Data
 					.WithMany()
 					.HasForeignKey(o => o.UpdatedBy)
 					.OnDelete(DeleteBehavior.Restrict);
-			});
+            });
 
 			// Configure Event relationships
 			modelBuilder.Entity<Event>(b =>
@@ -115,10 +115,10 @@ namespace ems_back.Repo.Data
 					.OnDelete(DeleteBehavior.Cascade);
 
 				// Relationship with User
-				b.HasOne(ou => ou.User)
-					.WithMany(u => u.OrganizationUsers)
-					.HasForeignKey(ou => ou.UserId)
-					.OnDelete(DeleteBehavior.Cascade);
+				//b.HasOne(ou => ou.User)
+				//	.WithMany(u => u.OrganizationUsers)
+				//	.HasForeignKey(ou => ou.UserId)
+				//	.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// Configure composite key for EventAttendee

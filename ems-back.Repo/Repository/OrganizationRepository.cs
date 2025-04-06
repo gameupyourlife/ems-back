@@ -92,8 +92,9 @@ namespace ems_back.Repo.Repository
 
 		public async Task<IEnumerable<OrganizationDto>> GetOrganizationsByUserAsync(Guid userId)
 		{
-			return await _context.Organizations
-				.Where(o => o.Members.Any(m => m.Id == userId))
+            return await _context.OrganizationUsers
+				.Where(ou => ou.UserId == userId)
+				.Select(ou => ou.Organization)
 				.Select(o => new OrganizationDto
 				{
 					Id = o.Id,
@@ -102,7 +103,7 @@ namespace ems_back.Repo.Repository
 				})
 				.AsNoTracking()
 				.ToListAsync();
-		}
+        }
 
 		public async Task<int> GetMemberCountAsync(Guid organizationId)
 		{

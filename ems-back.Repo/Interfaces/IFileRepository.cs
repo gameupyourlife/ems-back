@@ -1,4 +1,5 @@
 ﻿// IFileRepository.cs
+using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.File;
 using ems_back.Repo.Models.Types;
 using System;
