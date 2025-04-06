@@ -2,20 +2,17 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ems_back.Repo.Models.Types;
 
-namespace ems_back.Repo.Models
-{
-    [Table("Files")]
-    public class EventFile
-    {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+	namespace ems_back.Repo.Models
+	{
+		[Table("Files")]
+		public class EventFile
+	{
+			[Key]
+			public string Id { get; set; }
 
-        [Required]
-        public Guid OrganizationId { get; set; }
-
-        [Required]
-        [MaxLength(255)]
-        public string Url { get; set; }
+			[Required]
+			[MaxLength(255)]
+			public string Url { get; set; }
 
         [Required]
         [MaxLength(50)]
