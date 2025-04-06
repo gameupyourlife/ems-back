@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Action = ems_back.Repo.Models.Action;
+using ems_back.Repo.DTOs.Action;
 
 namespace ems_back.Repo.Repository
 {
-	public class ActionRepository : IActionRepository
+    public class ActionRepository : IActionRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;

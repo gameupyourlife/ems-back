@@ -4,13 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Action;
+using ems_back.Repo.DTOs.Agency;
+using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.DTOs.File;
+using ems_back.Repo.DTOs.Flow;
+using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.DTOs.Trigger;
+using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using Action = ems_back.Repo.Models.Action;
 
 namespace ems_back.Repo.MappingProfiles
 {
-	public class DbMappingProfile : Profile
+    public class DbMappingProfile : Profile
 	{
 		public DbMappingProfile()
 		{
@@ -148,35 +157,35 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<Action, ActionDetailedDto>();
 
 			// Add these mappings to your existing DbMappingProfile class
-			CreateMap<OrganizationUser, OrganizationUserDto>()
-				.ForMember(dest => dest.UserFullName,
-					opt => opt.MapFrom(src => $"{src.UserFirstName} {src.UserLastName}"));
+			//CreateMap<OrganizationUser, OrganizationUserDto>()
+			//	.ForMember(dest => dest.UserFullName,
+			//		opt => opt.MapFrom(src => $"{src.UserFirstName} {src.UserLastName}"));
 
-			CreateMap<CreateOrganizationUserDto, OrganizationUser>()
-				.ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.IsOrganizationAdmin,
-					opt => opt.MapFrom(src => src.UserRole == UserRole.Admin))
-				.ForMember(dest => dest.UserFirstName, opt => opt.Ignore())  // Will be set from User
-				.ForMember(dest => dest.UserLastName, opt => opt.Ignore())   // Will be set from User
-				.ForMember(dest => dest.UserEmail, opt => opt.Ignore())      // Will be set from User
-				.ForMember(dest => dest.OrganizationName, opt => opt.Ignore()) // Will be set from Organization
-				.ForMember(dest => dest.OrganizationAddress, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationDescription, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationProfilePicture, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationWebsite, opt => opt.Ignore());
+			//CreateMap<CreateOrganizationUserDto, OrganizationUser>()
+			//	.ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+			//	.ForMember(dest => dest.IsOrganizationAdmin,
+			//		opt => opt.MapFrom(src => src.UserRole == UserRole.Admin))
+			//	.ForMember(dest => dest.UserFirstName, opt => opt.Ignore())  // Will be set from User
+			//	.ForMember(dest => dest.UserLastName, opt => opt.Ignore())   // Will be set from User
+			//	.ForMember(dest => dest.UserEmail, opt => opt.Ignore())      // Will be set from User
+			//	.ForMember(dest => dest.OrganizationName, opt => opt.Ignore()) // Will be set from Organization
+			//	.ForMember(dest => dest.OrganizationAddress, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationDescription, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationProfilePicture, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationWebsite, opt => opt.Ignore());
 
-			CreateMap<UpdateOrganizationUserDto, OrganizationUser>()
-				.ForMember(dest => dest.UserId, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationId, opt => opt.Ignore())
-				.ForMember(dest => dest.JoinedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.UserFirstName, opt => opt.Ignore())
-				.ForMember(dest => dest.UserLastName, opt => opt.Ignore())
-				.ForMember(dest => dest.UserEmail, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationName, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationAddress, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationDescription, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationProfilePicture, opt => opt.Ignore())
-				.ForMember(dest => dest.OrganizationWebsite, opt => opt.Ignore());
+			//CreateMap<UpdateOrganizationUserDto, OrganizationUser>()
+			//	.ForMember(dest => dest.UserId, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationId, opt => opt.Ignore())
+			//	.ForMember(dest => dest.JoinedAt, opt => opt.Ignore())
+			//	.ForMember(dest => dest.UserFirstName, opt => opt.Ignore())
+			//	.ForMember(dest => dest.UserLastName, opt => opt.Ignore())
+			//	.ForMember(dest => dest.UserEmail, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationName, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationAddress, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationDescription, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationProfilePicture, opt => opt.Ignore())
+			//	.ForMember(dest => dest.OrganizationWebsite, opt => opt.Ignore());
 
 		}
 	}

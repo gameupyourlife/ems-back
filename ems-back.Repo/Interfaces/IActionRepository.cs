@@ -1,5 +1,5 @@
 ﻿// IActionRepository.cs
-using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using Action = ems_back.Repo.Models.Action;
 
 namespace ems_back.Repo.Interfaces
 {
-	public interface IActionRepository
+    public interface IActionRepository
 	{
 		Task<ActionDetailedDto> GetByIdAsync(Guid id);
 		Task<IEnumerable<ActionDto>> GetByFlowAsync(Guid flowId);

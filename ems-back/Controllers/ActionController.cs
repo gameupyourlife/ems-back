@@ -1,4 +1,4 @@
-﻿using ems_back.Repo.DTOs;
+﻿using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class ActionsController : ControllerBase
 	{

@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
@@ -8,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.DTOs.Flow;
 
 namespace ems_back.Repo.Repository
 {
-	public class FlowRepository : IFlowRepository
+    public class FlowRepository : IFlowRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;

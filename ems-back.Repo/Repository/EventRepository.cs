@@ -1,17 +1,17 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
 using ems_back.Repo.Interfaces;
-using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Repository
 {
-	public class EventRepository : IEventRepository
+    public class EventRepository : IEventRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;
@@ -62,7 +62,7 @@ namespace ems_back.Repo.Repository
 		public async Task<IEnumerable<EventBasicDto>> GetEventsByOrganizationAsync(Guid organizationId)
 		{
 			var events = await _context.Events
-				.Where(e => e.Creator.OrganizationId == organizationId)
+				.Where(e => e.OrganizationId == organizationId)
 				.Include(e => e.Creator)
 				.Include(e => e.Attendees)
 				.AsNoTracking()

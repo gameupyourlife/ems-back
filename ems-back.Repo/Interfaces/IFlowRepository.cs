@@ -2,11 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Flow;
 
 namespace ems_back.Repo.Interfaces
 {
-	public interface IFlowRepository
+    public interface IFlowRepository
 	{
 		Task<FlowResponseDto> GetByIdAsync(Guid id);
 		Task<IEnumerable<FlowBasicDto>> GetAllActiveAsync();

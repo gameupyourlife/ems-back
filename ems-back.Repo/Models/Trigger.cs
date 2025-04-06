@@ -5,28 +5,35 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Models
 {
-	[Table("Triggers")]
-	public class Trigger
-	{
-		[Key]
-		public Guid Id { get; set; } = Guid.NewGuid();
+    [Table("Triggers")]
+    public class Trigger
+    {
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
-		public TriggerType Type { get; set; } // Changed from `string` to `enum`
+        [Required]
+        public Guid OrganizationId { get; set; }
 
-		[Column(TypeName = "jsonb")]
-		public string Details { get; set; }  // JSON configuration
+        [Required]
+        public TriggerType Type { get; set; } // Changed from `string` to `enum`
 
-		[Required]
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column(TypeName = "jsonb")]
+        public string Details { get; set; }  // JSON configuration
 
-		// Relationships
-		public Guid? FlowId { get; set; }
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-		[ForeignKey("FlowId")]
-		public virtual Flow Flow { get; set; }
-	}
+        // Relationships
+        public Guid? FlowId { get; set; }
+
+        [ForeignKey("FlowId")]
+        public virtual Flow Flow { get; set; }
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+    }
 }

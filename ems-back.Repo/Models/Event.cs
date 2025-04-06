@@ -1,6 +1,7 @@
 ﻿using ems_back.Repo.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using ems_back.Repo.Models.Types;
 
 [Table("Events")]
 public class Event
@@ -11,7 +12,10 @@ public class Event
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public Guid Id { get; set; } = Guid.NewGuid();
 
-	[Required]
+    [Required]
+    public Guid OrganizationId { get; set; }
+
+    [Required]
 	[MaxLength(255)]
 	public string Title { get; set; }
 
@@ -54,6 +58,9 @@ public class Event
 	[ForeignKey("UpdatedBy")]
 	public virtual User Updater { get; set; }
 
-	public virtual ICollection<EventAttendee> Attendees { get; set; }
+    [ForeignKey("OrganizationId")]
+    public virtual Organization Organization { get; set; }
+
+    public virtual ICollection<EventAttendee> Attendees { get; set; }
 	public virtual ICollection<AgendaEntry> AgendaItems { get; set; }
 }

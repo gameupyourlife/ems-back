@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.DTOs;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ems_back.Repo.DTOs.Agency;
+using ems_back.Repo.DTOs.Agenda;
 
 namespace ems_back.Repo.Repository
 {
-	public class AgendaEntryRepository : IAgendaEntryRepository
+    public class AgendaEntryRepository : IAgendaEntryRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;

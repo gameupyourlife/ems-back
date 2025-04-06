@@ -7,7 +7,7 @@ using System;
 
 namespace ems_back.Repo.Data
 {
-	public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
@@ -70,16 +70,7 @@ namespace ems_back.Repo.Data
 				b.Property(f => f.Id).HasDefaultValueSql(null);
 				// Add other file-specific configurations if needed
 			});
-
-			// Configure User relationships
-			modelBuilder.Entity<User>(b =>
-			{
-				b.HasOne(u => u.Organization)
-					.WithMany(o => o.Members)
-					.HasForeignKey(u => u.OrganizationId)
-					.OnDelete(DeleteBehavior.Restrict);
-			});
-
+	
 			// Configure Organization relationships
 			modelBuilder.Entity<Organization>(b =>
 			{
@@ -115,9 +106,7 @@ namespace ems_back.Repo.Data
 				b.HasIndex(ou => new { ou.OrganizationId, ou.UserId }).IsUnique();
 
 				// Indexes for performance
-				b.HasIndex(ou => ou.UserEmail);
 				b.HasIndex(ou => ou.UserRole);
-				b.HasIndex(ou => ou.IsOrganizationAdmin);
 
 				// Relationship with Organization
 				b.HasOne(ou => ou.Organization)
@@ -192,40 +181,11 @@ namespace ems_back.Repo.Data
 
 			var result = base.SaveChanges();
 
+			
+
 			if (changedUsers.Any() || changedOrganizations.Any())
 			{
-				// This could be optimized, but shows the concept
-				foreach (var user in changedUsers)
-				{
-					var orgUsers = this.Set<OrganizationUser>().Where(ou => ou.UserId == user.Id).ToList();
-					foreach (var orgUser in orgUsers)
-					{
-						orgUser.UserFirstName = user.FirstName;
-						orgUser.UserLastName = user.LastName;
-						orgUser.UserEmail = user.Email;
-						orgUser.UserProfilePicture = user.ProfilePicture;
-						orgUser.UserRole = user.Role;
-						orgUser.IsOrganizationAdmin = user.Role == UserRole.Admin;
-					}
-				}
-
-				foreach (var org in changedOrganizations)
-				{
-					var orgUsers = this.Set<OrganizationUser>().Where(ou => ou.OrganizationId == org.Id).ToList();
-					foreach (var orgUser in orgUsers)
-					{
-						orgUser.OrganizationName = org.Name;
-						orgUser.OrganizationAddress = org.Address;
-						orgUser.OrganizationDescription = org.Description;
-						orgUser.OrganizationProfilePicture = org.ProfilePicture;
-						orgUser.OrganizationWebsite = org.Website;
-					}
-				}
-
-				if (changedUsers.Any() || changedOrganizations.Any())
-				{
-					base.SaveChanges();
-				}
+				base.SaveChanges();
 			}
 
 			return result;

@@ -1,4 +1,5 @@
 ﻿using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces
 {
-	public interface IOrganizationUserRepository
+    public interface IOrganizationUserRepository
 	{
 		Task<OrganizationUser> GetByIdAsync(Guid id);
 		Task<IEnumerable<OrganizationUser>> GetByOrganizationIdAsync(Guid organizationId);

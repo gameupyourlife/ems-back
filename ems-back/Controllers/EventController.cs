@@ -1,15 +1,15 @@
-﻿using ems_back.Repo.DTOs;
-using ems_back.Repo.Interfaces;
+﻿using ems_back.Repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using ems_back.Repo.Models;
+using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
