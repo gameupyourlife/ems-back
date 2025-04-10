@@ -366,3 +366,5 @@ FodyWeavers.xsd
 # Added new ignore rules
 ems-back/appsettings.Development.json
 ems-back/appsettings.Production.json
+appsettings.development.json
+appsettings.Development.json
