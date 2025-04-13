@@ -10,6 +10,9 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Repository;
 using ems_back.Repo.MappingProfiles;
 
+using Quartz;
+using ems_back.Repo.Jobs;
+
 namespace ems_back
 {
     public class Program
@@ -59,6 +62,21 @@ namespace ems_back
 
             builder.Services.AddControllers();
 
+            builder.Services.AddQuartz(opt =>
+            {
+                var jobKey = JobKey.Create("TestBackgroundJob");
+                opt.AddJob<TestBackgroundJob>(jobKey)
+                .AddTrigger(trigger =>
+                trigger
+                    .ForJob(jobKey)
+                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(10).RepeatForever()));
+            });
+
+            builder.Services.AddQuartzHostedService(opt =>
+            {
+                opt.WaitForJobsToComplete = true;
+            });
+
             var app = builder.Build();
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
@@ -79,7 +97,6 @@ namespace ems_back
 		            return Results.Problem($"Connection failed: {ex.Message}");
 	            }
             });*/
-
 
             app.UseHttpsRedirection();
 
