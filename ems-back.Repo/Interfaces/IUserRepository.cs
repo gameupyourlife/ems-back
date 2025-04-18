@@ -13,15 +13,12 @@ namespace ems_back.Repo.Interfaces
     public interface IUserRepository
 	{
 		// Basic CRUD with DTOs
-		Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto);
 		Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto);
 		Task<bool> DeleteUserAsync(Guid id);
 
 		// Query methods
 		Task<UserResponseDto> GetUserByIdAsync(Guid id);
-		Task<UserResponseDto> GetUserByEmailAsync(string email);
-		Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
-		Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role);
+
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
 
 		// Utility methods
