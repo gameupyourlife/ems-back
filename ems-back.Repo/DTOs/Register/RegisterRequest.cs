@@ -17,4 +17,3 @@ namespace ems_back.Repo.DTOs.Register
 	}
 
 }
-s
