@@ -96,7 +96,7 @@ namespace ems_back
 			// Auth Service
 			builder.Services.AddScoped<AuthService>();
 
-			var app = builder.Build();
+			//var app = builder.Build();
 
             builder.Services.AddControllers();
 
@@ -145,6 +145,7 @@ namespace ems_back
 
             app.UseAuthorization();
 
+			app.UseAuthentication();
 
             app.MapControllers();
 
