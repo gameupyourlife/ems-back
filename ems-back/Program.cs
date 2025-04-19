@@ -62,14 +62,32 @@ namespace ems_back
 
             builder.Services.AddControllers();
 
+
             builder.Services.AddQuartz(opt =>
             {
-                var jobKey = JobKey.Create("TestBackgroundJob");
+
+                opt.UsePersistentStore(storeOptions =>
+                {
+                    storeOptions.UseProperties = true;
+
+                    //storeOptions.PerformSchemaValidation = false;
+
+                    storeOptions.UsePostgres(postgres =>
+                    {
+                        postgres.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                    });
+
+                    storeOptions.UseJsonSerializer(); //TODO: Create DB tables
+
+                });
+
+                var jobKey = JobKey.Create("CheckTriggersJob");
+                //opt.AddJob<CheckTriggersJob>(jobKey)
                 opt.AddJob<TestBackgroundJob>(jobKey)
                 .AddTrigger(trigger =>
                 trigger
                     .ForJob(jobKey)
-                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(10).RepeatForever()));
+                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(20).RepeatForever()));
             });
 
             builder.Services.AddQuartzHostedService(opt =>
