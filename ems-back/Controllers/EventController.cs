@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ems_back.Controllers
 {
@@ -193,6 +194,7 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPost]
+		[Authorize(Roles = "Organizer,Admin")] // Only Organizers/Admins can create events
 		public async Task<ActionResult<EventBasicDetailedDto>> CreateEvent([FromBody] EventCreateDto eventDto)
 		{
 			try

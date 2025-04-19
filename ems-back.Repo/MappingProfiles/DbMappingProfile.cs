@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agency;
 using ems_back.Repo.DTOs.Agenda;

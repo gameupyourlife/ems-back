@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ems_back.Repo.Data;
+using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.File;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models;
@@ -17,7 +18,7 @@ public class FileRepository : IFileRepository
 		_mapper = mapper;
 	}
 
-	public async Task<FileDetailedDto> GetByIdAsync(Guid id)
+	public async Task<FileDetailedDto> GetByIdAsync(string id)
 	{
 		var file = await _context.Files
 			.Include(f => f.Uploader)
@@ -70,7 +71,7 @@ public class FileRepository : IFileRepository
 		return await GetByIdAsync(fileDto.Id);
 	}
 
-	public async Task<bool> DeleteAsync(Guid id)
+	public async Task<bool> DeleteAsync(string id)
 	{
 		var file = await _context.Files.FindAsync(id);
 		if (file == null) return false;
@@ -80,7 +81,7 @@ public class FileRepository : IFileRepository
 		return true;
 	}
 
-	public async Task<bool> ExistsAsync(Guid id)
+	public async Task<bool> ExistsAsync(string id)
 	{
 		return await _context.Files.AnyAsync(f => f.Id == id);
 	}
