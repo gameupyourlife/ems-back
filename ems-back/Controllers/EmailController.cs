@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ems_back.Repo.DTOs.Placeholder;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("[controller]")]
+[Route("/api/org/{orgId}")]
 public class MailController : ControllerBase
 {
     private readonly MailService _mailService;
@@ -11,43 +12,17 @@ public class MailController : ControllerBase
         _mailService = mailService;
     }
 
-    [HttpPost("send")]
-    public IActionResult SendMail([FromQuery] string to)
+    // POST: /api/org/{orgId}/mails
+    [HttpPost("emails")]
+    public async Task<ActionResult<PlaceholderDTO>> CreateMailTemplate(Guid orgId, [FromBody] PlaceholderDTO bodyDto)
     {
-        _mailService.SendEmail(to, "Testmail", "Das ist eine Testmail von deiner API 😎");
-        return Ok("Mail gesendet!");
+        throw new NotImplementedException();
+    }
+
+    // POST: /api/org/{orgId}/events/{eventId}/email
+    [HttpPost("events/{eventId}/email")]
+    public async Task<ActionResult<PlaceholderDTO>> SendEventMail(Guid orgId, Guid eventId,  [FromBody] PlaceholderDTO bodyDto)
+    {
+        throw new NotImplementedException();
     }
 }
-
-/*using ems_back.Emails;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-
-namespace ems_back.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class EmailController : ControllerBase
-    {
-        private readonly IEmailSender _emailSender;
-
-        public EmailController(IEmailSender emailSender)
-        {
-            _emailSender = emailSender;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            Console.WriteLine("EmailController");
-
-            var receiver = "rebisanik@web.de";
-            var subject = "Test Email";
-            var message = "This is a test email from the EMS application.";
-
-            await _emailSender.SendEmailAsync(receiver, subject, message);
-
-            return Ok("Email sent.");
-        }
-    }
-}*/

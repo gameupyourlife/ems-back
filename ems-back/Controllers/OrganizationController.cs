@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ems_back.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/orgs")]
     [ApiController]
     public class OrganizationsController : ControllerBase
     {

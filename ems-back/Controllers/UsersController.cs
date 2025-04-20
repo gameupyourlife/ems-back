@@ -8,7 +8,7 @@ using ems_back.Repo.DTOs.User;
 
 namespace ems_back.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
@@ -25,7 +25,7 @@ namespace ems_back.Controllers
 
 		// GET: api/users/{userId}
 		[HttpGet("{userId}")]
-		public async Task<ActionResult<UserResponseDto>> GetUserById(Guid userId)
+		public async Task<ActionResult<UserResponseDto>> GetUser(Guid userId)
 		{
 			try
 			{
@@ -48,7 +48,7 @@ namespace ems_back.Controllers
 
 		// PUT: api/users/{userId}
 		[HttpPut("{userId}")]
-		public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateDto userDto)
+		public async Task<ActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateDto userDto)
 		{
 			try
 			{
