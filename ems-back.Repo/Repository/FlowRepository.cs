@@ -28,7 +28,7 @@ namespace ems_back.Repo.Repository
 				.Include(f => f.Creator)
 				.Include(f => f.Updater)
 				.AsNoTracking()
-				.FirstOrDefaultAsync(f => f.Id == id);
+				.FirstOrDefaultAsync(f => f.FlowId == id);
 
 			return flow == null ? null : _mapper.Map<FlowResponseDto>(flow);
 		}
@@ -54,7 +54,7 @@ namespace ems_back.Repo.Repository
 			await _context.SaveChangesAsync();
 
 			// Reload with related entities for the response
-			return await GetByIdAsync(flow.Id);
+			return await GetByIdAsync(flow.FlowId);
 		}
 
 		public async Task<FlowResponseDto> UpdateAsync(Guid id, FlowUpdateDto flowDto)
@@ -107,7 +107,7 @@ namespace ems_back.Repo.Repository
 
 		public async Task<bool> ExistsAsync(Guid id)
 		{
-			return await _context.Flows.AnyAsync(f => f.Id == id);
+			return await _context.Flows.AnyAsync(f => f.FlowId == id);
 		}
 
 		public async Task<FlowDetailedDto> GetWithDetailsAsync(Guid id)
@@ -118,7 +118,7 @@ namespace ems_back.Repo.Repository
 				.Include(f => f.Creator)
 				.Include(f => f.Updater)
 				.AsNoTracking()
-				.FirstOrDefaultAsync(f => f.Id == id);
+				.FirstOrDefaultAsync(f => f.FlowId == id);
 
 			return flow == null ? null : _mapper.Map<FlowDetailedDto>(flow);
 		}

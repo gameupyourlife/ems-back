@@ -17,5 +17,10 @@ namespace ems_back.Repo.DTOs.Flow
         public DateTime UpdatedAt { get; set; }
         public Guid CreatedBy { get; set; }
         public Guid UpdatedBy { get; set; }
-    }
+
+        public bool stillPending { get; set; } = false;
+        public bool multipleRuns { get; set; } = false;
+        public Guid OrganizationId { get; set; }
+        public Guid EventId { get; set; } // <-- Important!
+	}
 }

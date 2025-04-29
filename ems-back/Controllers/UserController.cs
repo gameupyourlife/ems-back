@@ -5,31 +5,32 @@ using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
+using ems_back.Repo.Services.Interfaces;
 
 namespace ems_back.Controllers
 {
-    [Route("api/[controller]")]
+
+	[Route("api/[controller]")]
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
-		private readonly IUserRepository _userRepository;
+		private readonly IUserService _userService;
 		private readonly ILogger<UsersController> _logger;
 
 		public UsersController(
-			IUserRepository userRepository,
+			IUserService userService,
 			ILogger<UsersController> logger)
 		{
-			_userRepository = userRepository;
+			_userService = userService;
 			_logger = logger;
 		}
 
-		// GET: api/users
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers()
 		{
 			try
 			{
-				var users = await _userRepository.GetAllUsersAsync();
+				var users = await _userService.GetAllUsersAsync();
 				return Ok(users);
 			}
 			catch (Exception ex)
@@ -39,20 +40,17 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// GET: api/users/{id}
 		[HttpGet("{id}")]
 		public async Task<ActionResult<UserResponseDto>> GetUserById(Guid id)
 		{
 			try
 			{
-				var user = await _userRepository.GetUserByIdAsync(id);
-
+				var user = await _userService.GetUserByIdAsync(id);
 				if (user == null)
 				{
 					_logger.LogWarning("User with id {UserId} not found", id);
 					return NotFound();
 				}
-
 				return Ok(user);
 			}
 			catch (Exception ex)
@@ -62,19 +60,16 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// POST: api/users
 		[HttpPost]
 		public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] UserCreateDto userDto)
 		{
 			try
 			{
-				// Validate email uniqueness
-				if (!await _userRepository.IsEmailUniqueAsync(userDto.Email))
+				var createdUser = await _userService.CreateUserAsync(userDto);
+				if (createdUser == null)
 				{
 					return Conflict("Email already exists");
 				}
-
-				var createdUser = await _userRepository.CreateUserAsync(userDto);
 				return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
 			}
 			catch (Exception ex)
@@ -84,18 +79,16 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// PUT: api/users/{id}
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto userDto)
+		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto userDto)  
 		{
 			try
 			{
-				var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
-				if (updatedUser == null)
+				var updated = await _userService.UpdateUserAsync(id, userDto);
+				if (updated == null)
 				{
 					return NotFound();
 				}
-
 				return NoContent();
 			}
 			catch (Exception ex)
@@ -105,18 +98,16 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// DELETE: api/users/{id}
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteUser(Guid id)
 		{
 			try
 			{
-				var result = await _userRepository.DeleteUserAsync(id);
-				if (!result)
+				var deleted = await _userService.DeleteUserAsync(id);
+				if (!deleted)
 				{
 					return NotFound();
 				}
-
 				return NoContent();
 			}
 			catch (Exception ex)
@@ -126,13 +117,12 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// GET: api/users/by-email?email=test@example.com
 		[HttpGet("by-email")]
 		public async Task<ActionResult<UserResponseDto>> GetUserByEmail([FromQuery] string email)
 		{
 			try
 			{
-				var user = await _userRepository.GetUserByEmailAsync(email);
+				var user = await _userService.GetUserByEmailAsync(email);
 				if (user == null)
 				{
 					return NotFound();
@@ -151,7 +141,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var organizations = await _userRepository.GetUserOrganizationsAsync(userId);
+				var organizations = await _userService.GetUserOrganizationsAsync(userId);
 				return Ok(organizations);
 			}
 			catch (Exception ex)
@@ -166,7 +156,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var role = await _userRepository.GetUserRoleAsync(userId);
+				var role = await _userService.GetUserRoleAsync(userId);
 				return Ok(role);
 			}
 			catch (Exception ex)
@@ -181,7 +171,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _userRepository.GetUserEventsAsync(userId);
+				var events = await _userService.GetUserEventsAsync(userId);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -196,7 +186,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var users = await _userRepository.GetUsersByRoleAsync(role);
+				var users = await _userService.GetUsersByRoleAsync(role);
 				return Ok(users);
 			}
 			catch (Exception ex)
@@ -211,7 +201,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var users = await _userRepository.GetUsersByOrganizationAsync(organizationId);
+				var users = await _userService.GetUsersByOrganizationAsync(organizationId);
 				return Ok(users);
 			}
 			catch (Exception ex)

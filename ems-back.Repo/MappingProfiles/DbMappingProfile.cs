@@ -11,6 +11,8 @@ using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.File;
 using ems_back.Repo.DTOs.Flow;
+using ems_back.Repo.DTOs.Flow.FlowsRun;
+using ems_back.Repo.DTOs.Flow.FlowTemplate;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.DTOs.User;
@@ -82,7 +84,12 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Triggers, opt => opt.Ignore())
 				.ForMember(dest => dest.Actions, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
-				.ForMember(dest => dest.Updater, opt => opt.Ignore());
+				.ForMember(dest => dest.Updater, opt => opt.Ignore())
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId))
+				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				;
+
 
 			CreateMap<FlowUpdateDto, Flow>()
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
@@ -92,7 +99,14 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Triggers, opt => opt.Ignore())
 				.ForMember(dest => dest.Actions, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
-				.ForMember(dest => dest.Updater, opt => opt.Ignore());
+				.ForMember(dest => dest.Updater, opt => opt.Ignore())
+
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId))
+				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				;
+
+
 
 			// Response mappings
 			CreateMap<Flow, FlowBasicDto>();
@@ -156,6 +170,21 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<Action, ActionDto>();
 			CreateMap<Action, ActionDetailedDto>();
+
+
+
+			CreateMap<FlowsRun, FlowsRunResponseDto>();
+			CreateMap<FlowsRunCreateDto, FlowsRun>()
+				.ForMember(dest => dest.Status, opt => opt.MapFrom(src => FlowRunStatus.Pending))
+				.ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+
+			CreateMap<FlowTemplateCreateDto, FlowTemplate>()
+				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+			CreateMap<FlowTemplate, FlowTemplateResponseDto>();
+
 
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()

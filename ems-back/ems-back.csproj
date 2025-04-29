@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ems-back.Repo\ems_back.Repo.csproj" />
+    <ProjectReference Include="..\ems-back.Tests\ems-back.Tests.csproj" />
   </ItemGroup>
 
 </Project>

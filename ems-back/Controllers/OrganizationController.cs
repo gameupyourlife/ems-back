@@ -1,5 +1,6 @@
 ﻿using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -7,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace ems_back.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/[controller]")]
 	[ApiController]
 	public class OrganizationsController : ControllerBase
 	{
-		private readonly IOrganizationRepository _organizationRepository;
+		private readonly IOrganizationService _organizationService;
 
-		public OrganizationsController(IOrganizationRepository organizationRepository)
+		public OrganizationsController(IOrganizationService organizationService)
 		{
-			_organizationRepository = organizationRepository;
+			_organizationService = organizationService;
 		}
 
 		// GET: api/organizations
@@ -24,7 +25,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var organizations = await _organizationRepository.GetAllOrganizationsAsync();
+				var organizations = await _organizationService.GetAllOrganizationsAsync();
 				return Ok(organizations);
 			}
 			catch (Exception ex)
@@ -39,7 +40,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var organization = await _organizationRepository.GetOrganizationByIdAsync(id);
+				var organization = await _organizationService.GetOrganizationByIdAsync(id);
 				return organization == null ? NotFound() : Ok(organization);
 			}
 			catch (Exception ex)
@@ -54,7 +55,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var organizations = await _organizationRepository.GetOrganizationsByUserAsync(userId);
+				var organizations = await _organizationService.GetOrganizationsByUserAsync(userId);
 				return Ok(organizations);
 			}
 			catch (Exception ex)
@@ -69,7 +70,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var count = await _organizationRepository.GetMemberCountAsync(id);
+				var count = await _organizationService.GetMemberCountAsync(id);
 				return Ok(count);
 			}
 			catch (Exception ex)
@@ -90,7 +91,7 @@ namespace ems_back.Controllers
 					return BadRequest(ModelState);
 				}
 
-				var createdOrg = await _organizationRepository.CreateOrganizationAsync(organizationDto);
+				var createdOrg = await _organizationService.CreateOrganizationAsync(organizationDto);
 				return CreatedAtAction(nameof(GetOrganization), new { id = createdOrg.Id }, createdOrg);
 			}
 			catch (Exception ex)
@@ -107,8 +108,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var result = await _organizationRepository.UpdateOrganizationAsync(id, organizationDto);
-				return result == null ? NotFound() : NoContent();
+				var success = await _organizationService.UpdateOrganizationAsync(id, organizationDto);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{
@@ -122,17 +123,16 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var success = await _organizationRepository.DeleteOrganizationAsync(id);
+				var success = await _organizationService.DeleteOrganizationAsync(id);
 				if (!success)
 					return NotFound(new { message = "Organization not found" });
 
-				return Ok(new { message = "Organization deleted successfully" }); // Change from NoContent() to Ok()
+				return Ok(new { message = "Organization deleted successfully" });
 			}
 			catch (Exception ex)
 			{
 				return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
 			}
 		}
-
 	}
 }
