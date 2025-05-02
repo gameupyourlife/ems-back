@@ -99,6 +99,7 @@ namespace ems_back.Tests.Utilities
 			public bool Passed { get; set; }
 			public TimeSpan Duration { get; set; }
 			public string Message { get; set; }
+
 		}
 	}
 }
