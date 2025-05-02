@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
+using Microsoft.AspNetCore.Authorization;
+using ems_back.Repo.Services.Interfaces;
 
 namespace ems_back.Controllers
 {
@@ -13,14 +15,14 @@ namespace ems_back.Controllers
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
-		private readonly IEventRepository _eventRepository;
+		private readonly IEventService _eventService;
 		private readonly ILogger<EventsController> _logger;
 
 		public EventsController(
-			IEventRepository eventRepository,
+			IEventService eventService,
 			ILogger<EventsController> logger)
 		{
-			_eventRepository = eventRepository;
+			_eventService = eventService;
 			_logger = logger;
 		}
 
@@ -29,7 +31,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetAllEventsAsync();
+				var events = await _eventService.GetAllEventsAsync();
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -44,7 +46,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetUpcomingEventsAsync(days);
+				var events = await _eventService.GetUpcomingEventsAsync(days);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -59,13 +61,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var eventEntity = await _eventRepository.GetByIdAsync(id);
-				if (eventEntity == null)
-				{
-					_logger.LogWarning("Event with id {EventId} not found", id);
-					return NotFound();
-				}
-				return Ok(eventEntity);
+				var eventEntity = await _eventService.GetEventByIdAsync(id);
+				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
@@ -79,12 +76,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var eventEntity = await _eventRepository.GetEventWithAttendeesAsync(id);
-				if (eventEntity == null)
-				{
-					return NotFound();
-				}
-				return Ok(eventEntity);
+				var eventEntity = await _eventService.GetEventWithAttendeesAsync(id);
+				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
@@ -98,12 +91,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var eventEntity = await _eventRepository.GetEventWithAgendaAsync(id);
-				if (eventEntity == null)
-				{
-					return NotFound();
-				}
-				return Ok(eventEntity);
+				var eventEntity = await _eventService.GetEventWithAgendaAsync(id);
+				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
@@ -117,12 +106,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var eventEntity = await _eventRepository.GetEventWithAllDetailsAsync(id);
-				if (eventEntity == null)
-				{
-					return NotFound();
-				}
-				return Ok(eventEntity);
+				var eventEntity = await _eventService.GetEventWithAllDetailsAsync(id);
+				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
@@ -136,7 +121,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetEventsByOrganizationAsync(organizationId);
+				var events = await _eventService.GetEventsByOrganizationAsync(organizationId);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -151,7 +136,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetEventsByCreatorAsync(userId);
+				var events = await _eventService.GetEventsByCreatorAsync(userId);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -166,7 +151,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetEventsByCategoryAsync(category);
+				var events = await _eventService.GetEventsByCategoryAsync(category);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -182,7 +167,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var events = await _eventRepository.GetEventsByDateRangeAsync(start, end);
+				var events = await _eventService.GetEventsByDateRangeAsync(start, end);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -193,11 +178,12 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPost]
+		[Authorize(Roles = "Organizer,Admin")]
 		public async Task<ActionResult<EventBasicDetailedDto>> CreateEvent([FromBody] EventCreateDto eventDto)
 		{
 			try
 			{
-				var createdEvent = await _eventRepository.AddAsync(eventDto);
+				var createdEvent = await _eventService.CreateEventAsync(eventDto);
 				return CreatedAtAction(
 					nameof(GetEvent),
 					new { id = createdEvent.Id },
@@ -220,13 +206,8 @@ namespace ems_back.Controllers
 					return BadRequest("ID mismatch");
 				}
 
-				var updatedEvent = await _eventRepository.UpdateAsync(eventDto);
-				if (updatedEvent == null)
-				{
-					return NotFound();
-				}
-
-				return NoContent();
+				var success = await _eventService.UpdateEventAsync(id, eventDto);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{
@@ -240,12 +221,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var updatedEvent = await _eventRepository.UpdateStatusAsync(id, statusDto);
-				if (updatedEvent == null)
-				{
-					return NotFound();
-				}
-				return Ok(updatedEvent);
+				var updatedEvent = await _eventService.UpdateEventStatusAsync(id, statusDto);
+				return updatedEvent == null ? NotFound() : Ok(updatedEvent);
 			}
 			catch (Exception ex)
 			{
@@ -259,12 +236,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var result = await _eventRepository.DeleteAsync(id);
-				if (!result)
-				{
-					return NotFound();
-				}
-				return NoContent();
+				var success = await _eventService.DeleteEventAsync(id);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{
@@ -278,7 +251,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var count = await _eventRepository.GetAttendeeCountAsync(id);
+				var count = await _eventService.GetAttendeeCountAsync(id);
 				return Ok(count);
 			}
 			catch (Exception ex)

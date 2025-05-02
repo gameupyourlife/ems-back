@@ -11,7 +11,11 @@ namespace ems_back.Repo.DTOs.Flow
     // Full detailed response (with triggers and actions)
     public class FlowDetailedDto : FlowResponseDto
     {
-        public List<TriggerDto> Triggers { get; set; } = new();
+	    public bool stillPending { get; set; } = false;
+	    public bool multipleRuns { get; set; } = false;
+	    public Guid OrganizationId { get; set; }
+	    public Guid EventId { get; set; } // <-- Important!
+		public List<TriggerDto> Triggers { get; set; } = new();
         public List<ActionDto> Actions { get; set; } = new();
     }
 }

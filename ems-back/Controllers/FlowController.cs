@@ -1,5 +1,6 @@
 ﻿using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,14 @@ namespace ems_back.Controllers
 	[ApiController]
 	public class FlowsController : ControllerBase
 	{
-		private readonly IFlowRepository _flowRepository;
+		private readonly IFlowService _flowService;
 		private readonly ILogger<FlowsController> _logger;
 
 		public FlowsController(
-			IFlowRepository flowRepository,
+			IFlowService flowService,
 			ILogger<FlowsController> logger)
 		{
-			_flowRepository = flowRepository;
+			_flowService = flowService;
 			_logger = logger;
 		}
 
@@ -27,7 +28,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var flows = await _flowRepository.GetAllActiveAsync();
+				var flows = await _flowService.GetAllActiveFlowsAsync();
 				return Ok(flows);
 			}
 			catch (Exception ex)
@@ -42,13 +43,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var flow = await _flowRepository.GetByIdAsync(id);
-				if (flow == null)
-				{
-					_logger.LogWarning("Flow with id {FlowId} not found", id);
-					return NotFound();
-				}
-				return Ok(flow);
+				var flow = await _flowService.GetFlowByIdAsync(id);
+				return flow == null ? NotFound() : Ok(flow);
 			}
 			catch (Exception ex)
 			{
@@ -62,13 +58,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var flow = await _flowRepository.GetWithDetailsAsync(id);
-				if (flow == null)
-				{
-					_logger.LogWarning("Detailed flow with id {FlowId} not found", id);
-					return NotFound();
-				}
-				return Ok(flow);
+				var flow = await _flowService.GetFlowDetailsAsync(id);
+				return flow == null ? NotFound() : Ok(flow);
 			}
 			catch (Exception ex)
 			{
@@ -82,7 +73,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var createdFlow = await _flowRepository.AddAsync(flowDto);
+				var createdFlow = await _flowService.CreateFlowAsync(flowDto);
 				return CreatedAtAction(
 					nameof(GetFlowById),
 					new { id = createdFlow.Id },
@@ -105,13 +96,8 @@ namespace ems_back.Controllers
 					return BadRequest("ID mismatch");
 				}
 
-				var updatedFlow = await _flowRepository.UpdateAsync(id, flowDto);
-				if (updatedFlow == null)
-				{
-					return NotFound();
-				}
-
-				return NoContent();
+				var success = await _flowService.UpdateFlowAsync(id, flowDto);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{
@@ -125,12 +111,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var updatedFlow = await _flowRepository.ToggleStatusAsync(id, statusDto);
-				if (updatedFlow == null)
-				{
-					return NotFound();
-				}
-				return Ok(updatedFlow);
+				var updatedFlow = await _flowService.ToggleFlowStatusAsync(id, statusDto);
+				return updatedFlow == null ? NotFound() : Ok(updatedFlow);
 			}
 			catch (Exception ex)
 			{
@@ -144,12 +126,8 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var result = await _flowRepository.DeleteAsync(id);
-				if (!result)
-				{
-					return NotFound();
-				}
-				return NoContent();
+				var success = await _flowService.DeleteFlowAsync(id);
+				return success ? NoContent() : NotFound();
 			}
 			catch (Exception ex)
 			{

@@ -2,27 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ems_back.Repo.Models
 {
-    [Table("Flows")]
+	[Table("Flows")]
 	public class Flow
 	{
-
 		[Key]
 		[Required]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public Guid Id { get; set; } = Guid.NewGuid();
+		public Guid FlowId { get; set; } = Guid.NewGuid(); // renamed from Id to FlowId
 
-        [Required]
-        public Guid OrganizationId { get; set; }
-
-        [Required]
+		[Required]
 		[MaxLength(100)]
-		public string Name { get; set; } // Removed nullable (`?`)
+		public string Name { get; set; }
 
 		public string? Description { get; set; }
 
@@ -30,18 +23,28 @@ namespace ems_back.Repo.Models
 		public bool IsActive { get; set; } = true;
 
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public bool stillPending { get; set; } = false; // NEW
+
+		[Required]
+		public bool multipleRuns { get; set; } = false; // NEW
+
+		[Required]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid UpdatedBy { get; set; }
+
+		[Required]
+		public Guid OrganizationId { get; set; }
+
+		[Required]
+		public Guid EventId { get; set; } // NEW (foreign key to Event)
 
 		// Navigation properties
 		[ForeignKey("CreatedBy")]
@@ -50,10 +53,13 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
+		[ForeignKey("OrganizationId")]
+		public virtual Organization Organization { get; set; }
 
-        public virtual List<Trigger> Triggers { get; set; } = new();
+		[ForeignKey("EventId")]
+		public virtual Event Event { get; set; } // NEW (navigation)
+
+		public virtual List<Trigger> Triggers { get; set; } = new();
 		public virtual List<Action> Actions { get; set; } = new();
 	}
 }

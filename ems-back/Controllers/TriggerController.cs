@@ -1,20 +1,21 @@
 ﻿using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Models.Types;
+using ems_back.Repo.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
 public class TriggersController : ControllerBase
 {
-	private readonly ITriggerRepository _triggerRepository;
+	private readonly ITriggerService _triggerService;
 	private readonly ILogger<TriggersController> _logger;
 
 	public TriggersController(
-		ITriggerRepository triggerRepository,
+		ITriggerService triggerService,
 		ILogger<TriggersController> logger)
 	{
-		_triggerRepository = triggerRepository;
+		_triggerService = triggerService;
 		_logger = logger;
 	}
 
@@ -23,7 +24,7 @@ public class TriggersController : ControllerBase
 	{
 		try
 		{
-			var trigger = await _triggerRepository.GetByIdAsync(id);
+			var trigger = await _triggerService.GetByIdAsync(id);
 			if (trigger == null) return NotFound();
 			return Ok(trigger);
 		}
@@ -39,7 +40,7 @@ public class TriggersController : ControllerBase
 	{
 		try
 		{
-			var triggers = await _triggerRepository.GetByFlowAsync(flowId);
+			var triggers = await _triggerService.GetByFlowAsync(flowId);
 			return Ok(triggers);
 		}
 		catch (Exception ex)
@@ -54,7 +55,7 @@ public class TriggersController : ControllerBase
 	{
 		try
 		{
-			var triggers = await _triggerRepository.GetByTypeAsync(type);
+			var triggers = await _triggerService.GetByTypeAsync(type);
 			return Ok(triggers);
 		}
 		catch (Exception ex)
@@ -69,7 +70,7 @@ public class TriggersController : ControllerBase
 	{
 		try
 		{
-			var createdTrigger = await _triggerRepository.AddAsync(triggerDto);
+			var createdTrigger = await _triggerService.AddAsync(triggerDto);
 			return CreatedAtAction(
 				nameof(GetTrigger),
 				new { id = createdTrigger.Id },
@@ -89,7 +90,7 @@ public class TriggersController : ControllerBase
 		{
 			if (id != triggerDto.Id) return BadRequest("ID mismatch");
 
-			var updatedTrigger = await _triggerRepository.UpdateAsync(triggerDto);
+			var updatedTrigger = await _triggerService.UpdateAsync(triggerDto);
 			if (updatedTrigger == null) return NotFound();
 
 			return NoContent();
@@ -106,7 +107,7 @@ public class TriggersController : ControllerBase
 	{
 		try
 		{
-			var result = await _triggerRepository.DeleteAsync(id);
+			var result = await _triggerService.DeleteAsync(id);
 			if (!result) return NotFound();
 			return NoContent();
 		}
