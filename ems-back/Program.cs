@@ -14,12 +14,13 @@ using Microsoft.IdentityModel.Tokens;
 using Minio;
 using ems_back.Repo.Services.Interfaces;
 using ems_back.Repo.Services;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ems_back
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
@@ -54,46 +55,58 @@ namespace ems_back
 			builder.Services.AddScoped<IFlowService, FlowService>();
 			builder.Services.AddScoped<IFileService, FileService>();
 			builder.Services.AddScoped<IEventService, EventService>();
-			
 			builder.Services.AddScoped<ITokenService, TokenService>();
-			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
-			// Replace your current Identity configuration with this:
+			builder.Services.AddScoped<IRoleService, RoleService>();
 
-			// Identity Configuration
-			builder.Services.AddIdentityCore<User>(options =>
-				{
-					// Configure identity options if needed
-				})
-				.AddRoles<IdentityRole<Guid>>()
-				.AddEntityFrameworkStores<ApplicationDbContext>()
-				.AddSignInManager<SignInManager<User>>()  // Add this line
-				.AddDefaultTokenProviders();
+			// Identity Configuration - Updated for GUID
+			builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+			{
+				// Configure identity options
+				options.Password.RequireDigit = true;
+				options.Password.RequiredLength = 8;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = true;
+				options.Password.RequireLowercase = true;
+			})
+			.AddEntityFrameworkStores<ApplicationDbContext>()
+			.AddDefaultTokenProviders();
+
+			// Add RoleStore explicitly - Updated for GUID
+			builder.Services.AddTransient<IRoleStore<IdentityRole<Guid>>, RoleStore<IdentityRole<Guid>, ApplicationDbContext, Guid>>();
+
+			// Add RoleManager - Updated for GUID
+			builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 
 			// Add authentication services
 			builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			.AddJwtBearer(options =>
+			{
+				options.TokenValidationParameters = new TokenValidationParameters
 				{
-					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-				})
-				.AddJwtBearer(options =>
-				{
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = true,
-						ValidateAudience = true,
-						ValidateLifetime = true,
-						ValidateIssuerSigningKey = true,
-						ValidIssuer = builder.Configuration["Jwt:Issuer"],
-						ValidAudience = builder.Configuration["Jwt:Audience"],
-						IssuerSigningKey = new SymmetricSecurityKey(
-							Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-					};
-				});
+					ValidateIssuer = true,
+					ValidateAudience = true,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					ValidIssuer = builder.Configuration["Jwt:Issuer"],
+					ValidAudience = builder.Configuration["Jwt:Audience"],
+					IssuerSigningKey = new SymmetricSecurityKey(
+						Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+				};
+			});
 
-			// Authorization
-			builder.Services.AddAuthorization();
+			// Authorization with role policies
+			builder.Services.AddAuthorization(options =>
+			{
+				options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("ADMIN"));
+				options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
+				// Add more policies as needed
+			});
 
 			// MinIO Configuration
 			var minioConfig = builder.Configuration.GetSection("Minio");
@@ -103,10 +116,14 @@ namespace ems_back
 				.WithSSL()
 				.Build());
 
-			// Auth Service
-			builder.Services.AddScoped<AuthService>();
-
 			var app = builder.Build();
+
+			// Initialize roles
+			using (var scope = app.Services.CreateScope())
+			{
+				var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+				await roleService.EnsureRolesExist();
+			}
 
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
@@ -120,7 +137,7 @@ namespace ems_back
 			app.UseAuthorization();
 
 			app.MapControllers();
-			app.Run();
+			await app.RunAsync();
 		}
 	}
 }

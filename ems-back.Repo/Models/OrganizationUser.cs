@@ -23,7 +23,7 @@ namespace ems_back.Repo.Models
 		public Guid UserId { get; set; }
 
 		[Required]
-		public UserRole UserRole { get; set; } = UserRole.Participant;
+		public UserRole UserRole { get; set; } = UserRole.User;
 
 		[Required]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]

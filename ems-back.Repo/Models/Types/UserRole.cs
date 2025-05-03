@@ -3,6 +3,8 @@
 public enum UserRole
 {
     Admin,
+    Owner,
     Organizer,
-    Participant
+    EventOrganizer,
+    User
 }
