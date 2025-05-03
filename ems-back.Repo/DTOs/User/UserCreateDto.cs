@@ -14,5 +14,6 @@ namespace ems_back.Repo.DTOs.User
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Password { get; set; } // Only for creation
-    }
+       
+	}
 }

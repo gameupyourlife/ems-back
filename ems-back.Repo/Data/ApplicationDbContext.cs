@@ -7,7 +7,7 @@ using System;
 
 namespace ems_back.Repo.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+	public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
@@ -29,9 +29,18 @@ namespace ems_back.Repo.Data
 		public DbSet<Models.Action> Actions { get; set; }
 		public DbSet<OrganizationUser> OrganizationUsers { get; set; }
 
+		public DbSet<FlowsRun> FlowsRun { get; set; }
+		public DbSet<FlowTemplate> FlowTemplates { get; set; }
+
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			//Moved this up 
+			modelBuilder.Entity<FlowsRun>()
+				.Property(fr => fr.Status)
+				.HasConversion<string>(); // Saves enum as string
 
 			// Global configuration for all entities
 			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -70,7 +79,7 @@ namespace ems_back.Repo.Data
 				b.Property(f => f.Id).HasDefaultValueSql(null);
 				// Add other file-specific configurations if needed
 			});
-	
+
 			// Configure Organization relationships
 			modelBuilder.Entity<Organization>(b =>
 			{
@@ -83,7 +92,7 @@ namespace ems_back.Repo.Data
 					.WithMany()
 					.HasForeignKey(o => o.UpdatedBy)
 					.OnDelete(DeleteBehavior.Restrict);
-            });
+			});
 
 			// Configure Event relationships
 			modelBuilder.Entity<Event>(b =>
@@ -162,26 +171,26 @@ namespace ems_back.Repo.Data
 			// Sync OrganizationUser data when User or Organization changes
 			var changedUsers = ChangeTracker.Entries<User>()
 				.Where(e => e.State == EntityState.Modified &&
-				            (e.Property(nameof(User.FirstName)).IsModified ||
-				             e.Property(nameof(User.LastName)).IsModified ||
-				             e.Property(nameof(User.Email)).IsModified ||
-				             e.Property(nameof(User.ProfilePicture)).IsModified ||
-				             e.Property(nameof(User.Role)).IsModified))
+							(e.Property(nameof(User.FirstName)).IsModified ||
+							 e.Property(nameof(User.LastName)).IsModified ||
+							 e.Property(nameof(User.Email)).IsModified ||
+							 e.Property(nameof(User.ProfilePicture)).IsModified ||
+							 e.Property(nameof(User.Role)).IsModified))
 				.Select(e => e.Entity)
 				.ToList();
 			var changedOrganizations = ChangeTracker.Entries<Organization>()
 				.Where(e => e.State == EntityState.Modified &&
-				            (e.Property(nameof(Organization.Name)).IsModified ||
-				             e.Property(nameof(Organization.Address)).IsModified ||
-				             e.Property(nameof(Organization.Description)).IsModified ||
-				             e.Property(nameof(Organization.ProfilePicture)).IsModified ||
-				             e.Property(nameof(Organization.Website)).IsModified))
+							(e.Property(nameof(Organization.Name)).IsModified ||
+							 e.Property(nameof(Organization.Address)).IsModified ||
+							 e.Property(nameof(Organization.Description)).IsModified ||
+							 e.Property(nameof(Organization.ProfilePicture)).IsModified ||
+							 e.Property(nameof(Organization.Website)).IsModified))
 				.Select(e => e.Entity)
 				.ToList();
 
 			var result = base.SaveChanges();
 
-			
+
 
 			if (changedUsers.Any() || changedOrganizations.Any())
 			{
@@ -190,6 +199,10 @@ namespace ems_back.Repo.Data
 
 			return result;
 		}
+
+
+
+
 	}
 
 	// Optional interface for entities with timestamps

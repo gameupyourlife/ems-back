@@ -57,6 +57,9 @@ namespace ems_back.Repo.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("Start")
                         .HasColumnType("timestamp with time zone");
 
@@ -79,6 +82,8 @@ namespace ems_back.Repo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UpdatedBy");
 
@@ -234,6 +239,9 @@ namespace ems_back.Repo.Migrations
                     b.Property<Guid?>("FlowId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -242,6 +250,8 @@ namespace ems_back.Repo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FlowId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Actions");
                 });
@@ -262,6 +272,9 @@ namespace ems_back.Repo.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("Start")
                         .HasColumnType("timestamp with time zone");
 
@@ -273,6 +286,8 @@ namespace ems_back.Repo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("AgendaEntries");
                 });
@@ -290,10 +305,15 @@ namespace ems_back.Repo.Migrations
                     b.Property<bool>("Attended")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("EventId", "UserId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UserId");
 
@@ -302,14 +322,16 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("ems_back.Repo.Models.EventFile", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("OriginalName")
                         .IsRequired()
@@ -336,6 +358,8 @@ namespace ems_back.Repo.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrganizationId");
+
                     b.HasIndex("UploadedBy");
 
                     b.ToTable("Files");
@@ -343,10 +367,9 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("ems_back.Repo.Models.Flow", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("FlowId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -359,6 +382,9 @@ namespace ems_back.Repo.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -366,6 +392,9 @@ namespace ems_back.Repo.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -375,13 +404,94 @@ namespace ems_back.Repo.Migrations
                     b.Property<Guid>("UpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.Property<bool>("multipleRuns")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("stillPending")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("FlowId");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("Flows");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.FlowTemplate", b =>
+                {
+                    b.Property<Guid>("FlowTemplateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("FlowTemplateId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("FlowTemplates");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.FlowsRun", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("FlowId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Logs")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlowId");
+
+                    b.ToTable("FlowsRun");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
@@ -444,66 +554,20 @@ namespace ems_back.Repo.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<bool>("IsOrganizationAdmin")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("JoinedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("OrganizationAddress")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("OrganizationDescription")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("OrganizationName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("OrganizationProfilePicture")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("OrganizationWebsite")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserFirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("UserLastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("UserProfilePicture")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
 
                     b.Property<int>("UserRole")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IsOrganizationAdmin");
-
-                    b.HasIndex("UserEmail");
 
                     b.HasIndex("UserId");
 
@@ -512,7 +576,7 @@ namespace ems_back.Repo.Migrations
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("OrganizationUsers");
+                    b.ToTable("Organisation_User");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Trigger", b =>
@@ -534,12 +598,17 @@ namespace ems_back.Repo.Migrations
                     b.Property<Guid?>("FlowId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("FlowId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Triggers");
                 });
@@ -601,9 +670,6 @@ namespace ems_back.Repo.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<Guid?>("OrganizationId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -641,8 +707,6 @@ namespace ems_back.Repo.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("OrganizationId");
-
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -654,6 +718,12 @@ namespace ems_back.Repo.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ems_back.Repo.Models.User", "Updater")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
@@ -661,6 +731,8 @@ namespace ems_back.Repo.Migrations
                         .IsRequired();
 
                     b.Navigation("Creator");
+
+                    b.Navigation("Organization");
 
                     b.Navigation("Updater");
                 });
@@ -722,7 +794,15 @@ namespace ems_back.Repo.Migrations
                         .WithMany("Actions")
                         .HasForeignKey("FlowId");
 
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Flow");
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.AgendaEntry", b =>
@@ -733,7 +813,15 @@ namespace ems_back.Repo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Event");
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.EventAttendee", b =>
@@ -741,6 +829,12 @@ namespace ems_back.Repo.Migrations
                     b.HasOne("Event", "Event")
                         .WithMany("Attendees")
                         .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -752,16 +846,26 @@ namespace ems_back.Repo.Migrations
 
                     b.Navigation("Event");
 
+                    b.Navigation("Organization");
+
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.EventFile", b =>
                 {
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ems_back.Repo.Models.User", "Uploader")
                         .WithMany()
                         .HasForeignKey("UploadedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Organization");
 
                     b.Navigation("Uploader");
                 });
@@ -774,6 +878,18 @@ namespace ems_back.Repo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ems_back.Repo.Models.User", "Updater")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
@@ -782,7 +898,33 @@ namespace ems_back.Repo.Migrations
 
                     b.Navigation("Creator");
 
+                    b.Navigation("Event");
+
+                    b.Navigation("Organization");
+
                     b.Navigation("Updater");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.FlowTemplate", b =>
+                {
+                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.FlowsRun", b =>
+                {
+                    b.HasOne("ems_back.Repo.Models.Flow", "Flow")
+                        .WithMany()
+                        .HasForeignKey("FlowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Flow");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
@@ -813,7 +955,7 @@ namespace ems_back.Repo.Migrations
                         .IsRequired();
 
                     b.HasOne("ems_back.Repo.Models.User", "User")
-                        .WithMany("OrganizationUsers")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -829,15 +971,13 @@ namespace ems_back.Repo.Migrations
                         .WithMany("Triggers")
                         .HasForeignKey("FlowId");
 
-                    b.Navigation("Flow");
-                });
-
-            modelBuilder.Entity("ems_back.Repo.Models.User", b =>
-                {
                     b.HasOne("ems_back.Repo.Models.Organization", "Organization")
-                        .WithMany("Members")
+                        .WithMany()
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Flow");
 
                     b.Navigation("Organization");
                 });
@@ -858,8 +998,6 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
                 {
-                    b.Navigation("Members");
-
                     b.Navigation("OrganizationUsers");
                 });
 
@@ -870,8 +1008,6 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("CreatedEvents");
 
                     b.Navigation("CreatedOrganizations");
-
-                    b.Navigation("OrganizationUsers");
                 });
 #pragma warning restore 612, 618
         }
