@@ -11,8 +11,11 @@ using ems_back.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Minio;
-using ems_back.Repo.Services.Interfaces;
+
 using ems_back.Repo.Services;
+using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back
 {
@@ -35,28 +38,25 @@ namespace ems_back
 			builder.Services.AddAutoMapper(typeof(DbMappingProfile));
 
 			// Repositories
+			builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+			builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+			builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
+			builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IEventRepository, EventRepository>();
 			builder.Services.AddScoped<IFileRepository, FileRepository>();
-			builder.Services.AddScoped<IActionRepository, ActionRepository>();
-			builder.Services.AddScoped<IAgendaEntryRepository, AgendaEntryRepository>();
-			builder.Services.AddScoped<IFlowRepository, FlowRepository>();
-			builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
-			builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
-			builder.Services.AddSingleton<MailService>();
 
 			// Services
-			builder.Services.AddScoped<IUserService, UserService>();
-			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-			builder.Services.AddScoped<ITriggerService, TriggerService>();
-			builder.Services.AddScoped<IFlowService, FlowService>();
-			builder.Services.AddScoped<IFileService, FileService>();
-			builder.Services.AddScoped<IEventService, EventService>();
-			
-			builder.Services.AddScoped<ITokenService, TokenService>();
-			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
+			builder.Services.AddScoped<IEmailService, EmailService>();
+			builder.Services.AddScoped<IEventFlowService, EventFlowService>();
+			builder.Services.AddScoped<IEventService, EventService>();
+			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+			builder.Services.AddScoped<IOrgFlowService, OrgFlowService>();
+			builder.Services.AddScoped<IUserService, UserService>();
+			
+		
 			// Replace your current Identity configuration with this:
 
 			// Identity Configuration

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces.Repository
 {
-    internal interface IEventFlowRepository
+    public interface IEventFlowRepository
     {
+        
     }
 }

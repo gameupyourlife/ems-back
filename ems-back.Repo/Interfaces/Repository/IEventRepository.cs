@@ -1,24 +1,23 @@
 ﻿using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
-
 namespace ems_back.Repo.Interfaces.Repository;
 
 public interface IEventRepository
 {
-	Task<EventBasicDetailedDto> GetByIdAsync(Guid id);
-	Task<IEnumerable<EventBasicDto>> GetAllEventsAsync();
-	Task<IEnumerable<EventBasicDto>> GetUpcomingEventsAsync(int days = 30);
-	Task<IEnumerable<EventBasicDto>> GetEventsByOrganizationAsync(Guid organizationId);
-	Task<IEnumerable<EventBasicDto>> GetEventsByCreatorAsync(Guid userId);
-	Task<IEnumerable<EventBasicDto>> GetEventsByCategoryAsync(EventCategory category);
-	Task<IEnumerable<EventBasicDto>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
-	Task<EventBasicDetailedDto> AddAsync(EventCreateDto eventDto);
-	Task<EventBasicDetailedDto> UpdateAsync(EventUpdateDto eventDto);
-	Task<EventBasicDetailedDto> UpdateStatusAsync(Guid eventId, EventStatusDto statusDto);
+	Task<EventInfoDTO> GetByIdAsync(Guid id);
+	Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync();
+	Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30);
+	Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId);
+	Task<IEnumerable<EventInfoDTO>> GetEventsByCreatorAsync(Guid userId);
+	Task<IEnumerable<EventInfoDTO>> GetEventsByCategoryAsync(int category);
+	Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
+	Task<EventInfoDTO> AddAsync(EventCreateDto eventDto);
+	Task<EventInfoDTO> UpdateAsync(EventInfoDTO eventDto);
+	Task<EventInfoDTO> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
 	Task<bool> DeleteAsync(Guid id);
 	Task<bool> ExistsAsync(Guid id);
-	Task<EventBasicDetailedDto> GetEventWithAttendeesAsync(Guid eventId);
-	Task<EventBasicDetailedDto> GetEventWithAgendaAsync(Guid eventId);
-	Task<EventBasicDetailedDto> GetEventWithAllDetailsAsync(Guid eventId);
+	Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid eventId);
+	Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId);
+	Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId);
 	Task<int> GetAttendeeCountAsync(Guid eventId);
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces.Repository
 {
-    internal interface IEmailRepository
+    public interface IEmailRepository
     {
     }
 }

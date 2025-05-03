@@ -8,27 +8,19 @@ using ems_back.Repo.DTOs.User;
 
 public interface IEventService
 {
-    // Events
-    Task<IEnumerable<EventBasicDto>> GetEventsAsync(Guid orgId);
-    Task<EventBasicDto> CreateEventAsync(Guid orgId, EventBasicDto eventDto);
-    Task<EventBasicDto> GetEventByIdAsync(Guid orgId, Guid eventId);
-    Task<EventBasicDto> UpdateEventAsync(Guid orgId, Guid eventId, EventBasicDto eventDto);
-    Task DeleteEventAsync(Guid orgId, Guid eventId);
-
-    // Attendees
-    Task<IEnumerable<UserDto>> GetAttendeesAsync(Guid orgId, Guid eventId);
-    Task<UserDto> AddAttendeeAsync(Guid orgId, Guid eventId, UserDto attendeeDto);
-    Task RemoveAttendeeAsync(Guid orgId, Guid eventId, Guid userId);
-
-    // Files
-    Task<IEnumerable<FileDto>> GetFilesAsync(Guid orgId, Guid eventId);
-    Task<FileDto> AddFileAsync(Guid orgId, Guid eventId, FileDto fileDto);
-    Task<FileDto> UpdateFileAsync(Guid orgId, Guid eventId, Guid fileId, FileDto fileDto);
-    Task DeleteFileAsync(Guid orgId, Guid eventId, Guid fileId);
-
-    // Agenda
-    Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId);
-    Task<AgendaEntryDto> AddAgendaEntryAsync(Guid orgId, Guid eventId, AgendaEntryDto agendaEntryDto);
-    Task<AgendaEntryDto> UpdateAgendaEntryAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntryDto);
-    Task DeleteAgendaEntryAsync(Guid orgId, Guid eventId, Guid agendaId);
+    Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync();
+    Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30);
+    Task<EventInfoDTO> GetEventByIdAsync(Guid id);
+    Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid id);
+    Task<EventInfoDTO> GetEventWithAgendaAsync(Guid id);
+    Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid id);
+    Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId);
+    Task<IEnumerable<EventInfoDTO>> GetEventsByCreatorAsync(Guid userId);
+    Task<IEnumerable<EventInfoDTO>> GetEventsByCategoryAsync(int category);
+    Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
+    Task<EventInfoDTO> CreateEventAsync(EventCreateDto eventDto);
+    Task<bool> UpdateEventAsync(Guid id, EventInfoDTO eventDto);
+    Task<EventInfoDTO> UpdateEventStatusAsync(Guid id, EventInfoDTO statusDto);
+    Task<bool> DeleteEventAsync(Guid id);
+    Task<int> GetAttendeeCountAsync(Guid id);
 }

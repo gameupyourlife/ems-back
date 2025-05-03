@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces.Service
 {
-    internal interface IOrganizationService
+    public interface IOrganizationService
     {
     }
 }
