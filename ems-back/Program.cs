@@ -11,11 +11,12 @@ using ems_back.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Minio;
-
 using ems_back.Repo.Services;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.DTOs.Organization;
+using AutoMapper;
 
 namespace ems_back
 {
@@ -42,8 +43,8 @@ namespace ems_back
 			builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 			builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
 			builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
-			builder.Services.AddScoped<IUserRepository, UserRepository>();
-			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IEventRepository, EventRepository>();
 			builder.Services.AddScoped<IFileRepository, FileRepository>();
 
@@ -55,12 +56,13 @@ namespace ems_back
 			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 			builder.Services.AddScoped<IOrgFlowService, OrgFlowService>();
 			builder.Services.AddScoped<IUserService, UserService>();
-			
-		
-			// Replace your current Identity configuration with this:
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
-			// Identity Configuration
-			builder.Services.AddIdentityCore<User>(options =>
+
+            // Replace your current Identity configuration with this:
+
+            // Identity Configuration
+            builder.Services.AddIdentityCore<User>(options =>
 				{
 					// Configure identity options if needed
 				})

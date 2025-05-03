@@ -16,6 +16,6 @@ namespace ems_back.Repo.DTOs.Agency
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Guid EventId { get; set; }
-        public EventBasicDto Event { get; set; }
+        public EventDetailsDto Event { get; set; }
     }
 }

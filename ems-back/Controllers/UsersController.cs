@@ -106,7 +106,7 @@ namespace ems_back.Controllers
 
         // GET: api/users/{userId}/events
         [HttpGet("{userId}/events")]
-		public async Task<ActionResult<IEnumerable<EventResponseDto>>> GetUserEvents(Guid userId)
+		public async Task<ActionResult<IEnumerable<EventInfoDTO>>> GetUserEvents(Guid userId)
 		{
 			try
 			{

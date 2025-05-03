@@ -6,11 +6,10 @@ using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
-using ems_back.Repo.Services.Interfaces;
 
 namespace ems_back.Controllers
 {
-    [Route("api/orgs/{orgId}/[controller]")]
+    [Route("api/orgs/{orgId}/events")]
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
@@ -25,8 +24,9 @@ namespace ems_back.Controllers
 			_logger = logger;
 		}
 
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetAllEvents()
+        // GET: api/orgs/{orgId}/events
+        [HttpGet]
+		public async Task<ActionResult<IEnumerable<EventInfoDTO>>> GetAllEvents()
 		{
 			try
 			{
@@ -40,23 +40,9 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpGet("upcoming")]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetUpcomingEvents([FromQuery] int days = 30)
-		{
-			try
-			{
-				var events = await _eventService.GetUpcomingEventsAsync(days);
-				return Ok(events);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting upcoming events");
-				return StatusCode(500, "Internal server error");
-			}
-		}
-
-		[HttpGet("{id}")]
-		public async Task<ActionResult<EventBasicDetailedDto>> GetEvent(Guid id)
+        // GET: api/orgs/{orgId}/events/{eventId}
+        [HttpGet("{eventId}")]
+		public async Task<ActionResult<EventInfoDTO>> GetEvent(Guid id)
 		{
 			try
 			{
@@ -70,8 +56,9 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpGet("{id}/attendees")]
-		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAttendees(Guid id)
+        // GET: api/orgs/{orgId}/events/{eventId}/attendees
+        [HttpGet("{eventId}/attendees")]
+		public async Task<ActionResult<EventInfoDTO>> GetEventWithAttendees(Guid id)
 		{
 			try
 			{
@@ -85,8 +72,23 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpGet("{id}/agenda")]
-		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAgenda(Guid id)
+        // POST: api/orgs/{orgId}/events/{eventId}/attendees
+        [HttpPost("{eventId}/attendees")]
+        public async Task<ActionResult<EventInfoDTO>> AddAttendeeToEvent(Guid eventId, Guid attendeeId)
+		{
+			throw new NotImplementedException("This method is not implemented yet.");
+		}
+
+        // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{attendeeId}
+        [HttpDelete("{eventId}/attendees/{userId}")]
+        public async Task<ActionResult<EventInfoDTO>> RemoveAttendeeFromEvent(Guid eventId, Guid attendeeId)
+		{
+			throw new NotImplementedException("This method is not implemented yet.");
+        }
+
+        // GET: api/orgs/{orgId}/events/{eventId}/agenda
+        [HttpGet("{eventId}/agenda")]
+		public async Task<ActionResult<EventInfoDTO>> GetEventWithAgenda(Guid id)
 		{
 			try
 			{
@@ -100,85 +102,57 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpGet("{id}/details")]
-		public async Task<ActionResult<EventBasicDetailedDto>> GetEventWithAllDetails(Guid id)
+        // POST: api/orgs/{orgId}/events/{eventId}/agenda
+        [HttpPost("{eventId}/agenda")]
+        public async Task<ActionResult<EventInfoDTO>> AddAgendaToEvent(Guid eventId, Guid agendaId)
 		{
-			try
-			{
-				var eventEntity = await _eventService.GetEventWithAllDetailsAsync(id);
-				return eventEntity == null ? NotFound() : Ok(eventEntity);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting event details for event {EventId}", id);
-				return StatusCode(500, "Internal server error");
-			}
-		}
+			throw new NotImplementedException("This method is not implemented yet.");
+        }
 
-		[HttpGet("organization/{organizationId}")]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByOrganization(Guid organizationId)
+        // PUt: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
+        [HttpPut("{eventId}/agenda/{agendaId}")]
+        public async Task<ActionResult<EventInfoDTO>> UpdateAgendaInEvent(Guid eventId, Guid agendaId)
 		{
-			try
-			{
-				var events = await _eventService.GetEventsByOrganizationAsync(organizationId);
-				return Ok(events);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting events for organization {OrganizationId}", organizationId);
-				return StatusCode(500, "Internal server error");
-			}
-		}
+			throw new NotImplementedException("This method is not implemented yet.");
+        }
 
-		[HttpGet("creator/{userId}")]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByCreator(Guid userId)
+        // DELETE: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
+        [HttpDelete("{eventId}/agenda/{agendaId}")]
+        public async Task<ActionResult<EventInfoDTO>> RemoveAgendaFromEvent(Guid eventId, Guid agendaId)
 		{
-			try
-			{
-				var events = await _eventService.GetEventsByCreatorAsync(userId);
-				return Ok(events);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting events for creator {UserId}", userId);
-				return StatusCode(500, "Internal server error");
-			}
-		}
+            throw new NotImplementedException("This method is not implemented yet.");
+        }
 
-		[HttpGet("category/{category}")]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByCategory(EventCategory category)
+        // GET: api/orgs/{orgId}/events/{eventId}/files
+        [HttpGet("{eventId}/files")]
+        public async Task<ActionResult<EventInfoDTO>> GetFilesfromEvent(Guid id)
 		{
-			try
-			{
-				var events = await _eventService.GetEventsByCategoryAsync(category);
-				return Ok(events);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting events for category {Category}", category);
-				return StatusCode(500, "Internal server error");
-			}
-		}
+			throw new NotImplementedException("This method is not implemented yet.");
+        }
 
-		[HttpGet("date-range")]
-		public async Task<ActionResult<IEnumerable<EventBasicDto>>> GetEventsByDateRange(
-			[FromQuery] DateTime start, [FromQuery] DateTime end)
+        // POST: api/orgs/{orgId}/events/{eventId}/files
+        [HttpPost("{eventId}/files")]
+        public async Task<ActionResult<EventInfoDTO>> AddFileToEvent(Guid eventId, Guid fileId)
+        {
+            throw new NotImplementedException("This method is not implemented yet.");
+        }
+
+        // PUT: api/orgs/{orgId}/events/{eventId}/files/{fileId}
+        [HttpPut("{eventId}/files/{fileId}")]
+        public async Task<ActionResult<EventInfoDTO>> UpdateFileInEvent(Guid eventId, Guid fileId)
 		{
-			try
-			{
-				var events = await _eventService.GetEventsByDateRangeAsync(start, end);
-				return Ok(events);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting events between {StartDate} and {EndDate}", start, end);
-				return StatusCode(500, "Internal server error");
-			}
-		}
+			throw new NotImplementedException("This method is not implemented yet.");
+        }
+        // DELETE: api/orgs/{orgId}/events/{eventId}/files/{fileId}
+        [HttpDelete("{eventId}/files/{fileId}")]
+        public async Task<ActionResult<EventInfoDTO>> RemoveFileFromEvent(Guid eventId, Guid fileId)
+        {
+            throw new NotImplementedException("This method is not implemented yet.");
+        }
 
-		[HttpPost]
+        [HttpPost]
 		[Authorize(Roles = "Organizer,Admin")]
-		public async Task<ActionResult<EventBasicDetailedDto>> CreateEvent([FromBody] EventCreateDto eventDto)
+		public async Task<ActionResult<EventInfoDTO>> CreateEvent([FromBody] EventCreateDto eventDto)
 		{
 			try
 			{
@@ -195,8 +169,8 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventUpdateDto eventDto)
+		[HttpPut("{eventId}")]
+		public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventInfoDTO eventDto)
 		{
 			try
 			{
@@ -215,22 +189,7 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpPatch("{id}/status")]
-		public async Task<ActionResult<EventBasicDetailedDto>> UpdateEventStatus(Guid id, [FromBody] EventStatusDto statusDto)
-		{
-			try
-			{
-				var updatedEvent = await _eventService.UpdateEventStatusAsync(id, statusDto);
-				return updatedEvent == null ? NotFound() : Ok(updatedEvent);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error updating status for event {EventId}", id);
-				return StatusCode(500, "Internal server error");
-			}
-		}
-
-		[HttpDelete("{id}")]
+		[HttpDelete("{eventId}")]
 		public async Task<IActionResult> DeleteEvent(Guid id)
 		{
 			try
@@ -241,21 +200,6 @@ namespace ems_back.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error deleting event with id {EventId}", id);
-				return StatusCode(500, "Internal server error");
-			}
-		}
-
-		[HttpGet("{id}/attendee-count")]
-		public async Task<ActionResult<int>> GetAttendeeCount(Guid id)
-		{
-			try
-			{
-				var count = await _eventService.GetAttendeeCountAsync(id);
-				return Ok(count);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting attendee count for event {EventId}", id);
 				return StatusCode(500, "Internal server error");
 			}
 		}
