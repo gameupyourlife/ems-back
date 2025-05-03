@@ -2,9 +2,10 @@
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
-using ems_back.Repo.Services.Interfaces;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -241,7 +242,7 @@ namespace ems_back.Services
 			}
 		}
 
-		public async Task<IEnumerable<EventResponseDto>> GetUserEventsAsync(Guid userId)
+		public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
 		{
 			try
 			{
@@ -300,5 +301,10 @@ namespace ems_back.Services
 		{
 			return await _signInManager.CheckPasswordSignInAsync(user, password, false);
 		}
-	}
+
+        Task<IEnumerable<EventInfoDTO>> IUserService.GetUserEventsAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

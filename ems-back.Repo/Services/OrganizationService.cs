@@ -1,15 +1,8 @@
-﻿using ems_back.Repo.DTOs.Organization;
-using ems_back.Repo.Interfaces;
-using ems_back.Repo.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
 
-namespace ems_back.Repo.Services
-{
-	public class OrganizationService : IOrganizationService
+public class OrganizationService : IOrganizationService
 	{
 		private readonly IOrganizationRepository _organizationRepository;
 
@@ -54,4 +47,3 @@ namespace ems_back.Repo.Services
 			return await _organizationRepository.DeleteOrganizationAsync(id);
 		}
 	}
-}

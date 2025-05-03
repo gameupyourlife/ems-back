@@ -1,5 +1,4 @@
-﻿using ems_back.Repo.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ using ems_back.Repo.Services.Interfaces;
 
 namespace ems_back.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/orgs/{orgId}/[controller]")]
 	[ApiController]
 	public class EventsController : ControllerBase
 	{

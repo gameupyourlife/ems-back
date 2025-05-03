@@ -3,7 +3,7 @@ using ems_back.Repo.Data;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
-using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Identity;
@@ -44,7 +44,6 @@ namespace ems_back.Repo.Repository
 
             return _mapper.Map<UserResponseDto>(user);
         }
-
 
         public async Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto)
         {
@@ -212,7 +211,7 @@ namespace ems_back.Repo.Repository
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<EventResponseDto>> GetUserEventsAsync(Guid userId)
+        public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
         {
             var events = await _context.EventAttendees
                 .Where(ea => ea.UserId == userId)
@@ -227,7 +226,7 @@ namespace ems_back.Repo.Repository
                 .AsNoTracking()
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<EventResponseDto>>(events);
+            return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
         }
 
         // Internal methods for authentication

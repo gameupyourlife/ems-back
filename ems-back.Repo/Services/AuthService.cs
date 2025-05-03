@@ -1,7 +1,6 @@
-﻿
+
 using ems_back.Repo.DTOs.Auth;
 using ems_back.Repo.Models;
-using ems_back.Repo.Services.Interfaces;
 
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Login;
 using ems_back.Repo.DTOs.Register;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Services
 {

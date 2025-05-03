@@ -1,4 +1,4 @@
-﻿using ems_back.Repo.DTOs.Auth;
+using ems_back.Repo.DTOs.Auth;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Login;
 using ems_back.Repo.DTOs.Register;
-using ems_back.Repo.Services.Interfaces;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Controllers
 {
