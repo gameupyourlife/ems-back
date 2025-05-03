@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
-using ems_back.Repo.Interfaces;
 using ems_back.Repo.Repository;
 using ems_back.Repo.MappingProfiles;
 using Minio;
 using Minio.DataModel.Args;
 using Microsoft.OpenApi.Models;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back
 {

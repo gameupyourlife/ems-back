@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.Data;
-using ems_back.Repo.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Repo.Repository
 {

@@ -1,7 +1,7 @@
 ﻿using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.Models;
 
-namespace ems_back.Repo.Interfaces;
+namespace ems_back.Repo.Interfaces.Repository;
 
 public interface IOrganizationRepository
 {

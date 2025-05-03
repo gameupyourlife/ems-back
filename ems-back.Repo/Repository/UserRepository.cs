@@ -3,7 +3,7 @@ using ems_back.Repo.Data;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
-using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Identity;

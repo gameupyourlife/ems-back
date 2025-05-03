@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using ems_back.Repo.Interfaces;
 using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Repo.Repository
 {

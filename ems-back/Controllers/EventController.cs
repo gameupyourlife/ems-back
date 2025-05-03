@@ -1,5 +1,4 @@
-﻿using ems_back.Repo.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Placeholder;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Controllers
 {

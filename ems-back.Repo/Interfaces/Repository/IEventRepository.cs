@@ -1,7 +1,7 @@
 ﻿using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 
-namespace ems_back.Repo.Interfaces;
+namespace ems_back.Repo.Interfaces.Repository;
 
 public interface IEventRepository
 {

@@ -1,10 +1,10 @@
-﻿using ems_back.Repo.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Controllers
 {

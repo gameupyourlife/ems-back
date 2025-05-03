@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ems_back.Repo.Interfaces
+namespace ems_back.Repo.Interfaces.Repository
 {
     public interface IUserRepository
 	{
