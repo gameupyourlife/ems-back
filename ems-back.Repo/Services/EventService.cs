@@ -19,15 +19,17 @@ namespace ems_back.Repo.Services
 
         public EventService(
 			IEventRepository eventRepository,
-			ILogger<EventService> logger)
+			IUserRepository userRepository,
+            ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
 			_logger = logger;
 		}
 
-        public async Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync()
+        public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
-			return await _eventRepository.GetAllEventsAsync();
+			// Anzahl der Teilnehmer müssen gezählt werden
+			return await _eventRepository.GetAllEventsAsync(orgId);
 		}
 
 		public async Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30)
@@ -35,12 +37,15 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.GetUpcomingEventsAsync(days);
 		}
 
-		public async Task<EventInfoDTO> GetEventByIdAsync(Guid id)
+		public async Task<EventDetailsDto> GetEventByIdAsync(Guid orgId, Guid eventid)
 		{
-			var eventEntity = await _eventRepository.GetByIdAsync(id);
+
+
+
+			var eventEntity = await _eventRepository.GetByIdAsync(orgId, eventid);
 			if (eventEntity == null)
 			{
-				_logger.LogWarning("Event with id {EventId} not found", id);
+				_logger.LogWarning("Event with id {EventId} not found", eventid);
 			}
 			return eventEntity;
 		}
@@ -80,7 +85,7 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.GetEventsByDateRangeAsync(start, end);
 		}
 
-		public async Task<EventInfoDTO> CreateEventAsync(EventCreateDto eventDto)
+		public async Task<EventDetailsDto> CreateEventAsync(EventCreateDto eventDto)
 		{
 			return await _eventRepository.AddAsync(eventDto);
 		}
@@ -94,7 +99,7 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.UpdateAsync(eventDto) != null;
 		}
 
-		public async Task<EventInfoDTO> UpdateEventStatusAsync(Guid id, EventInfoDTO statusDto)
+		public async Task<EventDetailsDto> UpdateEventStatusAsync(Guid id, EventInfoDTO statusDto)
 		{
 			return await _eventRepository.UpdateStatusAsync(id, statusDto);
 		}

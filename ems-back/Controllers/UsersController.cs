@@ -90,7 +90,7 @@ namespace ems_back.Controllers
 
         // GET: api/users/{userId}/orgs
         [HttpGet("{userId}/orgs")]
-		public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
+		public async Task<ActionResult<IEnumerable<OrganizationOverviewDto>>> GetUserOrganizations(Guid userId)
 		{
 			try
 			{

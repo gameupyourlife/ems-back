@@ -25,7 +25,7 @@ public class Event
 	public string? Description { get; set; }
 
 	[MaxLength(255)]
-	public string? Location { get; set; }
+	public string Location { get; set; }
 
 	[Required]
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -37,9 +37,9 @@ public class Event
 	[MaxLength(255)]
 	public string? Image { get; set; }
 
-	public int Category { get; set; }
+	public EventCategory Category { get; set; }
 
-	public int Status { get; set; }
+	public EventStatus Status { get; set; }
 
 	[Required]
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -48,8 +48,8 @@ public class Event
 	[Required]
 	public Guid UpdatedBy { get; set; }
 
-	public DateTime? Start { get; set; }
-	public DateTime? End { get; set; }
+	public DateTime Start { get; set; }
+	public DateTime End { get; set; }
 
 	// Navigation properties
 	[ForeignKey("CreatedBy")]

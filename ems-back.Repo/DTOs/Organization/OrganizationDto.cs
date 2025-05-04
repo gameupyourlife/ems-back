@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Organization
 {
-    // For minimal organization info (used in dropdowns/lists)
     public class OrganizationDto
     {
-        public Guid Id { get; set; }
+        public Guid OrgId { get; set; }
+        public int NumOfMembers { get; set; }
+        public int NumOfEvents { get; set; }
+        public Guid OwnerId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public Guid UpdatedBy { get; set; }
         public string Name { get; set; }
-        public string? ProfilePicture { get; set; }
+        public string Address { get; set; }
+        public string Description { get; set; }
+        public string ProfilePicture { get; set; }
+        public string Website { get; set; }
     }
 }

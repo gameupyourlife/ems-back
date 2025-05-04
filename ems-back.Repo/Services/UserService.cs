@@ -216,7 +216,7 @@ namespace ems_back.Services
 			}
 		}
 
-		public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
+		public async Task<IEnumerable<OrganizationOverviewDto>> GetUserOrganizationsAsync(Guid userId)
 		{
 			try
 			{

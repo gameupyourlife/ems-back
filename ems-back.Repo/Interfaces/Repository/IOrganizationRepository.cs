@@ -13,7 +13,7 @@ public interface IOrganizationRepository
 	// Query Methods
 	Task<OrganizationResponseDto> GetOrganizationByIdAsync(Guid id);
 	Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync();
-	Task<IEnumerable<OrganizationDto>> GetOrganizationsByUserAsync(Guid userId);
+	Task<IEnumerable<OrganizationOverviewDto>> GetOrganizationsByUserAsync(Guid userId);
 
 	// Utility Methods
 	Task<bool> OrganizationExistsAsync(Guid id);

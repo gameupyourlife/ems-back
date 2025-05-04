@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -48,7 +49,7 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<Organization, OrganizationResponseDto>();
 
-			CreateMap<Organization, OrganizationDto>();
+			CreateMap<Organization, OrganizationOverviewDto>();
 
 			// Event mappings
 			CreateMap<EventCreateDto, Event>()
@@ -57,8 +58,11 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore())
 				.ForMember(dest => dest.AgendaItems, opt => opt.Ignore());
 
-			// Related mappings
-			CreateMap<EventAttendee, EventAttendeeDto>()
+			CreateMap<Event, EventOverviewDto>()
+				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
+
+            // Related mappings
+            CreateMap<EventAttendee, EventAttendeeDto>()
 				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
 				.ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePicture));
 

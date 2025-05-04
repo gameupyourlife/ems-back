@@ -189,7 +189,7 @@ namespace ems_back.Repo.Repository
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
 
-        public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
+        public async Task<IEnumerable<OrganizationOverviewDto>> GetUserOrganizationsAsync(Guid userId)
         {
             var organizations = await _context.Users
              .Where(u => u.Id == userId)
@@ -200,7 +200,7 @@ namespace ems_back.Repo.Repository
              .AsNoTracking()
              .ToListAsync();
 
-            return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
+            return _mapper.Map<IEnumerable<OrganizationOverviewDto>>(organizations);
         }
 
         public async Task<UserRole> GetUserRoleAsync(Guid userId)

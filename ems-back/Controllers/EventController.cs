@@ -26,11 +26,11 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events
         [HttpGet]
-		public async Task<ActionResult<IEnumerable<EventInfoDTO>>> GetAllEvents()
+		public async Task<ActionResult<IEnumerable<EventOverviewDto>>> GetAllEvents(Guid orgId)
 		{
 			try
 			{
-				var events = await _eventService.GetAllEventsAsync();
+				var events = await _eventService.GetAllEventsAsync(orgId);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -42,16 +42,16 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}
         [HttpGet("{eventId}")]
-		public async Task<ActionResult<EventInfoDTO>> GetEvent(Guid id)
+		public async Task<ActionResult<EventInfoDTO>> GetEvent(Guid orgId, Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventByIdAsync(id);
+				var eventEntity = await _eventService.GetEventByIdAsync(orgId, eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event with id {EventId}", id);
+				_logger.LogError(ex, "Error getting event with id {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
@@ -159,7 +159,7 @@ namespace ems_back.Controllers
 				var createdEvent = await _eventService.CreateEventAsync(eventDto);
 				return CreatedAtAction(
 					nameof(GetEvent),
-					new { id = createdEvent.Id },
+					new { id = createdEvent.Metadata.Id },
 					createdEvent);
 			}
 			catch (Exception ex)
