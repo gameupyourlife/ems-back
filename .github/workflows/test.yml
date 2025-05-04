@@ -27,3 +27,4 @@ jobs:
 
     - name: run tests
       run: dotnet test ems-back.Tests/ems-back.Tests.csproj --no-build --configuration Release --logger:trx
+      #run: dotnet test ems-back.Tests/ems-back.Tests.csproj --configuration Release --logger:trx

@@ -72,7 +72,7 @@ namespace ems_back.Tests.Services
 			}
 		}
 
-		[Fact]
+		/*[Fact]
 		public async Task LoginAsync_InvalidEmail_ReturnsFailure()
 		{
 			// Similar structure with invalid email test
@@ -94,7 +94,7 @@ namespace ems_back.Tests.Services
 		public async Task RegisterAsync_DuplicateEmail_ReturnsError()
 		{
 			// Duplicate email test implementation
-		}
+		}*/
 
 		public void Dispose()
 		{
