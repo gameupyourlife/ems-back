@@ -1,0 +1,29 @@
+name: .NET Tests
+
+on:
+  push:
+    branches: [ testSetupGithubActions ]
+  pull_request:
+    branches: [ testSetupGithubActions ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: check repo
+      uses: actions/checkout@v3
+
+    - name: install .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: restore dependencies
+      run: dotnet restore
+
+    - name: build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: run tests
+      run: dotnet test ems-back.Tests/ems-back.Tests.csproj --no-build --configuration Release --logger:trx
