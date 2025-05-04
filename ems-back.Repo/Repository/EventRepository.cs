@@ -67,12 +67,6 @@ namespace ems_back.Repo.Repository
                 })
                 .FirstOrDefaultAsync();
 
-
-			//.Include(e => e.Creator)
-			//.Include(e => e.Updater)
-			//.AsNoTracking()
-			//.FirstOrDefaultAsync(e => e.Id == eventId);
-
 			return eventEntity;
 		}
 
@@ -212,16 +206,24 @@ namespace ems_back.Repo.Repository
 			return await _context.Events.AnyAsync(e => e.Id == id);
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid eventId)
-		{
-			var eventEntity = await _context.Events
-				.Include(e => e.Attendees)
-					.ThenInclude(a => a.User)
-				.Include(e => e.Creator)
-				.FirstOrDefaultAsync(e => e.Id == eventId);
+        public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId)
+        {
+            var attendeesList = await _context.Events
+                .Where(e => e.Id == eventId && e.OrganizationId == orgId)
+                .SelectMany(e => e.Attendees)
+                .Select(a => new EventAttendeeDto
+                {
+                    UserId = a.UserId,
+                    UserEmail = a.User.Email,
+                    UserName = a.User.FirstName + " " + a.User.LastName,
+                    Status = a.Attended,
+                    ProfilePicture = a.User.ProfilePicture,
+                    RegisteredAt = a.RegisteredAt,
+                })
+                .ToListAsync();
 
-			return _mapper.Map<EventInfoDTO>(eventEntity);
-		}
+            return attendeesList;
+        }
 
 		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId)
 		{

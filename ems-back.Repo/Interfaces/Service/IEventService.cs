@@ -11,7 +11,7 @@ public interface IEventService
     Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
     Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30);
     Task<EventDetailsDto> GetEventByIdAsync(Guid orgId, Guid eventId);
-    Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid id);
+    Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId);
     Task<EventInfoDTO> GetEventWithAgendaAsync(Guid id);
     Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid id);
     Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId);

@@ -58,16 +58,16 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpGet("{eventId}/attendees")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventWithAttendees(Guid id)
+		public async Task<ActionResult<EventInfoDTO>> GetEventWithAttendees(Guid orgId, Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventWithAttendeesAsync(id);
+				var eventEntity = await _eventService.GetEventAttendeesAsync(orgId, eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event attendees for event {EventId}", id);
+				_logger.LogError(ex, "Error getting event attendees for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}

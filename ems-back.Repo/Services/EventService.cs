@@ -50,9 +50,9 @@ namespace ems_back.Repo.Services
 			return eventEntity;
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid id)
+		public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId)
 		{
-			return await _eventRepository.GetEventWithAttendeesAsync(id);
+			return await _eventRepository.GetEventAttendeesAsync(orgId, eventId);
 		}
 
 		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid id)

@@ -16,7 +16,7 @@ public interface IEventRepository
 	Task<EventDetailsDto> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
 	Task<bool> DeleteAsync(Guid id);
 	Task<bool> ExistsAsync(Guid id);
-	Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid eventId);
+	Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId);
 	Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId);
 	Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId);
 	Task<int> GetAttendeeCountAsync(Guid eventId);
