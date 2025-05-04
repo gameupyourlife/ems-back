@@ -20,6 +20,7 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.Services.Interfaces;
 using ems_back.Services;
 
 namespace ems_back
@@ -104,6 +105,9 @@ namespace ems_back
 			builder.Services.AddAuthorization(options =>
 			{
 				options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("ADMIN"));
+				options.AddPolicy("RequireOwnerRole", policy => policy.RequireRole("OWNER"));
+				options.AddPolicy("RequireEventOrganizerRole", policy => policy.RequireRole("EVENT-ORGANIZER"));
+				options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("ORGANIZER"));
 				options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
 			});
 
@@ -140,4 +144,5 @@ namespace ems_back
 			await app.RunAsync();
 		}
 	}
+
 }
