@@ -1,7 +1,7 @@
-﻿using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models.Types;
-using ems_back.Repo.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,8 +15,9 @@ namespace ems_back.Repo.Services
 	{
 		private readonly IEventRepository _eventRepository;
 		private readonly ILogger<EventService> _logger;
+        private IEventRepository @object;
 
-		public EventService(
+        public EventService(
 			IEventRepository eventRepository,
 			ILogger<EventService> logger)
 		{
@@ -24,17 +25,17 @@ namespace ems_back.Repo.Services
 			_logger = logger;
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetAllEventsAsync()
+        public async Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync()
 		{
 			return await _eventRepository.GetAllEventsAsync();
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetUpcomingEventsAsync(int days = 30)
+		public async Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30)
 		{
 			return await _eventRepository.GetUpcomingEventsAsync(days);
 		}
 
-		public async Task<EventBasicDetailedDto> GetEventByIdAsync(Guid id)
+		public async Task<EventInfoDTO> GetEventByIdAsync(Guid id)
 		{
 			var eventEntity = await _eventRepository.GetByIdAsync(id);
 			if (eventEntity == null)
@@ -44,47 +45,47 @@ namespace ems_back.Repo.Services
 			return eventEntity;
 		}
 
-		public async Task<EventBasicDetailedDto> GetEventWithAttendeesAsync(Guid id)
+		public async Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid id)
 		{
 			return await _eventRepository.GetEventWithAttendeesAsync(id);
 		}
 
-		public async Task<EventBasicDetailedDto> GetEventWithAgendaAsync(Guid id)
+		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid id)
 		{
 			return await _eventRepository.GetEventWithAgendaAsync(id);
 		}
 
-		public async Task<EventBasicDetailedDto> GetEventWithAllDetailsAsync(Guid id)
+		public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid id)
 		{
 			return await _eventRepository.GetEventWithAllDetailsAsync(id);
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetEventsByOrganizationAsync(Guid organizationId)
+		public async Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId)
 		{
 			return await _eventRepository.GetEventsByOrganizationAsync(organizationId);
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetEventsByCreatorAsync(Guid userId)
+		public async Task<IEnumerable<EventInfoDTO>> GetEventsByCreatorAsync(Guid userId)
 		{
 			return await _eventRepository.GetEventsByCreatorAsync(userId);
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetEventsByCategoryAsync(EventCategory category)
+		public async Task<IEnumerable<EventInfoDTO>> GetEventsByCategoryAsync(int category)
 		{
 			return await _eventRepository.GetEventsByCategoryAsync(category);
 		}
 
-		public async Task<IEnumerable<EventBasicDto>> GetEventsByDateRangeAsync(DateTime start, DateTime end)
+		public async Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end)
 		{
 			return await _eventRepository.GetEventsByDateRangeAsync(start, end);
 		}
 
-		public async Task<EventBasicDetailedDto> CreateEventAsync(EventCreateDto eventDto)
+		public async Task<EventInfoDTO> CreateEventAsync(EventCreateDto eventDto)
 		{
 			return await _eventRepository.AddAsync(eventDto);
 		}
 
-		public async Task<bool> UpdateEventAsync(Guid id, EventUpdateDto eventDto)
+		public async Task<bool> UpdateEventAsync(Guid id, EventInfoDTO eventDto)
 		{
 			if (id != eventDto.Id)
 			{
@@ -93,7 +94,7 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.UpdateAsync(eventDto) != null;
 		}
 
-		public async Task<EventBasicDetailedDto> UpdateEventStatusAsync(Guid id, EventStatusDto statusDto)
+		public async Task<EventInfoDTO> UpdateEventStatusAsync(Guid id, EventInfoDTO statusDto)
 		{
 			return await _eventRepository.UpdateStatusAsync(id, statusDto);
 		}

@@ -7,9 +7,9 @@ using Moq;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
-using ems_back.Repo.Services.Interfaces;
 using ems_back.Tests.Utilities;
 using Microsoft.Extensions.Logging;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Tests.Services
 {

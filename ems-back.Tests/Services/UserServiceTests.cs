@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using ems_back.Repo.Interfaces;
 using ems_back.Tests.Utilities;
 using Microsoft.Extensions.Logging;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Tests.Services
 {

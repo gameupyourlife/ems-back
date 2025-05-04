@@ -9,6 +9,7 @@ using ems_back.Repo.Interfaces;
 using Microsoft.Extensions.Logging;
 using ems_back.Tests.Utilities;
 using ems_back.Repo.Services;
+using ems_back.Repo.Interfaces.Repository;
 
 namespace ems_back.Tests.Services
 {
@@ -39,11 +40,11 @@ namespace ems_back.Tests.Services
 			{
 				// Arrange
 				var eventId = Guid.NewGuid();
-				var expectedEvent = new EventBasicDetailedDto
+				var expectedEvent = new EventInfoDTO
 				{
 					Id = eventId,
 					Title = "Test Event",
-					Status = EventStatus.Scheduled
+					Status = 3
 				};
 
 				_eventRepoMock.Setup(x => x.GetByIdAsync(eventId))
@@ -85,10 +86,10 @@ namespace ems_back.Tests.Services
 				{
 					Title = "New Event",
 					Description = "Test Description",
-					Category = EventCategory.Conference
+					Category = 3
 				};
 
-				var expectedEvent = new EventBasicDetailedDto
+				var expectedEvent = new EventInfoDTO
 				{
 					Id = Guid.NewGuid(),
 					Title = eventDto.Title,
@@ -134,9 +135,9 @@ namespace ems_back.Tests.Services
 			{
 				// Arrange
 				var eventId = Guid.NewGuid();
-				var statusDto = new EventStatusDto { Status = EventStatus.Canceled };
+				var statusDto = new EventInfoDTO { Status = 3 };
 
-				var expectedEvent = new EventBasicDetailedDto
+				var expectedEvent = new EventInfoDTO
 				{
 					Id = eventId,
 					Status = statusDto.Status

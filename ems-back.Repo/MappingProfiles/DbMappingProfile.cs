@@ -57,19 +57,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore())
 				.ForMember(dest => dest.AgendaItems, opt => opt.Ignore());
 
-			CreateMap<EventUpdateDto, Event>()
-				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
-				.ForMember(dest => dest.Attendees, opt => opt.Ignore())
-				.ForMember(dest => dest.AgendaItems, opt => opt.Ignore());
-
-			CreateMap<Event, EventBasicDto>()
-				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count))
-				.ForMember(dest => dest.AgendaItemCount, opt => opt.MapFrom(src => src.AgendaItems.Count));
-
-			CreateMap<Event, EventBasicDetailedDto>();
-
 			// Related mappings
 			CreateMap<EventAttendee, EventAttendeeDto>()
 				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))

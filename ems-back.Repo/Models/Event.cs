@@ -37,9 +37,9 @@ public class Event
 	[MaxLength(255)]
 	public string? Image { get; set; }
 
-	public EventCategory? Category { get; set; }
+	public int Category { get; set; }
 
-	public EventStatus? Status { get; set; }
+	public int Status { get; set; }
 
 	[Required]
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]

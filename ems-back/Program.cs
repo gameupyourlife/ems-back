@@ -1,20 +1,26 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
+using Minio;
+
+using ems_back;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
-using ems_back.Repo.Interfaces;
 using ems_back.Repo.Repository;
-using ems_back.Repo.MappingProfiles;
-using ems_back.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Minio;
-using ems_back.Repo.Services.Interfaces;
 using ems_back.Repo.Services;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using ems_back.Repo.MappingProfiles;
+using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.DTOs.Organization;
+using ems_back.Services;
 
 namespace ems_back
 {
@@ -24,7 +30,7 @@ namespace ems_back
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
+			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
@@ -37,32 +43,29 @@ namespace ems_back
 			builder.Services.AddAutoMapper(typeof(DbMappingProfile));
 
 			// Repositories
+			builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+			builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+			builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
+			builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IEventRepository, EventRepository>();
 			builder.Services.AddScoped<IFileRepository, FileRepository>();
-			builder.Services.AddScoped<IActionRepository, ActionRepository>();
-			builder.Services.AddScoped<IAgendaEntryRepository, AgendaEntryRepository>();
-			builder.Services.AddScoped<IFlowRepository, FlowRepository>();
-			builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
-			builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
-			builder.Services.AddSingleton<MailService>();
 
 			// Services
-			builder.Services.AddScoped<IUserService, UserService>();
-			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-			builder.Services.AddScoped<ITriggerService, TriggerService>();
-			builder.Services.AddScoped<IFlowService, FlowService>();
-			builder.Services.AddScoped<IFileService, FileService>();
-			builder.Services.AddScoped<IEventService, EventService>();
-			builder.Services.AddScoped<ITokenService, TokenService>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
+			builder.Services.AddScoped<IEmailService, EmailService>();
+			builder.Services.AddScoped<IEventFlowService, EventFlowService>();
+			builder.Services.AddScoped<IEventService, EventService>();
+			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+			builder.Services.AddScoped<IOrgFlowService, OrgFlowService>();
+			builder.Services.AddScoped<IUserService, UserService>();
+			builder.Services.AddScoped<ITokenService, TokenService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 
-			// Identity Configuration - Updated for GUID
+			// Identity Configuration - supports GUIDs for users and roles
 			builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 			{
-				// Configure identity options
 				options.Password.RequireDigit = true;
 				options.Password.RequiredLength = 8;
 				options.Password.RequireNonAlphanumeric = false;
@@ -72,13 +75,10 @@ namespace ems_back
 			.AddEntityFrameworkStores<ApplicationDbContext>()
 			.AddDefaultTokenProviders();
 
-			// Add RoleStore explicitly - Updated for GUID
 			builder.Services.AddTransient<IRoleStore<IdentityRole<Guid>>, RoleStore<IdentityRole<Guid>, ApplicationDbContext, Guid>>();
-
-			// Add RoleManager - Updated for GUID
 			builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 
-			// Add authentication services
+			// JWT Authentication
 			builder.Services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -100,15 +100,14 @@ namespace ems_back
 				};
 			});
 
-			// Authorization with role policies
+			// Authorization Policies
 			builder.Services.AddAuthorization(options =>
 			{
 				options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("ADMIN"));
 				options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
-				// Add more policies as needed
 			});
 
-			// MinIO Configuration
+			// MinIO Client Configuration
 			var minioConfig = builder.Configuration.GetSection("Minio");
 			builder.Services.AddMinio(configureClient => configureClient
 				.WithEndpoint(minioConfig["Endpoint"])
@@ -118,14 +117,14 @@ namespace ems_back
 
 			var app = builder.Build();
 
-			// Initialize roles
+			// Initialize roles on startup
 			using (var scope = app.Services.CreateScope())
 			{
 				var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
 				await roleService.EnsureRolesExist();
 			}
 
-			// Configure the HTTP request pipeline.
+			// Middleware
 			if (app.Environment.IsDevelopment())
 			{
 				app.UseSwagger();
@@ -137,6 +136,7 @@ namespace ems_back
 			app.UseAuthorization();
 
 			app.MapControllers();
+
 			await app.RunAsync();
 		}
 	}

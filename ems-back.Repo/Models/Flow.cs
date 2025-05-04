@@ -61,5 +61,8 @@ namespace ems_back.Repo.Models
 
 		public virtual List<Trigger> Triggers { get; set; } = new();
 		public virtual List<Action> Actions { get; set; } = new();
+
+		[Required]
+		public String FlowType { get; set; } = "Template"; // Default value for Type
 	}
 }

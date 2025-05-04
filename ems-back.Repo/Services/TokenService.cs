@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -6,82 +6,81 @@ using ems_back.Repo.Models;
 using Microsoft.Extensions.Logging;
 using ems_back.Repo.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Repo.Services
 {
-	public class TokenService : ITokenService
-	{
-		private readonly IConfiguration _configuration;
-		private readonly ILogger<TokenService> _logger;
-		private readonly SymmetricSecurityKey _securityKey;
-		private readonly SigningCredentials _signingCredentials;
+    public class TokenService : ITokenService
+    {
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<TokenService> _logger;
+        private readonly SymmetricSecurityKey _securityKey;
+        private readonly SigningCredentials _signingCredentials;
 
-		public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
-		{
-			_configuration = configuration;
-			_logger = logger;
+        public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
+        {
+            _configuration = configuration;
+            _logger = logger;
 
-			// Validate and initialize JWT configuration
-			var key = _configuration["Jwt:Key"];
-			if (string.IsNullOrEmpty(key))
-			{
-				throw new ArgumentNullException("Jwt:Key", "JWT signing key cannot be null or empty");
-			}
+            var key = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException("Jwt:Key", "JWT signing key cannot be null or empty");
+            }
 
-			var keyByteCount = Encoding.UTF8.GetByteCount(key);
-			if (keyByteCount < 64) // 512 bits minimum for HMAC-SHA512
-			{
-				_logger.LogError("JWT key is too short. Expected at least 64 bytes, got {KeyLength} bytes", keyByteCount);
-				throw new ArgumentException($"JWT key must be at least 64 bytes (512 bits) for HMAC-SHA512. Current length: {keyByteCount} bytes");
-			}
+            var keyByteCount = Encoding.UTF8.GetByteCount(key);
+            if (keyByteCount < 64)
+            {
+                _logger.LogError("JWT key is too short. Expected at least 64 bytes, got {KeyLength} bytes", keyByteCount);
+                throw new ArgumentException($"JWT key must be at least 64 bytes (512 bits). Current length: {keyByteCount} bytes");
+            }
 
-			_securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-			_signingCredentials = new SigningCredentials(_securityKey, SecurityAlgorithms.HmacSha512);
-		}
+            _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            _signingCredentials = new SigningCredentials(_securityKey, SecurityAlgorithms.HmacSha512);
+        }
 
-		public async Task<string> GenerateTokenAsync(User user)
-		{
-			try
-			{
-				if (user == null)
-				{
-					throw new ArgumentNullException(nameof(user));
-				}
+        public async Task<string> GenerateTokenAsync(User user)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    throw new ArgumentNullException(nameof(user));
+                }
 
-				var claims = new List<Claim>
-				{
-					new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-					new Claim(JwtRegisteredClaimNames.Email, user.Email),
-					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-					new Claim(ClaimTypes.Role, user.Role.ToString())
-				};
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
+                };
 
-				// Add additional claims if needed
-				if (!string.IsNullOrEmpty(user.UserName))
-				{
-					claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName));
-				}
+                if (!string.IsNullOrEmpty(user.UserName))
+                {
+                    claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName));
+                }
 
-				var tokenDescriptor = new SecurityTokenDescriptor
-				{
-					Subject = new ClaimsIdentity(claims),
-					Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiryInMinutes"])),
-					Issuer = _configuration["Jwt:Issuer"],
-					Audience = _configuration["Jwt:Audience"],
-					SigningCredentials = _signingCredentials
-				};
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiryInMinutes"])),
+                    Issuer = _configuration["Jwt:Issuer"],
+                    Audience = _configuration["Jwt:Audience"],
+                    SigningCredentials = _signingCredentials
+                };
 
-				var tokenHandler = new JwtSecurityTokenHandler();
-				var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor);
 
-				_logger.LogInformation("Generated JWT token for user {UserId}", user.Id);
-				return tokenHandler.WriteToken(token);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error generating JWT token for user {UserId}", user?.Id);
-				throw new SecurityTokenException("Failed to generate authentication token", ex);
-			}
-		}
-	}
+                _logger.LogInformation("Generated JWT token for user {UserId}", user.Id);
+                return await Task.FromResult(tokenHandler.WriteToken(token));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating JWT token for user {UserId}", user?.Id);
+                throw new SecurityTokenException("Failed to generate authentication token", ex);
+            }
+        }
+    }
 }
