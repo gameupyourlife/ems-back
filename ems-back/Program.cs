@@ -21,6 +21,7 @@ using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Services;
+using ems_back.Repo.Services.Interfaces;
 
 namespace ems_back
 {
