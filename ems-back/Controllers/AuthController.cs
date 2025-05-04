@@ -77,7 +77,7 @@ namespace ems_back.Controllers
 				var response = new
 				{
 					Message = "User registered successfully!",
-					Token = result.Token  // Include token if available
+				
 				};
 
 				return Ok(response);

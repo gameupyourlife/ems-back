@@ -1,25 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
-using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Controllers
 {
-    [Route("api/users")]
+	[Route("api/users")]
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
-		private readonly IUserRepository _userRepository;
+		private readonly IUserService _userService;
 		private readonly ILogger<UsersController> _logger;
 
 		public UsersController(
-			IUserRepository userRepository,
+			IUserService userService,
 			ILogger<UsersController> logger)
 		{
-			_userRepository = userRepository;
+			_userService = userService;
 			_logger = logger;
 		}
 
@@ -29,7 +28,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var user = await _userRepository.GetUserByIdAsync(userId);
+				var user = await _userService.GetUserByIdAsync(userId);
 
 				if (user == null)
 				{
@@ -52,7 +51,7 @@ namespace ems_back.Controllers
 		{
 			try
 			{
-				var updatedUser = await _userRepository.UpdateUserAsync(userId, userDto);
+				var updatedUser = await _userService.UpdateUserAsync(userId, userDto);
 				if (updatedUser == null)
 				{
 					return NotFound();
@@ -67,13 +66,13 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// DELETE: api/users/{usersId}
+		// DELETE: api/users/{userId}
 		[HttpDelete("{userId}")]
 		public async Task<IActionResult> DeleteUser(Guid userId)
 		{
 			try
 			{
-				var result = await _userRepository.DeleteUserAsync(userId);
+				var result = await _userService.DeleteUserAsync(userId);
 				if (!result)
 				{
 					return NotFound();
@@ -88,13 +87,13 @@ namespace ems_back.Controllers
 			}
 		}
 
-        // GET: api/users/{userId}/orgs
-        [HttpGet("{userId}/orgs")]
+		// GET: api/users/{userId}/orgs
+		[HttpGet("{userId}/orgs")]
 		public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
 		{
 			try
 			{
-				var organizations = await _userRepository.GetUserOrganizationsAsync(userId);
+				var organizations = await _userService.GetUserOrganizationsAsync(userId);
 				return Ok(organizations);
 			}
 			catch (Exception ex)
@@ -104,20 +103,32 @@ namespace ems_back.Controllers
 			}
 		}
 
-        // GET: api/users/{userId}/events
-        [HttpGet("{userId}/events")]
-		public async Task<ActionResult<IEnumerable<EventInfoDTO>>> GetUserEvents(Guid userId)
+	
+
+		// DELETE: api/users/admin-delete
+		[HttpDelete("admin-delete")]
+		public async Task<IActionResult> AdminDeleteUser([FromQuery] Guid? userId, [FromQuery] string? email)
 		{
 			try
 			{
-				var events = await _userRepository.GetUserEventsAsync(userId);
-				return Ok(events);
+				if (!userId.HasValue && string.IsNullOrEmpty(email))
+				{
+					return BadRequest("Either userId or email must be provided.");
+				}
+
+				var success = await _userService.DeleteUserByIdOrEmailAsync(userId, email);
+				if (!success)
+				{
+					return NotFound("User not found or could not be deleted.");
+				}
+
+				return NoContent();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting events for user {UserId}", userId);
+				_logger.LogError(ex, "Admin error deleting user by Id or Email");
 				return StatusCode(500, "Internal server error");
 			}
 		}
-    }
+	}
 }
