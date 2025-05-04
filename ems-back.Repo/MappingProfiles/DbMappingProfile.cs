@@ -37,7 +37,7 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.EmailConfirmed,
 					opt => opt.MapFrom(src => false))
 				.ForMember(dest => dest.Role,
-					opt => opt.MapFrom(src => UserRole.Participant)); // Default role
+					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
 				.IncludeBase<User, UserDto>();
