@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
+using ems_back.Repo.Models;
+using ems_back.Repo.DTOs;
 
 namespace ems_back.Controllers
 {
@@ -42,7 +44,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}
         [HttpGet("{eventId}")]
-		public async Task<ActionResult<EventInfoDTO>> GetEvent(Guid orgId, Guid eventId)
+		public async Task<ActionResult<EventDetailsDto>> GetEvent(Guid orgId, Guid eventId)
 		{
 			try
 			{
@@ -58,11 +60,11 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpGet("{eventId}/attendees")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventWithAttendees(Guid orgId, Guid eventId)
+		public async Task<ActionResult<List<EventAttendeeDto>>> GetAttendeesFromEvent(Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventAttendeesAsync(orgId, eventId);
+				var eventEntity = await _eventService.GetEventAttendeesAsync(eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
@@ -88,16 +90,16 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventWithAgenda(Guid id)
+		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventWithAgendaAsync(id);
+				var eventEntity = await _eventService.GetAgendaWithEventAsync(eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event agenda for event {EventId}", id);
+				_logger.LogError(ex, "Error getting event agenda for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
@@ -125,9 +127,10 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/files
         [HttpGet("{eventId}/files")]
-        public async Task<ActionResult<EventInfoDTO>> GetFilesfromEvent(Guid id)
+        public async Task<ActionResult<List<FileDto>>> GetFilesfromEvent(Guid eventId)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+			var fileList = await _eventService.GetFilesFromEvent(eventId);
+            return fileList == null ? NotFound() : Ok(fileList);
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/files

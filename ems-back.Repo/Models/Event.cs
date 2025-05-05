@@ -7,7 +7,6 @@ using ems_back.Repo.Models.Types;
 public class Event
 {
 	[Key]
-
 	[Required]
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public Guid Id { get; set; } = Guid.NewGuid();

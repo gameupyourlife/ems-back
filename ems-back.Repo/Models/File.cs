@@ -2,17 +2,17 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ems_back.Repo.Models.Types;
 
-	namespace ems_back.Repo.Models
+namespace ems_back.Repo.Models
+{
+	[Table("Files")]
+	public class EventFile
 	{
-		[Table("Files")]
-		public class EventFile
-	{
-			[Key]
-			public string Id { get; set; }
+		[Key]
+		public string Id { get; set; }
 
-			[Required]
-			[MaxLength(255)]
-			public string Url { get; set; }
+		[Required]
+		[MaxLength(255)]
+		public string Url { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -36,8 +36,11 @@ using ems_back.Repo.Models.Types;
         [ForeignKey("UploadedBy")]
         public virtual User Uploader { get; set; }
 
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
+        [ForeignKey("EventId")]
+        public virtual Event Event { get; set; }
+
+        //[ForeignKey("OrganizationId")]
+        //public virtual Organization Organization { get; set; }
     }
 }
 

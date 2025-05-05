@@ -13,6 +13,7 @@ using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Trigger;
+using ems_back.Repo.DTOs;
 
 namespace ems_back.Repo.Repository
 {
@@ -206,10 +207,10 @@ namespace ems_back.Repo.Repository
 			return await _context.Events.AnyAsync(e => e.Id == id);
 		}
 
-        public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId)
+        public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId)
         {
             var attendeesList = await _context.Events
-                .Where(e => e.Id == eventId && e.OrganizationId == orgId)
+                .Where(e => e.Id == eventId)
                 .SelectMany(e => e.Attendees)
                 .Select(a => new EventAttendeeDto
                 {
@@ -225,17 +226,36 @@ namespace ems_back.Repo.Repository
             return attendeesList;
         }
 
-		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId)
+		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId)
 		{
-			var eventEntity = await _context.Events
-				.Include(e => e.AgendaItems)
-				.Include(e => e.Creator)
-				.FirstOrDefaultAsync(e => e.Id == eventId);
+			var eventEntity = await _context.EventAttendees
+				.Where(e => e.EventId == eventId)
+				.SelectMany(e => e.Event.AgendaItems)
+				.ToListAsync();
 
-			return _mapper.Map<EventInfoDTO>(eventEntity);
+            return eventEntity;
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId)
+        public async Task<List<FileDto>> GetFilesFromEvent(Guid eventId)
+        {
+            var files = await _context.Files
+                .Where(e => e.Event.Id == eventId)
+                .Select(f => new FileDto
+                {
+                    Id = f.Id,
+                    Url = f.Url,
+                    Type = f.Type,
+                    UploadedAt = f.UploadedAt,
+                    OriginalName = f.OriginalName,
+                    ContentType = f.ContentType,
+                    SizeInBytes = f.SizeInBytes
+                })
+                .ToListAsync();
+
+            return files;
+        }
+
+        public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId)
 		{
 			var eventEntity = await _context.Events
 				.Include(e => e.Creator)

@@ -1,6 +1,8 @@
+using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.Extensions.Logging;
 using System;
@@ -50,17 +52,22 @@ namespace ems_back.Repo.Services
 			return eventEntity;
 		}
 
-		public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid orgId, Guid eventId)
+		public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId)
 		{
-			return await _eventRepository.GetEventAttendeesAsync(orgId, eventId);
+			return await _eventRepository.GetEventAttendeesAsync(eventId);
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid id)
+		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid id)
 		{
-			return await _eventRepository.GetEventWithAgendaAsync(id);
+			return await _eventRepository.GetAgendaWithEventAsync(id);
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid id)
+        public async Task<List<FileDto>> GetFilesFromEvent(Guid eventId)
+        {
+            return await _eventRepository.GetFilesFromEvent(eventId);
+        }
+
+        public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid id)
 		{
 			return await _eventRepository.GetEventWithAllDetailsAsync(id);
 		}
