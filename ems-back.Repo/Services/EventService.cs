@@ -54,8 +54,17 @@ namespace ems_back.Repo.Services
 
 		public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId)
 		{
-			return await _eventRepository.GetEventAttendeesAsync(eventId);
-		}
+
+			var attendeeList = await _eventRepository.GetEventAttendeesAsync(eventId);
+            if (attendeeList == null)
+            {
+                _logger.LogWarning("No attendees found for event with id {EventId}", eventId);
+				return new List<EventAttendeeDto>();
+            } else
+			{
+				return attendeeList;
+            }
+        }
 
 		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid id)
 		{
