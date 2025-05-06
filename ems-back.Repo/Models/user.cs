@@ -4,44 +4,46 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using ems_back.Repo.Models.Types;
-
 namespace ems_back.Repo.Models
+
 {
     public class User : IdentityUser<Guid>
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public override Guid Id { get; set; } = Guid.NewGuid();
+    {
 
-		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public override Guid Id { get; set; } = Guid.NewGuid();
 
-		[Required]
-		[MaxLength(100)]
-		public string FirstName { get; set; }
+        [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-		[Required]
-		[MaxLength(100)]
-		public string LastName { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string FirstName { get; set; }
 
-		[Required]
-		public UserRole Role { get; set; } = UserRole.Participant;
+        [Required]
+        [MaxLength(100)]
+        public string LastName { get; set; }
 
-		public bool IsEmailConfirmed { get; set; } = false;
+        [Required]
+        public UserRole Role { get; set; }
 
-		[MaxLength(100)]
-		public string? EmailConfirmationToken { get; set; }
+        public bool IsEmailConfirmed { get; set; } = false;
 
-		[MaxLength(255)]
-		public string? ProfilePicture { get; set; }
+        [MaxLength(100)]
+        public string? EmailConfirmationToken { get; set; }
 
-		// Navigation properties
-		public virtual ICollection<Organization> CreatedOrganizations { get; set; } = new List<Organization>();
-		public virtual ICollection<Event> CreatedEvents { get; set; } = new List<Event>();
-		public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
-        //public virtual ICollection<Organization> Organizations { get; set; } = new List<Organization>();
+        [MaxLength(255)]
+        public string? ProfilePicture { get; set; }
+
+        public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
+
+        public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
+
         [NotMapped]
-		public string FullName => $"{FirstName} {LastName}";
-	}
+        public string FullName => $"{FirstName} {LastName}";
+
+        public virtual ICollection<Event> CreatedEvents { get; set; }
+    }
 }

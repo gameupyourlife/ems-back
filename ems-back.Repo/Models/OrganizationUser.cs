@@ -10,31 +10,23 @@ namespace ems_back.Repo.Models
     [Table("Organisation_User")]
 	public class OrganizationUser
 	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public Guid Id { get; set; } = Guid.NewGuid();
-
-		// Organization Information
-		[Required]
+		[Key, Column(Order = 0)]
 		public Guid OrganizationId { get; set; }
 
-		// User Information
-		[Required]
+		[Key, Column(Order = 0)]
 		public Guid UserId { get; set; }
 
 		[Required]
-		public UserRole UserRole { get; set; } = UserRole.Participant;
+		public UserRole UserRole { get; set; }
 
 		[Required]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
-		// Navigation properties
 		[ForeignKey("OrganizationId")]
 		public virtual Organization Organization { get; set; }
 
 		[ForeignKey("UserId")]
 		public virtual User User { get; set; }
-
 	}
 }

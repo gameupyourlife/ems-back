@@ -8,39 +8,36 @@ namespace ems_back.Repo.Models
 	public class EventFile
 	{
 		[Key]
-		public string Id { get; set; }
+        public string Id { get; set; }
 
-		[Required]
+        [Required]
 		[MaxLength(255)]
 		public string Url { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public FileType Type { get; set; }  // "image", "document", etc.
+        public FileType Type { get; set; }
 
         [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
         public Guid UploadedBy { get; set; }
 
+        [Required]
         [MaxLength(255)]
-        public string OriginalName { get; set; }
+        public string Name { get; set; }
 
-        [MaxLength(50)]
-        public string ContentType { get; set; }
+        [Required]
+        public Guid EventId { get; set; }
 
-        public long SizeInBytes { get; set; }
+        public long? SizeInBytes { get; set; }
 
-        // Navigation properties
         [ForeignKey("UploadedBy")]
         public virtual User Uploader { get; set; }
 
         [ForeignKey("EventId")]
         public virtual Event Event { get; set; }
-
-        //[ForeignKey("OrganizationId")]
-        //public virtual Organization Organization { get; set; }
     }
 }
-

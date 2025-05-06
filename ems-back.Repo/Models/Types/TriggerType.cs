@@ -2,8 +2,9 @@
 
 public enum TriggerType
 {
-    DateReached,
-    UserRegistered,
-    EventStarted,
-    ManualActivation
+    Date,
+    RelativeDate,
+    NumOfAttendees,
+    Status,
+    Registration
 }

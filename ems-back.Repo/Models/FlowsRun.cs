@@ -12,9 +12,10 @@ namespace ems_back.Repo.Models
 	public class FlowsRun
 	{
 		[Key]
-		public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; } = new Guid();
 
-		[Required]
+        [Required]
 		public Guid FlowId { get; set; }
 
 		[ForeignKey("FlowId")]
@@ -24,7 +25,7 @@ namespace ems_back.Repo.Models
 		[MaxLength(50)]
 		public FlowRunStatus Status { get; set; }
 
-		public DateTime Timestamp { get; set; }
+		public DateTime? Timestamp { get; set; }
 
 		public string Logs { get; set; }
 	}

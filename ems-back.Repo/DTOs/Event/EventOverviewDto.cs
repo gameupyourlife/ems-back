@@ -10,7 +10,7 @@ namespace ems_back.Repo.DTOs.Event
     public class EventOverviewDto
     {
         public string Title { get; set; }
-        public EventCategory Category { get; set; }
+        public string Category { get; set; }
         public DateTime Start { get; set; }
         public string Location { get; set; }
         public int Attendees { get; set; }

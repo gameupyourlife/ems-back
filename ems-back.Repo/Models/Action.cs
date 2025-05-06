@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Models
 {
@@ -13,29 +14,30 @@ namespace ems_back.Repo.Models
 	public class Action
 	{
 		[Key]
-		public Guid Id { get; set; } = Guid.NewGuid();
-
         [Required]
-        public Guid OrganizationId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
 		[MaxLength(100)]
-		public string? Type { get; set; }  // "SendEmail", "CreateTask", etc.
+		public ActionType Type { get; set; }
 
-		[Column(TypeName = "jsonb")]
-		public string? Details { get; set; }  // JSON configuration
+        [Required]
+        [Column(TypeName = "jsonb")]
+		public string Details { get; set; }
 
 		[Required]
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-		// Relationships
-		public Guid? FlowId { get; set; }
+        public Guid? FlowId { get; set; }
 
-		[ForeignKey("FlowId")]
+        public Guid? FlowTemplateId { get; set; }
+
+        [ForeignKey("FlowId")]
 		public virtual Flow Flow { get; set; }
 
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
+		[ForeignKey("FlowTemplateId")]
+		public virtual FlowTemplate FlowTemplate { get; set; }
     }
-
 }

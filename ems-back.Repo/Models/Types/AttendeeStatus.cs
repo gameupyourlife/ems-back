@@ -8,11 +8,9 @@ namespace ems_back.Repo.Models.Types
 {
     public enum AttendeeStatus
     {
-        Registered,
-        Attended,
-        NoShow,
-        Cancelled,
-        Waitlisted,
-        Pending
+        Participant, 
+        Pending, 
+        Canceled,
+        Rejected
     }
 }
