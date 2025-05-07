@@ -34,7 +34,7 @@ namespace ems_back.Repo.Repository
             user.UserName = userDto.Email;
             user.CreatedAt = DateTime.UtcNow;
             user.EmailConfirmed = false;
-            user.Role = UserRole.Participant; // Default role
+            user.Role = UserRole.User; // Default role
 
             var result = await _userManager.CreateAsync(user, userDto.Password);
             if (!result.Succeeded)
@@ -213,20 +213,22 @@ namespace ems_back.Repo.Repository
 
         public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
         {
-            var events = await _context.EventAttendees
-                .Where(ea => ea.UserId == userId)
-                .Select(ea => ea.Event)
-                .Include(e => e.Creator)
-                .ThenInclude(c => _context.Organizations
-                        .Where(o => o.Id == _context.OrganizationUsers
-                            .Where(ou => ou.UserId == c.Id)
-                            .Select(ou => ou.OrganizationId)
-                            .FirstOrDefault())
-                        .FirstOrDefault())
-                .AsNoTracking()
-                .ToListAsync();
+            //var events = await _context.EventAttendees
+            //    .Where(ea => ea.UserId == userId)
+            //    .Select(ea => ea.Event)
+            //    .Include(e => e.Creator)
+            //    .ThenInclude(c => _context.Organizations
+            //            .Where(o => o.Id == _context.OrganizationUsers
+            //                .Where(ou => ou.UserId == c.Id)
+            //                .Select(ou => ou.OrganizationId)
+            //                .FirstOrDefault())
+            //            .FirstOrDefault())
+            //    .AsNoTracking()
+            //    .ToListAsync();
 
-            return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
+            //return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
+
+            throw new NotImplementedException("GetUserEventsAsync is not implemented yet.");
         }
 
         // Internal methods for authentication

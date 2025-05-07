@@ -228,9 +228,8 @@ namespace ems_back.Repo.Repository
 
 		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId)
 		{
-			var eventEntity = await _context.EventAttendees
+			var eventEntity = await _context.AgendaEntries
 				.Where(e => e.EventId == eventId)
-				.SelectMany(e => e.Event.AgendaItems)
 				.ToListAsync();
 
             return eventEntity;
@@ -246,8 +245,7 @@ namespace ems_back.Repo.Repository
                     Url = f.Url,
                     Type = f.Type,
                     UploadedAt = f.UploadedAt,
-                    OriginalName = f.OriginalName,
-                    ContentType = f.ContentType,
+                    OriginalName = f.Name,
                     SizeInBytes = f.SizeInBytes
                 })
                 .ToListAsync();
@@ -262,7 +260,6 @@ namespace ems_back.Repo.Repository
 				.Include(e => e.Updater)
 				.Include(e => e.Attendees)
 					.ThenInclude(a => a.User)
-				.Include(e => e.AgendaItems)
 				.FirstOrDefaultAsync(e => e.Id == eventId);
 
 			return _mapper.Map<EventInfoDTO>(eventEntity);

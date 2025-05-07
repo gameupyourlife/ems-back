@@ -88,7 +88,7 @@ namespace ems_back.Services
 					LastName = userDto.LastName,
 					Email = userDto.Email,
 					UserName = userDto.Email,
-					Role = UserRole.Participant
+					Role = UserRole.User
 					// Default role
 				};
 

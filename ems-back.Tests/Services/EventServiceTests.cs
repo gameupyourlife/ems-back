@@ -86,7 +86,7 @@ namespace ems_back.Tests.Services
                 {
                     Title = "New Event",
                     Description = "Test Description",
-                    Category = EventCategory.Networking,
+                    Category = "Test Category",
                 };
 
                 var expectedEvent = new EventDetailsDto // Updated to match the correct return type
@@ -131,7 +131,7 @@ namespace ems_back.Tests.Services
             {
                 // Arrange
                 var eventId = Guid.NewGuid();
-                var statusDto = new EventInfoDTO { Status = EventStatus.Draft };
+                var statusDto = new EventInfoDTO { Status = EventStatus.ONGOING };
 
                 var expectedEvent = new EventDetailsDto // Ensure the type matches the repository method's return type
                 {

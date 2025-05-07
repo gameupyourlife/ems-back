@@ -38,7 +38,7 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.EmailConfirmed,
 					opt => opt.MapFrom(src => false))
 				.ForMember(dest => dest.Role,
-					opt => opt.MapFrom(src => UserRole.Participant)); // Default role
+					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
 				.IncludeBase<User, UserDto>();
@@ -55,8 +55,7 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<EventCreateDto, Event>()
 				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.Attendees, opt => opt.Ignore())
-				.ForMember(dest => dest.AgendaItems, opt => opt.Ignore());
+				.ForMember(dest => dest.Attendees, opt => opt.Ignore());
 
 			CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
@@ -72,8 +71,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
 				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.Triggers, opt => opt.Ignore())
-				.ForMember(dest => dest.Actions, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
 				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId))
@@ -87,8 +84,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.IsActive, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
-				.ForMember(dest => dest.Triggers, opt => opt.Ignore())
-				.ForMember(dest => dest.Actions, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
 
@@ -107,9 +102,7 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Updater, opt => opt.MapFrom(src => src.Updater));
 
 			CreateMap<Flow, FlowDetailedDto>()
-				.IncludeBase<Flow, FlowResponseDto>()
-				.ForMember(dest => dest.Triggers, opt => opt.MapFrom(src => src.Triggers))
-				.ForMember(dest => dest.Actions, opt => opt.MapFrom(src => src.Actions));
+				.IncludeBase<Flow, FlowResponseDto>();
 
 			// Trigger mappings
 			CreateMap<TriggerCreateDto, Trigger>()
@@ -134,7 +127,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Type, opt => opt.Ignore())
 				.ForMember(dest => dest.UploadedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.UploadedBy, opt => opt.Ignore())
-				.ForMember(dest => dest.ContentType, opt => opt.Ignore())
 				.ForMember(dest => dest.SizeInBytes, opt => opt.Ignore())
 				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
 
