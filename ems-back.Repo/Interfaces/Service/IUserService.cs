@@ -14,10 +14,9 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<IdentityResult> CreateUserAsync(User user, string password);
 		Task<UserResponseDto> UpdateUserAsync(Guid id, UserUpdateDto userDto);
 		Task<bool> DeleteUserAsync(Guid id);
-		Task<bool> DeleteUserByIdOrEmailAsync(Guid? userId, string? email); // 👈 NEW
-
-		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);
-
+		Task<UserResponseDto> GetUserByEmailAsync(string email);
+		Task<IEnumerable<OrganizationOverviewDto>> GetUserOrganizationsAsync(Guid userId);
+		Task<UserRole> GetUserRoleAsync(Guid userId);
 		Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId);
 
 		

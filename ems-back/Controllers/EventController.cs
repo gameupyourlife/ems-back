@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
+using ems_back.Repo.Models;
+using ems_back.Repo.DTOs;
 
 namespace ems_back.Controllers
 {
@@ -26,11 +28,11 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events
         [HttpGet]
-		public async Task<ActionResult<IEnumerable<EventInfoDTO>>> GetAllEvents()
+		public async Task<ActionResult<IEnumerable<EventOverviewDto>>> GetAllEvents(Guid orgId)
 		{
 			try
 			{
-				var events = await _eventService.GetAllEventsAsync();
+				var events = await _eventService.GetAllEventsAsync(orgId);
 				return Ok(events);
 			}
 			catch (Exception ex)
@@ -42,32 +44,32 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}
         [HttpGet("{eventId}")]
-		public async Task<ActionResult<EventInfoDTO>> GetEvent(Guid id)
+		public async Task<ActionResult<EventDetailsDto>> GetEvent(Guid orgId, Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventByIdAsync(id);
+				var eventEntity = await _eventService.GetEventByIdAsync(orgId, eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event with id {EventId}", id);
+				_logger.LogError(ex, "Error getting event with id {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
 
         // GET: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpGet("{eventId}/attendees")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventWithAttendees(Guid id)
+		public async Task<ActionResult<List<EventAttendeeDto>>> GetAttendeesFromEvent(Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventWithAttendeesAsync(id);
+				var eventEntity = await _eventService.GetEventAttendeesAsync(eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event attendees for event {EventId}", id);
+				_logger.LogError(ex, "Error getting event attendees for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
@@ -88,16 +90,16 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventWithAgenda(Guid id)
+		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(Guid eventId)
 		{
 			try
 			{
-				var eventEntity = await _eventService.GetEventWithAgendaAsync(id);
+				var eventEntity = await _eventService.GetAgendaWithEventAsync(eventId);
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting event agenda for event {EventId}", id);
+				_logger.LogError(ex, "Error getting event agenda for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
@@ -125,9 +127,10 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/files
         [HttpGet("{eventId}/files")]
-        public async Task<ActionResult<EventInfoDTO>> GetFilesfromEvent(Guid id)
+        public async Task<ActionResult<List<FileDto>>> GetFilesfromEvent(Guid eventId)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+			var fileList = await _eventService.GetFilesFromEvent(eventId);
+            return fileList == null ? NotFound() : Ok(fileList);
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/files
@@ -159,7 +162,7 @@ namespace ems_back.Controllers
 				var createdEvent = await _eventService.CreateEventAsync(eventDto);
 				return CreatedAtAction(
 					nameof(GetEvent),
-					new { id = createdEvent.Id },
+					new { id = createdEvent.Metadata.Id },
 					createdEvent);
 			}
 			catch (Exception ex)

@@ -90,12 +90,12 @@ namespace ems_back.Repo.Repository
 			return _mapper.Map<IEnumerable<OrganizationResponseDto>>(organizations);
 		}
 
-		public async Task<IEnumerable<OrganizationDto>> GetOrganizationsByUserAsync(Guid userId)
+		public async Task<IEnumerable<OrganizationOverviewDto>> GetOrganizationsByUserAsync(Guid userId)
 		{
             return await _context.OrganizationUsers
 				.Where(ou => ou.UserId == userId)
 				.Select(ou => ou.Organization)
-				.Select(o => new OrganizationDto
+				.Select(o => new OrganizationOverviewDto
 				{
 					Id = o.Id,
 					Name = o.Name,

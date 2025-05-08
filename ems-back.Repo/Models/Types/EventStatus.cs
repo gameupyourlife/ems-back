@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Models.Types
 {
-    public enum EmailStatus
+    public enum EventStatus
     {
-        draft,
-        sent,
-        scheduled,
-        failed,
+        SCHEDULED,
+        ONGOING,
+        COMPLETED,
+        CANCELLED,
+        POSTPONED,
+        DELAYED,
+        ARCHIVED
     }
 }

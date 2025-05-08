@@ -9,6 +9,11 @@ using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.Interfaces.Repository;
 using System.Reflection;
+using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.Models;
+using ems_back.Repo.DTOs.Flow;
+using ems_back.Repo.DTOs.Trigger;
+using ems_back.Repo.DTOs;
 
 namespace ems_back.Repo.Repository
 {
@@ -23,27 +28,58 @@ namespace ems_back.Repo.Repository
 			_mapper = mapper;
 		}
 
-		public async Task<EventInfoDTO> GetByIdAsync(Guid id)
+		public async Task<EventDetailsDto> GetByIdAsync(Guid orgId, Guid eventId)
 		{
 			var eventEntity = await _context.Events
-				.Include(e => e.Creator)
-				.Include(e => e.Updater)
-				.AsNoTracking()
-				.FirstOrDefaultAsync(e => e.Id == id);
+				.Where(e => e.OrganizationId == orgId && e.Id == eventId)
+				.Select( e => new EventDetailsDto
+				{
+					Metadata = new EventInfoDTO
+					{
+                        Id = e.Id,
+                        Title = e.Title,
+                        Category = e.Category,
+                        Start = e.Start,
+                        End = e.End,
+                        Location = e.Location,
+                        Description = e.Description,
+                        Status = e.Status,
+                        CreatedAt = e.CreatedAt,
+                        UpdatedAt = e.UpdatedAt,
+                        CreatedBy = e.CreatedBy,
+                        UpdatedBy = e.UpdatedBy
+                    },
+					Organization = new OrganizationOverviewDto
+					{
+                        Id = e.Organization.Id,
+                        Name = e.Organization.Name,
+						ProfilePicture = e.Organization.ProfilePicture,
+                    }
+                })
+                .FirstOrDefaultAsync();
 
-			return _mapper.Map<EventInfoDTO>(eventEntity);
+			return eventEntity;
 		}
 
-		public async Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync()
+		public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
 			var events = await _context.Events
-				.Include(e => e.Attendees)
-				.Include(e => e.AgendaItems)
-				.Include(e => e.Creator)
-				.AsNoTracking()
-				.ToListAsync();
+				.Where(e => e.OrganizationId == orgId)
+				.Select(e => new EventOverviewDto
+				{
+					Title = e.Title,
+					Category = e.Category,
+					Start = e.Start,
+					Location = e.Location,
+					Attendees = e.Attendees.Count,
+					Status = e.Status,
+					Description = e.Description
+				})
 
-			return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
+				.AsNoTracking()
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<EventOverviewDto>>(events);
 		}
 
 		public async Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30)
@@ -102,7 +138,7 @@ namespace ems_back.Repo.Repository
 			return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
 		}
 
-		public async Task<EventInfoDTO> AddAsync(EventCreateDto eventDto)
+		public async Task<EventDetailsDto> AddAsync(EventCreateDto eventDto)
 		{
 			var eventEntity = _mapper.Map<Event>(eventDto);
 			eventEntity.CreatedAt = DateTime.UtcNow;
@@ -111,10 +147,10 @@ namespace ems_back.Repo.Repository
 			await _context.Events.AddAsync(eventEntity);
 			await _context.SaveChangesAsync();
 
-			return await GetByIdAsync(eventEntity.Id);
+			return await GetByIdAsync(eventEntity.Organization.Id, eventEntity.Id);
 		}
 
-		public async Task<EventInfoDTO> UpdateAsync(EventInfoDTO eventDto)
+		public async Task<EventDetailsDto> UpdateAsync(EventInfoDTO eventDto)
 		{
 			var existingEvent = await _context.Events.FindAsync(eventDto.Id);
 			if (existingEvent == null)
@@ -126,24 +162,24 @@ namespace ems_back.Repo.Repository
 			_context.Events.Update(existingEvent);
 			await _context.SaveChangesAsync();
 
-			return await GetByIdAsync(eventDto.Id);
+			return await GetByIdAsync(eventDto.OrganizationId, eventDto.Id);
 		}
 
-		public async Task<EventInfoDTO> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto)
-		{
-			var existingEvent = await _context.Events.FindAsync(eventId);
-			if (existingEvent == null)
-				return null;
+        public async Task<EventDetailsDto> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto)
+        {
+            var existingEvent = await _context.Events.FindAsync(eventId);
+            if (existingEvent == null)
+                return null;
 
-			existingEvent.Status = statusDto.Status;
-			existingEvent.UpdatedBy = statusDto.UpdatedBy;
-			existingEvent.UpdatedAt = DateTime.UtcNow;
+            existingEvent.Status = statusDto.Status;
+            existingEvent.UpdatedBy = statusDto.UpdatedBy;
+            existingEvent.UpdatedAt = DateTime.UtcNow;
 
-			_context.Events.Update(existingEvent);
-			await _context.SaveChangesAsync();
+            _context.Events.Update(existingEvent);
+            await _context.SaveChangesAsync();
 
-			return await GetByIdAsync(eventId);
-		}
+            return await GetByIdAsync(existingEvent.OrganizationId, eventId);
+        }
 
 		public async Task<bool> DeleteAsync(Guid id)
 		{
@@ -161,35 +197,59 @@ namespace ems_back.Repo.Repository
 			return await _context.Events.AnyAsync(e => e.Id == id);
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid eventId)
-		{
-			var eventEntity = await _context.Events
-				.Include(e => e.Attendees)
-					.ThenInclude(a => a.User)
-				.Include(e => e.Creator)
-				.FirstOrDefaultAsync(e => e.Id == eventId);
+        public async Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId)
+        {
+            var attendeesList = await _context.Events
+                .Where(e => e.Id == eventId)
+                .SelectMany(e => e.Attendees)
+                .Select(a => new EventAttendeeDto
+                {
+                    UserId = a.UserId,
+                    UserEmail = a.User.Email,
+                    UserName = a.User.FirstName + " " + a.User.LastName,
+                    Status = a.Status,
+                    ProfilePicture = a.User.ProfilePicture,
+                    RegisteredAt = a.RegisteredAt,
+                })
+                .ToListAsync();
 
-			return _mapper.Map<EventInfoDTO>(eventEntity);
+            return attendeesList;
+        }
+
+		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId)
+		{
+			var eventEntity = await _context.AgendaEntries
+				.Where(e => e.EventId == eventId)
+				.ToListAsync();
+
+            return eventEntity;
 		}
 
-		public async Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId)
-		{
-			var eventEntity = await _context.Events
-				.Include(e => e.AgendaItems)
-				.Include(e => e.Creator)
-				.FirstOrDefaultAsync(e => e.Id == eventId);
+        public async Task<List<FileDto>> GetFilesFromEvent(Guid eventId)
+        {
+            var files = await _context.Files
+                .Where(e => e.Event.Id == eventId)
+                .Select(f => new FileDto
+                {
+                    Id = f.Id,
+                    Url = f.Url,
+                    Type = f.Type,
+                    UploadedAt = f.UploadedAt,
+                    OriginalName = f.Name,
+                    SizeInBytes = f.SizeInBytes
+                })
+                .ToListAsync();
 
-			return _mapper.Map<EventInfoDTO>(eventEntity);
-		}
+            return files;
+        }
 
-		public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId)
+        public async Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId)
 		{
 			var eventEntity = await _context.Events
 				.Include(e => e.Creator)
 				.Include(e => e.Updater)
 				.Include(e => e.Attendees)
 					.ThenInclude(a => a.User)
-				.Include(e => e.AgendaItems)
 				.FirstOrDefaultAsync(e => e.Id == eventId);
 
 			return _mapper.Map<EventInfoDTO>(eventEntity);

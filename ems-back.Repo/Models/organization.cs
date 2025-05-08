@@ -9,7 +9,6 @@ namespace ems_back.Repo.Models
 	public class Organization
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required]
@@ -17,21 +16,17 @@ namespace ems_back.Repo.Models
 		public string Name { get; set; }
 
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
-		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+		public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
-		[Required]
-		public Guid UpdatedBy { get; set; }
+		public Guid? UpdatedBy { get; set; }
 
-		[MaxLength(500)]
-		public string Address { get; set; }
+        [MaxLength(500)]
+		public string? Address { get; set; }
 
 		[Column(TypeName = "text")]
 		public string? Description { get; set; }
@@ -39,17 +34,21 @@ namespace ems_back.Repo.Models
 		[MaxLength(255)]
 		public string? ProfilePicture { get; set; }
 
+		[Required]
 		[MaxLength(255)]
-		public string? Website { get; set; }
+		public string Domain { get; set; }
 
-		// Navigation properties
-		[ForeignKey("CreatedBy")]
+        // for navigation:
+
+        [ForeignKey("CreatedBy")]
 		public virtual User Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
-		//public virtual ICollection<User> Members { get; set; } = new HashSet<User>();
-		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new HashSet<OrganizationUser>();
-	}
+		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
+		public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+		public virtual ICollection<FlowTemplate> FlowTemplates { get; set; } = new List<FlowTemplate>();
+        public virtual ICollection<MailTemplate> MailTemplates { get; set; } = new List<MailTemplate>();
+    }
 }

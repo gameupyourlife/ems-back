@@ -3,7 +3,9 @@
 public enum ActionType
 {
     SendEmail,
-    CreateTask,
-    NotifyUser,
-    UpdateStatus
+    ChangeStatus,
+    ShareFile,
+    ChangeImage,
+    ChangeTitle,
+    ChangeDescription
 }

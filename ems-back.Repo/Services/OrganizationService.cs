@@ -21,7 +21,7 @@ public class OrganizationService : IOrganizationService
 			return await _organizationRepository.GetOrganizationByIdAsync(id);
 		}
 
-		public async Task<IEnumerable<OrganizationDto>> GetOrganizationsByUserAsync(Guid userId)
+		public async Task<IEnumerable<OrganizationOverviewDto>> GetOrganizationsByUserAsync(Guid userId)
 		{
 			return await _organizationRepository.GetOrganizationsByUserAsync(userId);
 		}

@@ -10,8 +10,7 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public Guid FlowId { get; set; } = Guid.NewGuid(); // renamed from Id to FlowId
+		public Guid FlowId { get; set; } = Guid.NewGuid();
 
 		[Required]
 		[MaxLength(100)]
@@ -23,46 +22,41 @@ namespace ems_back.Repo.Models
 		public bool IsActive { get; set; } = true;
 
 		[Required]
-		public bool stillPending { get; set; } = false; // NEW
+		public bool stillPending { get; set; } = false;
 
 		[Required]
-		public bool multipleRuns { get; set; } = false; // NEW
+		public bool multipleRuns { get; set; } = false;
 
 		[Required]
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
-		[Required]
-		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+
+		public Guid? UpdatedBy { get; set; }
 
 		[Required]
-		public Guid UpdatedBy { get; set; }
+		public Guid EventId { get; set; }
 
-		[Required]
-		public Guid OrganizationId { get; set; }
+		public Guid? FlowTemplateId { get; set; }
 
-		[Required]
-		public Guid EventId { get; set; } // NEW (foreign key to Event)
+        // for navigation:
 
-		// Navigation properties
-		[ForeignKey("CreatedBy")]
+        [ForeignKey("CreatedBy")]
 		public virtual User Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]
-		public virtual User Updater { get; set; }
-
-		[ForeignKey("OrganizationId")]
-		public virtual Organization Organization { get; set; }
+		public virtual User? Updater { get; set; }
 
 		[ForeignKey("EventId")]
-		public virtual Event Event { get; set; } // NEW (navigation)
+		public virtual Event Event { get; set; }
 
-		public virtual List<Trigger> Triggers { get; set; } = new();
-		public virtual List<Action> Actions { get; set; } = new();
-
-		[Required]
-		public String FlowType { get; set; } = "Template"; // Default value for Type
-	}
+		[ForeignKey("FlowTemplateId")]
+        public virtual FlowTemplate FlowTemplate { get; set; }
+        public virtual ICollection<FlowsRun> FlowsRuns { get; set; } = new List<FlowsRun>();
+        public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
+        public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
+    }
 }

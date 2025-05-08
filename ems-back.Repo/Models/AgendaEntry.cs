@@ -12,14 +12,12 @@ namespace ems_back.Repo.Models
 	public class AgendaEntry
 	{
 		[Key]
-		public Guid Id { get; set; } = Guid.NewGuid();
-
         [Required]
-        public Guid OrganizationId { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
 		[MaxLength(255)]
-		public string? Title { get; set; }
+		public string Title { get; set; }
 
 		[Column(TypeName = "text")]
 		public string? Description { get; set; }
@@ -30,13 +28,10 @@ namespace ems_back.Repo.Models
 		[Required]
 		public DateTime End { get; set; }
 
-		// Navigation
-		public Guid EventId { get; set; }
+        [Required]
+        public Guid EventId { get; set; }
 
 		[ForeignKey("EventId")]
 		public virtual Event Event { get; set; }
-
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
     }
 }

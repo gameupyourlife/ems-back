@@ -14,10 +14,7 @@ namespace ems_back.Repo.DTOs.Event
     public class EventDetailsDto
     {
         public EventInfoDTO Metadata { get; set; }
-        public OrganizationDto Organization { get; set; } // Organization Dto überarbeiten
-        public List<UserDto> Attendees { get; set; } // UserDto überarbeiten
-        public List<FlowBasicDto> Flows { get; set; } // FlowDto überarbeiten
-        public List<AgendaItemDto> Agenda { get; set; } // AgendaItemDto überarbeiten
-        public List<EmailDto> Emails { get; set; }
+        public OrganizationOverviewDto Organization { get; set; }
+        public List<EventAttendeeDto> Attendees { get; set; }
     }
 }

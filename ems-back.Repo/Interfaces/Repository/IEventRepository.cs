@@ -1,23 +1,26 @@
-﻿using ems_back.Repo.DTOs.Event;
+﻿using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 namespace ems_back.Repo.Interfaces.Repository;
 
 public interface IEventRepository
 {
-	Task<EventInfoDTO> GetByIdAsync(Guid id);
-	Task<IEnumerable<EventInfoDTO>> GetAllEventsAsync();
+	Task<EventDetailsDto> GetByIdAsync(Guid orgId, Guid id);
+	Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
 	Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByCreatorAsync(Guid userId);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByCategoryAsync(int category);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
-	Task<EventInfoDTO> AddAsync(EventCreateDto eventDto);
-	Task<EventInfoDTO> UpdateAsync(EventInfoDTO eventDto);
-	Task<EventInfoDTO> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
+    Task<List<FileDto>> GetFilesFromEvent(Guid eventId);
+    Task<EventDetailsDto> AddAsync(EventCreateDto eventDto);
+	Task<EventDetailsDto> UpdateAsync(EventInfoDTO eventDto);
+	Task<EventDetailsDto> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
 	Task<bool> DeleteAsync(Guid id);
 	Task<bool> ExistsAsync(Guid id);
-	Task<EventInfoDTO> GetEventWithAttendeesAsync(Guid eventId);
-	Task<EventInfoDTO> GetEventWithAgendaAsync(Guid eventId);
+	Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId);
+	Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId);
 	Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId);
 	Task<int> GetAttendeeCountAsync(Guid eventId);
 }

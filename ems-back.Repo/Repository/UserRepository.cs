@@ -150,22 +150,24 @@ namespace ems_back.Repo.Repository
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role)
         {
-            var users = await _context.Users
-                .AsNoTracking()
-                .Where(u => u.Role == role)
-                .Select(u => new
-                {
-                    User = u,
-                    Organization = _context.Organizations
-                         .Where(o => o.Id == _context.OrganizationUsers
-                             .Where(ou => ou.UserId == u.Id)
-                             .Select(ou => ou.OrganizationId)
-                             .FirstOrDefault())
-                         .FirstOrDefault()
-                })
-                .ToListAsync();
+            //var users = await _context.Users
+            //    .AsNoTracking()
+            //    .Where(u => u.Role == role)
+            //    .Select(u => new
+            //    {
+            //        User = u,
+            //        Organization = _context.Organizations
+            //             .Where(o => o.Id == _context.OrganizationUsers
+            //                 .Where(ou => ou.UserId == u.Id)
+            //                 .Select(ou => ou.OrganizationId)
+            //                 .FirstOrDefault())
+            //             .FirstOrDefault()
+            //    })
+            //    .ToListAsync();
 
-            return _mapper.Map<IEnumerable<UserResponseDto>>(users);
+            //return _mapper.Map<IEnumerable<UserResponseDto>>(users);
+
+            throw new NotImplementedException("GetUsersByRoleAsync is not implemented yet.");
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
@@ -189,7 +191,7 @@ namespace ems_back.Repo.Repository
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
 
-        public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
+        public async Task<IEnumerable<OrganizationOverviewDto>> GetUserOrganizationsAsync(Guid userId)
         {
             var organizations = await _context.Users
              .Where(u => u.Id == userId)
@@ -200,33 +202,37 @@ namespace ems_back.Repo.Repository
              .AsNoTracking()
              .ToListAsync();
 
-            return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
+            return _mapper.Map<IEnumerable<OrganizationOverviewDto>>(organizations);
         }
 
         public async Task<UserRole> GetUserRoleAsync(Guid userId)
         {
-            return await _context.Users
-                .Where(u => u.Id == userId)
-                .Select(u => u.Role)
-                .FirstOrDefaultAsync();
+            //return await _context.Users
+            //    .Where(u => u.Id == userId)
+            //    .Select(u => u.Role)
+            //    .FirstOrDefaultAsync();
+
+            throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
         }
 
         public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
         {
-            var events = await _context.EventAttendees
-                .Where(ea => ea.UserId == userId)
-                .Select(ea => ea.Event)
-                .Include(e => e.Creator)
-                .ThenInclude(c => _context.Organizations
-                        .Where(o => o.Id == _context.OrganizationUsers
-                            .Where(ou => ou.UserId == c.Id)
-                            .Select(ou => ou.OrganizationId)
-                            .FirstOrDefault())
-                        .FirstOrDefault())
-                .AsNoTracking()
-                .ToListAsync();
+            //var events = await _context.EventAttendees
+            //    .Where(ea => ea.UserId == userId)
+            //    .Select(ea => ea.Event)
+            //    .Include(e => e.Creator)
+            //    .ThenInclude(c => _context.Organizations
+            //            .Where(o => o.Id == _context.OrganizationUsers
+            //                .Where(ou => ou.UserId == c.Id)
+            //                .Select(ou => ou.OrganizationId)
+            //                .FirstOrDefault())
+            //            .FirstOrDefault())
+            //    .AsNoTracking()
+            //    .ToListAsync();
 
-            return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
+            //return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
+
+            throw new NotImplementedException("GetUserEventsAsync is not implemented yet.");
         }
 
         // Internal methods for authentication

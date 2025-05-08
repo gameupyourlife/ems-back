@@ -16,24 +16,25 @@ namespace ems_back.Repo.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public Guid OrganizationId { get; set; }
+        public TriggerType Type { get; set; }
 
         [Required]
-        public TriggerType Type { get; set; } // Changed from `string` to `enum`
-
         [Column(TypeName = "jsonb")]
-        public string Details { get; set; }  // JSON configuration
+        public string Details { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Relationships
         public Guid? FlowId { get; set; }
+
+        public Guid? FlowTemplateId { get; set; }
+
+        // for navigation:
+
+        [ForeignKey("FlowTemplateId")]
+        public virtual FlowTemplate FlowTemplate { get; set; }
 
         [ForeignKey("FlowId")]
         public virtual Flow Flow { get; set; }
-
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
     }
 }

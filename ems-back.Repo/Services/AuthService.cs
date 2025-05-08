@@ -68,7 +68,7 @@ namespace ems_back.Services
 					LastName = request.LastName,
 					Email = request.Email,
 					UserName = request.Email,
-					Role = request.Role
+					//Role = request.Role
 				};
 
 				var createResult = await _userService.CreateUserAsync(user, request.Password);

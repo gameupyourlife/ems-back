@@ -15,7 +15,7 @@ namespace ems_back.Repo.DTOs.Email
         public string Subject { get; set; }
         public string Body { get; set; }
         public List<Guid> Recipients { get; set; }
-        public EmailStatus Status { get; set; }
+        public MailRunStatus Status { get; set; }
         public DateTime? Scheduledfor { get; set; }
         public DateTime? SentAt { get; set; }
         public DateTime CreatedAt { get; set; }
