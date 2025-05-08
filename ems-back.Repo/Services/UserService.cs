@@ -88,7 +88,7 @@ namespace ems_back.Services
 					LastName = userDto.LastName,
 					Email = userDto.Email,
 					UserName = userDto.Email,
-					//Role = UserRole.User
+					Role = UserRole.User
 					// Default role
 				};
 
@@ -104,11 +104,11 @@ namespace ems_back.Services
 				// 3. Create user in application repository
 				var repositoryDto = new UserCreateDto
 				{
-				
+
 					Email = user.Email,
 					FirstName = user.FirstName,
 					LastName = user.LastName,
-					
+
 				};
 
 				var createdUser = await _userRepository.CreateUserAsync(repositoryDto);
@@ -120,8 +120,7 @@ namespace ems_back.Services
 					Email = user.Email,
 					FirstName = user.FirstName,
 					LastName = user.LastName,
-					
-					//Role = user.Role
+					Role = user.Role
 				};
 			}
 			catch (Exception ex)
@@ -130,6 +129,9 @@ namespace ems_back.Services
 				throw; // Re-throw to let controller handle it
 			}
 		}
+
+
+
 
 		public async Task<UserResponseDto> UpdateUserAsync(Guid id, UserUpdateDto userDto)
 		{
@@ -144,7 +146,7 @@ namespace ems_back.Services
 				{
 					user.FirstName = userDto.FirstName ?? user.FirstName;
 					user.LastName = userDto.LastName ?? user.LastName;
-					
+
 
 					var updateResult = await _userManager.UpdateAsync(user);
 					if (!updateResult.Succeeded)
@@ -229,59 +231,11 @@ namespace ems_back.Services
 			}
 		}
 
-		public async Task<UserRole> GetUserRoleAsync(Guid userId)
-		{
-			try
-			{
-				return await _userRepository.GetUserRoleAsync(userId);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting role for user: {UserId}", userId);
-				throw;
-			}
-		}
+		
 
-		public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
-		{
-			try
-			{
-				return await _userRepository.GetUserEventsAsync(userId);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting events for user: {UserId}", userId);
-				throw;
-			}
-		}
+		
 
-		public async Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role)
-		{
-			try
-			{
-				return await _userRepository.GetUsersByRoleAsync(role);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting users by role: {Role}", role);
-				throw;
-			}
-		}
-
-		public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
-		{
-			try
-			{
-				return await _userRepository.GetUsersByOrganizationAsync(organizationId);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting users by organization: {OrganizationId}", organizationId);
-				throw;
-			}
-		}
-
-		// Additional Identity-related methods
+		// Additional Identity-related methods, not important yet 
 		public async Task<User> FindByEmailAsync(string email)
 		{
 			return await _userManager.FindByEmailAsync(email);
@@ -302,9 +256,50 @@ namespace ems_back.Services
 			return await _signInManager.CheckPasswordSignInAsync(user, password, false);
 		}
 
-        Task<IEnumerable<EventInfoDTO>> IUserService.GetUserEventsAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-    }
+		Task<IEnumerable<EventInfoDTO>> IUserService.GetUserEventsAsync(Guid userId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<bool> DeleteUserByIdOrEmailAsync(Guid? userId, string? email)
+		{
+			try
+			{
+				User? user = null;
+
+				if (userId.HasValue)
+				{
+					user = await _userManager.FindByIdAsync(userId.Value.ToString());
+				}
+				else if (!string.IsNullOrEmpty(email))
+				{
+					user = await _userManager.FindByEmailAsync(email);
+				}
+
+				if (user == null)
+				{
+					_logger.LogWarning("Delete failed: User not found (UserId: {UserId}, Email: {Email})", userId, email);
+					return false;
+				}
+
+				var result = await _userManager.DeleteAsync(user);
+				if (!result.Succeeded)
+				{
+					_logger.LogError("Failed to delete user from Identity: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+					return false;
+				}
+
+				_logger.LogInformation("Successfully deleted user with ID: {UserId} and Email: {Email}", user.Id, user.Email);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting user by Id or Email (UserId: {UserId}, Email: {Email})", userId, email);
+				throw;
+			}
+		}
+
+
+
+	}
 }

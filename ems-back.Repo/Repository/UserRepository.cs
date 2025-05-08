@@ -34,6 +34,7 @@ namespace ems_back.Repo.Repository
             user.UserName = userDto.Email;
             user.CreatedAt = DateTime.UtcNow;
             user.EmailConfirmed = false;
+            user.Role = UserRole.User; // Default role
 
             var result = await _userManager.CreateAsync(user, userDto.Password);
             if (!result.Succeeded)
