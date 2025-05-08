@@ -10,7 +10,6 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid FlowId { get; set; } = Guid.NewGuid();
 
 		[Required]
@@ -29,13 +28,11 @@ namespace ems_back.Repo.Models
 		public bool multipleRuns { get; set; } = false;
 
 		[Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		[Required]
 		public Guid CreatedBy { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		public Guid? UpdatedBy { get; set; }
@@ -45,8 +42,7 @@ namespace ems_back.Repo.Models
 
 		public Guid? FlowTemplateId { get; set; }
 
-        [ForeignKey("FlowTemplateId")]
-        public virtual FlowTemplate? FlowTemplate { get; set; }
+        // for navigation:
 
         [ForeignKey("CreatedBy")]
 		public virtual User Creator { get; set; }
@@ -56,5 +52,10 @@ namespace ems_back.Repo.Models
 
 		[ForeignKey("EventId")]
 		public virtual Event Event { get; set; }
-	}
+
+        public virtual FlowTemplate FlowTemplate { get; set; }
+        public virtual ICollection<FlowsRun> FlowsRuns { get; set; } = new List<FlowsRun>();
+        public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
+        public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
+    }
 }

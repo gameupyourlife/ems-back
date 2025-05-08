@@ -34,7 +34,6 @@ namespace ems_back.Repo.Repository
             user.UserName = userDto.Email;
             user.CreatedAt = DateTime.UtcNow;
             user.EmailConfirmed = false;
-            user.Role = UserRole.User; // Default role
 
             var result = await _userManager.CreateAsync(user, userDto.Password);
             if (!result.Succeeded)
@@ -150,22 +149,24 @@ namespace ems_back.Repo.Repository
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role)
         {
-            var users = await _context.Users
-                .AsNoTracking()
-                .Where(u => u.Role == role)
-                .Select(u => new
-                {
-                    User = u,
-                    Organization = _context.Organizations
-                         .Where(o => o.Id == _context.OrganizationUsers
-                             .Where(ou => ou.UserId == u.Id)
-                             .Select(ou => ou.OrganizationId)
-                             .FirstOrDefault())
-                         .FirstOrDefault()
-                })
-                .ToListAsync();
+            //var users = await _context.Users
+            //    .AsNoTracking()
+            //    .Where(u => u.Role == role)
+            //    .Select(u => new
+            //    {
+            //        User = u,
+            //        Organization = _context.Organizations
+            //             .Where(o => o.Id == _context.OrganizationUsers
+            //                 .Where(ou => ou.UserId == u.Id)
+            //                 .Select(ou => ou.OrganizationId)
+            //                 .FirstOrDefault())
+            //             .FirstOrDefault()
+            //    })
+            //    .ToListAsync();
 
-            return _mapper.Map<IEnumerable<UserResponseDto>>(users);
+            //return _mapper.Map<IEnumerable<UserResponseDto>>(users);
+
+            throw new NotImplementedException("GetUsersByRoleAsync is not implemented yet.");
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
@@ -205,10 +206,12 @@ namespace ems_back.Repo.Repository
 
         public async Task<UserRole> GetUserRoleAsync(Guid userId)
         {
-            return await _context.Users
-                .Where(u => u.Id == userId)
-                .Select(u => u.Role)
-                .FirstOrDefaultAsync();
+            //return await _context.Users
+            //    .Where(u => u.Id == userId)
+            //    .Select(u => u.Role)
+            //    .FirstOrDefaultAsync();
+
+            throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
         }
 
         public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)

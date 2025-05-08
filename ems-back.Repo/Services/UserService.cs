@@ -88,7 +88,7 @@ namespace ems_back.Services
 					LastName = userDto.LastName,
 					Email = userDto.Email,
 					UserName = userDto.Email,
-					Role = UserRole.User
+					//Role = UserRole.User
 					// Default role
 				};
 
@@ -121,7 +121,7 @@ namespace ems_back.Services
 					FirstName = user.FirstName,
 					LastName = user.LastName,
 					
-					Role = user.Role
+					//Role = user.Role
 				};
 			}
 			catch (Exception ex)

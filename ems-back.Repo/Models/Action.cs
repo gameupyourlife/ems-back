@@ -15,7 +15,6 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
@@ -27,12 +26,13 @@ namespace ems_back.Repo.Models
 		public string Details { get; set; }
 
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Guid? FlowId { get; set; }
 
         public Guid? FlowTemplateId { get; set; }
+
+        // for navigation:
 
         [ForeignKey("FlowId")]
 		public virtual Flow Flow { get; set; }

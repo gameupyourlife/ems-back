@@ -5,8 +5,6 @@ public class Mail
 {
 
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
     public Guid MailId { get; set; } = Guid.NewGuid();
 
     [Required]
@@ -31,6 +29,9 @@ public class Mail
     [Required]
     public Guid EventId { get; set; }
 
+    // for navigation:
+
     [ForeignKey("EventId")]
     public virtual Event Event { get; set; }
+    public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
 }

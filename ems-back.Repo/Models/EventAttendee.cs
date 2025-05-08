@@ -17,12 +17,13 @@ namespace ems_back.Repo.Models
 		[Key, Column(Order = 1)]
 		public Guid UserId { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
 		public bool Attended { get; set; } = false;
 
-		[ForeignKey("EventId")]
-		public virtual ICollection<Event> Event { get; set; }
+        // for navigation:
+
+        [ForeignKey("EventId")]
+		public virtual Event Event { get; set; }
 
 		[ForeignKey("UserId")]
 		public virtual User User { get; set; }

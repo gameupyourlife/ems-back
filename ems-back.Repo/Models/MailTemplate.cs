@@ -11,7 +11,6 @@ namespace ems_back.Repo.Models
     public class MailTemplate
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = new Guid();
 
         [Required]
@@ -30,6 +29,8 @@ namespace ems_back.Repo.Models
 
         [Required]
         public Guid OrganizationId { get; set; }
+
+        // for navigation:
 
         [ForeignKey("OrganizationId")]
         public virtual Organization Organization { get; set; }

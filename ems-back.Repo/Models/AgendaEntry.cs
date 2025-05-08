@@ -13,7 +13,6 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]

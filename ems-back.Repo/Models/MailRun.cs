@@ -6,14 +6,12 @@ public class MailRun
 
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
     public Guid MainRunId { get; set; } = Guid.NewGuid();
 
     [Required]
     [MaxLength(50)]
-
-    public string MailId { get; set; }
+    public Guid MailId { get; set; }
 
     [Required]
     public MailRunStatus Status { get; set; }
@@ -23,4 +21,8 @@ public class MailRun
 
     [Column(TypeName = "jsonb")]
     public string Logs { get; set; }
+
+    // for navigation:
+    [ForeignKey("MailId")]
+    public virtual Mail Mail { get; set; }
 }
