@@ -23,8 +23,8 @@ namespace ems_back.Repo.Jobs.Trigger
     public class StatusTrigger : ITrigger
     {
         public TriggerType TriggerType => TriggerType.Status;
-        public StausTriggerOperator Operator { get; init; }
-        public StatusTriggerValue Value { get; init; }
+        public StausTriggerOperator Operator { get; set; }
+        public StatusTriggerValue Value { get; set; }
     }
 
 }

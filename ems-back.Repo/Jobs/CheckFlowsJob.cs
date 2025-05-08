@@ -20,7 +20,7 @@ namespace ems_back.Repo.Jobs
         {
             try
             {
-                //direkt auf Action und Trigger Models mappen wegen JSON
+                //direkt auf Action und Trigger Models mappen wegen JSON und direkt in mehrere Listen abhängig nach Action aufteilen
                 var flows = await _dbContext.Flows 
                     .Where(f => f.IsActive)
                     .Include(f => f.Event)

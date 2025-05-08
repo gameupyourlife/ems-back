@@ -19,9 +19,9 @@ namespace ems_back.Repo.Jobs.Trigger
     {
 
         public TriggerType TriggerType => TriggerType.Date;
-        public DateTime Value { get; init; }
+        public DateTime Value { get; set; }
 
-        public DateTriggerOperator Operator { get; init; }
+        public DateTriggerOperator Operator { get; set; }
 
     }
 }

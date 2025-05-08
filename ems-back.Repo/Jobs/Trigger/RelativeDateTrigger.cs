@@ -37,11 +37,11 @@ namespace ems_back.Repo.Jobs.Trigger
     public class RelativeDateTrigger : ITrigger
     {
         public TriggerType TriggerType => TriggerType.RelativeDate;
-        public RelativeDateOperator Operator { get; init; }
-        public int Value { get; init; }
-        public RelativeDateValueType ValueType { get; init; }
-        public RelativeDateRelativeTo ValueRelativeTo { get; init; }
-        public RelativeDateRelativeComparison ValueRelativeOperator { get; init; }
+        public RelativeDateOperator Operator { get; set; }
+        public int Value { get; set; }
+        public RelativeDateValueType ValueType { get; set; }
+        public RelativeDateRelativeTo ValueRelativeTo { get; set; }
+        public RelativeDateRelativeComparison ValueRelativeOperator { get; set; }
     }
 
 }
