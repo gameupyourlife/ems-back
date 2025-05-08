@@ -54,17 +54,7 @@ namespace ems_back.Repo.Repository
                         Id = e.Organization.Id,
                         Name = e.Organization.Name,
 						ProfilePicture = e.Organization.ProfilePicture,
-                    },
-					Attendees = e.Attendees.Select(a => new EventAttendeeDto
-					{
-						UserId = a.UserId,
-						UserEmail = a.User.Email,
-						UserName = a.User.FirstName + a.User.LastName,
-						Status = a.Attended,
-						ProfilePicture = a.User.ProfilePicture,
-						RegisteredAt = a.RegisteredAt,
-					})
-                    .ToList(),
+                    }
                 })
                 .FirstOrDefaultAsync();
 
@@ -217,7 +207,7 @@ namespace ems_back.Repo.Repository
                     UserId = a.UserId,
                     UserEmail = a.User.Email,
                     UserName = a.User.FirstName + " " + a.User.LastName,
-                    Status = a.Attended,
+                    Status = a.Status,
                     ProfilePicture = a.User.ProfilePicture,
                     RegisteredAt = a.RegisteredAt,
                 })

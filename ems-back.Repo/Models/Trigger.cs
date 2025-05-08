@@ -32,9 +32,9 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("FlowTemplateId")]
-        public virtual FlowTemplate? FlowTemplate { get; set; }
+        public virtual FlowTemplate FlowTemplate { get; set; }
 
         [ForeignKey("FlowId")]
-        public virtual Flow? Flow { get; set; }
+        public virtual Flow Flow { get; set; }
     }
 }

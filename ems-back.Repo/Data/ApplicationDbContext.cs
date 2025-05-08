@@ -97,8 +97,8 @@ namespace ems_back.Repo.Data
 
             modelBuilder.Entity<Flow>()
 				.HasOne(f => f.FlowTemplate)
-				.WithOne(ft => ft.Flow)
-				.HasForeignKey<Flow>(f => f.FlowTemplateId)
+				.WithMany(f => f.Flows)
+                .HasForeignKey(f => f.FlowTemplateId)
 				.OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Flow>()
@@ -203,16 +203,6 @@ namespace ems_back.Repo.Data
 					.WithOne(ou => ou.Organization)
 					.HasForeignKey(ou => ou.OrganizationId)
 					.OnDelete(DeleteBehavior.Cascade);
-
-				b.HasMany<FlowTemplate>()
-					.WithOne()
-					.HasForeignKey(ft => ft.OrganizationId)
-					.OnDelete(DeleteBehavior.Cascade);
-
-				b.HasMany<MailTemplate>()
-					.WithOne()
-					.HasForeignKey(mt => mt.OrganizationId)
-					.OnDelete(DeleteBehavior.Cascade);
 			});
 
             // Configure EventAttendee relationships and constraints
@@ -290,37 +280,27 @@ namespace ems_back.Repo.Data
 			modelBuilder.Entity<Models.Action>(entity =>
             {
                 entity.HasOne(a => a.Flow)
-                      .WithMany()
+                      .WithMany(f => f.Actions)
                       .HasForeignKey(a => a.FlowId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(a => a.FlowTemplate)
-                      .WithMany()
+                      .WithMany(f => f.Actions)
                       .HasForeignKey(a => a.FlowTemplateId)
                       .OnDelete(DeleteBehavior.Restrict);
-
-                //entity.ToTable(tb => tb.HasCheckConstraint(
-                //    "CK_Action_AtLeastOneFK",
-                //    "FlowId IS NOT NULL OR FlowTemplateId IS NOT NULL"
-                //));
-            });
+			});
 
 			modelBuilder.Entity<Trigger>(entity =>
 			{
 				entity.HasOne(a => a.Flow)
-					  .WithMany()
+					  .WithMany(f => f.Triggers)
 					  .HasForeignKey(a => a.FlowId)
 					  .OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(a => a.FlowTemplate)
-					  .WithMany()
+					  .WithMany(f => f.Triggers)
 					  .HasForeignKey(a => a.FlowTemplateId)
 					  .OnDelete(DeleteBehavior.Restrict);
-
-				//entity.ToTable(tb => tb.HasCheckConstraint(
-				//	"CK_Action_AtLeastOneFK",
-				//	"FlowId IS NOT NULL OR FlowTemplateId IS NOT NULL"
-				//));
 			});
 		}
 
@@ -354,7 +334,21 @@ namespace ems_back.Repo.Data
 				.Select(e => e.Entity)
 				.ToList();
 
-			var result = base.SaveChanges();
+            foreach (var entry in ChangeTracker.Entries<Trigger>())
+            {
+                var t = entry.Entity;
+                if (t.FlowTemplateId == null && t.FlowId == null)
+                    throw new InvalidOperationException("Trigger must be assigned to at least a Flow or a FlowTemplate.");
+            }
+
+            foreach (var entry in ChangeTracker.Entries<Models.Action>())
+            {
+                var a = entry.Entity;
+                if (a.FlowTemplateId == null && a.FlowId == null)
+                    throw new InvalidOperationException("Action must be assigned to at least a Flow or a FlowTemplate.");
+            }
+
+            var result = base.SaveChanges();
 
 
 

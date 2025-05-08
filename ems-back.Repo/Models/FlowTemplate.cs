@@ -40,10 +40,8 @@ namespace ems_back.Repo.Models
         [ForeignKey("UpdatedBy")]
         public virtual User? Updater { get; set; }
 
-        public virtual Flow Flow { get; set; }
-
+        public virtual ICollection<Flow> Flows { get; set; }
         public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
         public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
-        public virtual ICollection<Flow> Flows { get; set; } = new List<Flow>();
     }
 }

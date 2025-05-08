@@ -24,6 +24,9 @@ namespace ems_back.Repo.Models
         [MaxLength(100)]
         public string LastName { get; set; }
 
+        [Required]
+        public UserRole Role { get; set; } = UserRole.User;
+
         public bool IsEmailConfirmed { get; set; } = false;
 
         [MaxLength(100)]

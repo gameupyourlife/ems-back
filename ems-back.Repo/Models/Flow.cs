@@ -53,6 +53,7 @@ namespace ems_back.Repo.Models
 		[ForeignKey("EventId")]
 		public virtual Event Event { get; set; }
 
+		[ForeignKey("FlowTemplateId")]
         public virtual FlowTemplate FlowTemplate { get; set; }
         public virtual ICollection<FlowsRun> FlowsRuns { get; set; } = new List<FlowsRun>();
         public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
