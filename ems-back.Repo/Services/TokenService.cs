@@ -10,12 +10,10 @@ using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Repo.Services
 {
+
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<TokenService> _logger;
-        private readonly SymmetricSecurityKey _securityKey;
-        private readonly SigningCredentials _signingCredentials;
 
         public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
         {
@@ -45,7 +43,7 @@ namespace ems_back.Repo.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                //new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
                 if (user == null)
                 {
