@@ -252,9 +252,15 @@ namespace ems_back.Repo.Data
             modelBuilder.Entity<OrganizationUser>()
                 .HasKey(ea => new { ea.UserId, ea.OrganizationId });
 
-			// Configure enum conversions
+            // Configure enum conversions
 
-			modelBuilder.Entity<OrganizationUser>()
+            // Configure enum conversions
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            modelBuilder.Entity<OrganizationUser>()
 				.Property(u => u.UserRole)
 				.HasConversion<string>()
 				.HasMaxLength(20);
@@ -302,6 +308,8 @@ namespace ems_back.Repo.Data
 					  .HasForeignKey(a => a.FlowTemplateId)
 					  .OnDelete(DeleteBehavior.Restrict);
 			});
+
+
 		}
 
 		public override int SaveChanges()
