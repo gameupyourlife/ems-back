@@ -12,10 +12,10 @@ using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Repo.Services
 {
+
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-
         public TokenService(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -28,7 +28,7 @@ namespace ems_back.Repo.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                //new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             // Get secret key
