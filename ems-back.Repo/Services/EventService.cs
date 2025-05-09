@@ -30,8 +30,19 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
-			// Anzahl der Teilnehmer müssen gezählt werden
-			return await _eventRepository.GetAllEventsAsync(orgId);
+			var events = await _eventRepository.GetAllEventsAsync(orgId);
+
+			if (events == null)
+			{
+                _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
+                return Enumerable.Empty<EventOverviewDto>();
+            }
+			else
+			{
+				return events;
+            }
+
+				
 		}
 
 		public async Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30)
