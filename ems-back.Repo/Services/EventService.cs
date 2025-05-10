@@ -178,7 +178,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<FileDto>> GetFilesFromEventAsync(Guid orgId, Guid eventId)
         {
-            throw new NotImplementedException();
+            return await _eventRepository.GetFilesFromEvent(orgId, eventId);
         }
 
         public async Task<FileDto> AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file)

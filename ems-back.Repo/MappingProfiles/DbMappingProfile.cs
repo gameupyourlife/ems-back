@@ -110,8 +110,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
 				;
 
-
-
 			// Response mappings
 			CreateMap<Flow, FlowBasicDto>();
 
@@ -149,7 +147,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
 
 			CreateMap<EventFile, FileDto>();
-			CreateMap<EventFile, FileDetailedDto>();
 
 			// Add these to your existing DbMappingProfile
 			CreateMap<AgendaEntryCreateDto, AgendaEntry>();

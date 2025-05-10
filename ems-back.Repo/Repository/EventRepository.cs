@@ -35,10 +35,12 @@ namespace ems_back.Repo.Repository
                 .Where(e => e.OrganizationId == orgId)
                 .Select(e => new EventOverviewDto
                 {
+                    Id = e.Id,
                     Title = e.Title,
                     Category = e.Category,
                     Start = e.Start,
                     Location = e.Location,
+                    Image = e.Image,
                     Attendees = e.Attendees.Count,
                     Status = e.Status,
                     Description = e.Description
@@ -206,8 +208,8 @@ namespace ems_back.Repo.Repository
                     Url = f.Url,
                     Type = f.Type,
                     UploadedAt = f.UploadedAt,
-                    OriginalName = f.Name,
-                    SizeInBytes = f.SizeInBytes
+                    UploadedBy = f.UploadedBy,
+                    Name = f.Name,
                 })
                 .ToListAsync();
 

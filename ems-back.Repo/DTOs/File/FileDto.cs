@@ -15,7 +15,7 @@ namespace ems_back.Repo.DTOs
 		public string Url { get; set; }
 		public FileType Type { get; set; }
 		public DateTime UploadedAt { get; set; }
-		public string OriginalName { get; set; }
-		public long? SizeInBytes { get; set; }
+		public Guid UploadedBy { get; set; }
+		public string Name { get; set; }
 	}
 }

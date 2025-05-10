@@ -176,18 +176,21 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
-        public async Task<ActionResult<EventInfoDto>> AddAttendeeToEvent(
+        public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
-			[FromRoute] Guid eventId)
+			[FromRoute] Guid eventId,
+            [FromBody] EventAttendeeDto attendee)
 		{
-			var attendeeList = await _eventService.GetAllEventAttendeesAsync(orgId, eventId);
-            if (attendeeList == null || !attendeeList.Any())
+			var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee);
+            if (createdAttendee == null)
             {
-                _logger.LogWarning("No attendees found for event with id {EventId}", eventId);
-                return NotFound("No attendees found");
+                _logger.LogWarning("Failed to add Attendee");
+                return BadRequest("Failed to add attendee");
             }
-            _logger.LogInformation("Attendees found for event with id {EventId}", eventId);
-            return Ok(attendeeList);
+
+            _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
+            return Ok(createdAttendee);
+
         }
 
 
@@ -239,12 +242,17 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/files
         [HttpGet("{eventId}/files")]
-        public async Task<ActionResult<List<FileDto>>> GetFilesfromEvent(
+        public async Task<ActionResult<IEnumerable<FileDto>>> GetFilesfromEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
 		{
 			var fileList = await _eventService.GetFilesFromEventAsync(orgId, eventId);
-            return fileList == null ? NotFound() : Ok(fileList);
+            if (fileList == null || !fileList.Any())
+            {
+                _logger.LogWarning("No files found for event with id {EventId}", eventId);
+                return NotFound("No files found");
+            }
+            return Ok(fileList);
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/files
