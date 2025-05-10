@@ -18,15 +18,17 @@ namespace ems_back.Services
 		private readonly IUserService _userService;
 		private readonly ITokenService _tokenService;
 		private readonly ILogger<AuthService> _logger;
-
+		private readonly IOrganizationService _organizationService;
 		public AuthService(
 			IUserService userService,
 			ITokenService tokenService,
+			IOrganizationService organizationService,
 			ILogger<AuthService> logger)
 		{
 			_userService = userService;
 			_tokenService = tokenService;
 			_logger = logger;
+			_organizationService = organizationService;
 		}
 
 		public async Task<AuthResult> LoginAsync(LoginRequest request)
@@ -46,6 +48,9 @@ namespace ems_back.Services
 					_logger.LogWarning("Failed login attempt for user: {Email}", request.Email);
 					return AuthResult.Failure("Invalid email or password.");
 				}
+
+				// Add automatic organization membership handling
+				await _organizationService.HandleAutomaticOrganizationMembership(request.Email);
 
 				var token = await _tokenService.GenerateTokenAsync(user);
 				_logger.LogInformation("User {Email} logged in successfully", request.Email);
@@ -67,8 +72,7 @@ namespace ems_back.Services
 					FirstName = request.FirstName,
 					LastName = request.LastName,
 					Email = request.Email,
-					UserName = request.Email,
-					//Role = request.Role
+					UserName = request.Email
 				};
 
 				var createResult = await _userService.CreateUserAsync(user, request.Password);
@@ -87,9 +91,14 @@ namespace ems_back.Services
 					return AuthResult.Failure(roleResult.Errors);
 				}
 
+				// Add automatic organization membership handling
+				await _organizationService.HandleAutomaticOrganizationMembership(request.Email);
+
 				_logger.LogInformation("User {Email} registered successfully with role {Role}",
 					request.Email, request.Role);
-				return AuthResult.CreateSuccess();
+
+				var token = await _tokenService.GenerateTokenAsync(user);
+				return AuthResult.CreateSuccess(token);
 			}
 			catch (Exception ex)
 			{

@@ -1,5 +1,6 @@
 ﻿using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Organization;
+using ems_back.Repo.DTOs.Password;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
@@ -13,6 +14,7 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<UserResponseDto> GetUserByIdAsync(Guid id);
 		Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto);
 		Task<UserResponseDto> UpdateUserAsync(Guid id, UserUpdateDto userDto);
+		Task ResetPasswordAsync(PasswordResetDto resetDto);
 		Task<bool> DeleteUserAsync(Guid id);
 		Task<UserResponseDto> GetUserByEmailAsync(string email);
 		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);

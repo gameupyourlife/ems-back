@@ -25,5 +25,12 @@ namespace ems_back.Repo.DTOs.Organization
 
         // Counts instead of full collections
         public int MemberCount { get; set; }
-    }
+
+        // Domain information
+        public List<string> Domains { get; set; } = new List<string>();
+
+        // Additional calculated properties
+        public string PrimaryDomain => Domains?.FirstOrDefault() ?? string.Empty;
+        public bool HasMultipleDomains => Domains?.Count > 1;
+	}
 }

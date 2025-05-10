@@ -2,21 +2,20 @@
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Minio;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
 using ems_back.Repo.Repository;
 using ems_back.Repo.MappingProfiles;
 using ems_back.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Minio;
 using ems_back.Repo.Services;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Service;
-using ems_back.Repo.DTOs.Organization;
-using ems_back.Services;
 
 namespace ems_back
 {
@@ -28,8 +27,42 @@ namespace ems_back
 
 			// Add services to the container.
 			builder.Services.AddControllers();
+
+			// Swagger with JWT support
 			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen();
+			builder.Services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("v1", new OpenApiInfo
+				{
+					Title = "EMS API",
+					Version = "v1"
+				});
+
+				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				{
+					Name = "Authorization",
+					Type = SecuritySchemeType.Http,
+					Scheme = "Bearer",
+					BearerFormat = "JWT",
+					In = ParameterLocation.Header,
+					Description = "Enter 'Bearer' followed by your token.\nExample: Bearer eyJhbGciOi..."
+				});
+
+				c.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							}
+						},
+						Array.Empty<string>()
+					}
+				});
+			});
 
 			// Database Context
 			builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -43,11 +76,13 @@ namespace ems_back
 			builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 			builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
 			builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IEventRepository, EventRepository>();
 			builder.Services.AddScoped<IFileRepository, FileRepository>();
-
+			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+			builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
+			builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
 			// Services
 			builder.Services.AddScoped<IAuthService, AuthService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
@@ -56,28 +91,27 @@ namespace ems_back
 			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 			builder.Services.AddScoped<IOrgFlowService, OrgFlowService>();
 			builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<ITokenService, TokenService>();
+			builder.Services.AddScoped<ITokenService, TokenService>();
+			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 
-            // Replace your current Identity configuration with this:
-
-            // Identity Configuration
-            builder.Services.AddIdentityCore<User>(options =>
-				{
-					// Configure identity options if needed
-				})
+			// Identity Configuration
+			builder.Services.AddIdentityCore<User>(options =>
+			{
+				// Configure identity options if needed
+			})
 				.AddRoles<IdentityRole<Guid>>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
-				.AddSignInManager<SignInManager<User>>()  // Add this line
+				.AddSignInManager<SignInManager<User>>()
 				.AddDefaultTokenProviders();
 
-			// Add authentication services
+			// JWT Authentication
 			builder.Services.AddAuthentication(options =>
-				{
-					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-				})
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
 				.AddJwtBearer(options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters
@@ -117,6 +151,8 @@ namespace ems_back
 			}
 
 			app.UseHttpsRedirection();
+
+			// 🔥 Ensure these are before controllers
 			app.UseAuthentication();
 			app.UseAuthorization();
 

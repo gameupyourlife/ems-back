@@ -9,6 +9,7 @@ using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Microsoft.Extensions.Logging;
 
 namespace ems_back.Repo.Repository
 {
@@ -17,16 +18,20 @@ namespace ems_back.Repo.Repository
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
-
-        public UserRepository(
+        private readonly ILogger<UserRepository> _logger;
+		public UserRepository(
             ApplicationDbContext context,
             IMapper mapper,
-            UserManager<User> userManager)
+		  ILogger<UserRepository> logger,
+
+			UserManager<User> userManager)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
-        }
+            _logger = logger;
+
+		}
 
         public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto)
         {
@@ -46,28 +51,31 @@ namespace ems_back.Repo.Repository
 
         public async Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto)
         {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return null;
-
-            // Update only non-null properties
-            if (!string.IsNullOrEmpty(userDto.FirstName))
-                user.FirstName = userDto.FirstName;
-            if (!string.IsNullOrEmpty(userDto.LastName))
-                user.LastName = userDto.LastName;
-            if (!string.IsNullOrEmpty(userDto.ProfilePicture))
-                user.ProfilePicture = userDto.ProfilePicture;
-
-            if (!string.IsNullOrEmpty(userDto.NewPassword))
+	        var user = await _context.Users.FindAsync(userId);
+            if (user == null)
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                await _userManager.ResetPasswordAsync(user, token, userDto.NewPassword);
+                _logger.LogWarning("User with ID {UserId} not found for update.", userId);
+                return null;
             }
 
+			// Allow nulls or updates
+			user.ProfilePicture = userDto.ProfilePicture;
+
+			// Update only non-null properties
+			if (!string.IsNullOrEmpty(userDto.FirstName))
+		        user.FirstName = userDto.FirstName;
+
+	        if (!string.IsNullOrEmpty(userDto.LastName))
+		        user.LastName = userDto.LastName;
+
             await _context.SaveChangesAsync();
-            return await GetUserByIdAsync(userId);
+            _logger.LogInformation("User with ID {UserId} was successfully updated.", userId);
+
+			// Project to UserResponseDto without needing .Include(u => u.Organization)
+			return _mapper.Map<UserResponseDto>(user);
         }
 
-        public async Task<bool> DeleteUserAsync(Guid id)
+		public async Task<bool> DeleteUserAsync(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return false;
