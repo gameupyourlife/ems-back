@@ -31,14 +31,17 @@ namespace ems_back.Services
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IUserRepository userRepository,
-            IOrganizationDomainRepository orgDomainRepo,
-            IOrganizationUserRepository orgMembershipRepo,
+			   IOrganizationDomainRepository orgDomainRepo,
+			   IOrganizationUserRepository orgMembershipRepo,
 			ILogger<UserService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
-            _logger = logger;
+            _orgDomainRepo = orgDomainRepo;
+            _orgMembershipRepo = orgMembershipRepo;
+
+			_logger = logger;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()

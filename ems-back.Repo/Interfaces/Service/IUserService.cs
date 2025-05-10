@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Repo.Interfaces.Service
 {
-    public interface IUserService
-    {
-        Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
+	public interface IUserService
+	{
+		Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
 		Task<UserResponseDto> GetUserByIdAsync(Guid id);
 		Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto);
 		Task<UserResponseDto> UpdateUserAsync(Guid id, UserUpdateDto userDto);
@@ -26,6 +26,8 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<IdentityResult> CreateUserAsync(User user, string password);
 		Task<IdentityResult> AddToRoleAsync(User user, string role);
 		Task<SignInResult> CheckPasswordSignInAsync(User user, string password);
-        Task<bool> DeleteUserByIdOrEmailAsync(Guid? userId, string? email);
-    }
+		Task<bool> DeleteUserByIdOrEmailAsync(Guid? userId, string? email);
+
+		Task HandleAutomaticOrganizationMembership(string email);
+	}
 }

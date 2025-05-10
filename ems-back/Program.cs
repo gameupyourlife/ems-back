@@ -83,6 +83,7 @@ namespace ems_back
 			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
 			builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
+
 			// Services
 			builder.Services.AddScoped<IAuthService, AuthService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
@@ -152,7 +153,6 @@ namespace ems_back
 
 			app.UseHttpsRedirection();
 
-			// 🔥 Ensure these are before controllers
 			app.UseAuthentication();
 			app.UseAuthorization();
 
