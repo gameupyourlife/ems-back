@@ -106,40 +106,18 @@ namespace ems_back.Repo.Services
 
         public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
         {
-
-            // To Do: Manuell prüfen
-
-            if (eventId != eventDto.Id)
-            {
-                _logger.LogWarning("Event ID mismatch: {EventId} != {DtoEventId}", eventId, eventDto.Id);
-                return null;
-            }
-            var updatedEvent = await _eventRepository.UpdateEventAsync(eventDto);
-            if (updatedEvent == null)
-            {
-                _logger.LogWarning("Failed to update event with id {EventId}", eventId);
-            }
-            return updatedEvent;
+            throw new NotImplementedException("UpdateEventAsync is not implemented yet");
         }
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
         {
-
-            // To Do: Manuell prüfen
-
-            var eventExists = await _eventRepository.ExistsAsync(eventId);
-            if (!eventExists)
-            {
-                _logger.LogWarning("Event with id {EventId} not found", eventId);
-                return false;
-            }
-            return await _eventRepository.DeleteAsync(eventId);
+            throw new NotImplementedException("DeleteEventAsync is not implemented yet");
         }
 
         public async Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId)
         {
 
-            var attendeeList = await _eventRepository.GetAllEventAttendeesAsync(eventId);
+            var attendeeList = await _eventRepository.GetAllEventAttendeesAsync(orgId, eventId);
             if (attendeeList == null)
             {
                 _logger.LogWarning("No attendees found for event with id {EventId}", eventId);
@@ -161,23 +139,14 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId, Guid attendeeId)
         {
-
-            // To Do: Manuell prüfen
-
-            var attendeeExists = await _eventRepository.ExistsAsync(attendeeId);
-            if (!attendeeExists)
-            {
-                _logger.LogWarning("Attendee with id {AttendeeId} not found", attendeeId);
-                return false;
-            }
-            return await _eventRepository.DeleteAsync(attendeeId);
+            throw new NotImplementedException("RemoveAttendeeFromEventAsync is not implemented yet");
         }
 
 
 		public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId)
 		{
 
-            var agenda = await _eventRepository.GetAgendaWithEventAsync(orgId, eventId);
+            var agenda = await _eventRepository.GetAgendaByEventIdAsync(orgId, eventId);
 			if (agenda == null)
 			{
 				_logger.LogWarning("No agenda found for event with id {EventId}", eventId);
