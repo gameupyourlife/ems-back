@@ -49,8 +49,8 @@ namespace ems_back.Controllers
 		}
 
         // POST: api/orgs/{orgId}/events
-        [HttpPost]
-        [Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+        [HttpPost]  
+        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
         public async Task<ActionResult<EventInfoDto>> CreateEvent(
 			[FromBody] EventCreateDto eventDto, 
 			[FromRoute] Guid orgId)
