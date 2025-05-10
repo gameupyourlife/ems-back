@@ -49,6 +49,12 @@ public class Event
     [Required]
     public Guid OrganizationId { get; set; }
 
+    [Required]
+    public int AttendeeCount { get; set; }
+
+    [Required]
+    public int Capacity { get; set; }
+
     // for navigation:
 
     [ForeignKey("CreatedBy")]

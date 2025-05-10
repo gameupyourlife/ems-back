@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Event;
 
-namespace ems_back.Repo.DTOs.Agency
+namespace ems_back.Repo.DTOs.Agenda
 {
     // Response DTO
     public class AgendaEntryDto
@@ -16,6 +16,6 @@ namespace ems_back.Repo.DTOs.Agency
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Guid EventId { get; set; }
-        public EventDetailsDto Event { get; set; }
+        public EventInfoDTO Event { get; set; }
     }
 }

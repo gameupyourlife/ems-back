@@ -15,7 +15,7 @@ namespace ems_back.Repo.DTOs.Event
         public string Location { get; set; }
         public string? Description { get; set; }
         public string Category { get; set; }
-        public int MaxAttendees { get; set; }
+        public int AttendeeCount { get; set; }
         public int Capacity { get; set; }
         public string Image { get; set; }
         public EventStatus Status { get; set; }

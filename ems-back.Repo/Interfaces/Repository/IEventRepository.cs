@@ -6,7 +6,7 @@ namespace ems_back.Repo.Interfaces.Repository;
 
 public interface IEventRepository
 {
-	Task<EventDetailsDto> GetByIdAsync(Guid orgId, Guid id);
+	Task<EventInfoDTO> GetEventByIdAsync(Guid orgId, Guid id);
 	Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
 	Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByOrganizationAsync(Guid organizationId);
@@ -14,13 +14,14 @@ public interface IEventRepository
 	Task<IEnumerable<EventInfoDTO>> GetEventsByCategoryAsync(int category);
 	Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
     Task<List<FileDto>> GetFilesFromEvent(Guid eventId);
-    Task<EventDetailsDto> AddAsync(EventCreateDto eventDto);
-	Task<EventDetailsDto> UpdateAsync(EventInfoDTO eventDto);
-	Task<EventDetailsDto> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
+    Task<EventInfoDTO> CreateEventAsync(EventCreateDto eventDto);
+	Task<EventInfoDTO> UpdateEventAsync(EventInfoDTO eventDto);
+	Task<EventInfoDTO> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
 	Task<bool> DeleteAsync(Guid id);
 	Task<bool> ExistsAsync(Guid id);
-	Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId);
+	Task<List<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid eventId);
 	Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId);
 	Task<EventInfoDTO> GetEventWithAllDetailsAsync(Guid eventId);
 	Task<int> GetAttendeeCountAsync(Guid eventId);
+    Task<EventOverviewDto> GetEventByTitleAndDateAsync(string title, DateTime start, Guid orgId);
 }
