@@ -42,7 +42,7 @@ namespace ems_back.Tests.Services
                 // Arrange
                 var eventId = Guid.NewGuid();
                 var orgId = Guid.NewGuid();
-                var expectedEvent = new EventInfoDTO // Updated to match the correct type
+                var expectedEvent = new EventInfoDto
                 {
                     Title = "New Event",
                     OrganizationId = orgId,
@@ -90,12 +90,11 @@ namespace ems_back.Tests.Services
                 var eventDto = new EventCreateDto
                 {
                     Title = "New Event",
-                    OrganizationId = orgId,
                     Description = "Test Description",
                     Category = "Test Category",
                 };
 
-                var expectedEvent = new EventInfoDTO 
+                var expectedEvent = new EventInfoDto
                 {
                     Title = "New Event",
                     OrganizationId = orgId,
@@ -103,10 +102,11 @@ namespace ems_back.Tests.Services
                     Category = "Test Category",
                 };
 
-                _eventRepoMock.Setup(x => x.CreateEventAsync(eventDto)).ReturnsAsync(expectedEvent);
+                // Fix: Pass the required parameter to CreateEventAsync and fix the syntax error
+                _eventRepoMock.Setup(x => x.CreateEventAsync(It.IsAny<EventInfoDto>())).ReturnsAsync(Guid.NewGuid());
 
                 // Act
-                var result = await _eventService.CreateEventAsync(eventDto, orgId);
+                var result = await _eventService.CreateEventAsync(orgId, eventDto);
 
                 // Assert
                 result.Should().NotBeNull();

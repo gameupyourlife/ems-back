@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Event
 {
-    public class EventInfoDTO
+    public class EventInfoDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

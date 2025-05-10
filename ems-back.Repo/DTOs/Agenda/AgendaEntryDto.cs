@@ -16,6 +16,5 @@ namespace ems_back.Repo.DTOs.Agenda
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Guid EventId { get; set; }
-        public EventInfoDTO Event { get; set; }
     }
 }

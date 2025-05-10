@@ -50,8 +50,8 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events
         [HttpPost]
-        [Authorize(Roles = "Organizer,Admin,EventOrganizer")]
-        public async Task<ActionResult<EventInfoDTO>> CreateEvent(
+        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+        public async Task<ActionResult<EventInfoDto>> CreateEvent(
 			[FromBody] EventCreateDto eventDto, 
 			[FromRoute] Guid orgId)
         {
@@ -75,7 +75,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}
         [HttpGet("{eventId}")]
-		public async Task<ActionResult<EventInfoDTO>> GetEventById(
+		public async Task<ActionResult<EventInfoDto>> GetEventById(
 			[FromRoute] Guid orgId,
 			[FromRoute] Guid eventId)
 		{
@@ -99,10 +99,10 @@ namespace ems_back.Controllers
 
         // PUT: api/orgs/{orgId}/events/{eventId}
         [HttpPut("{eventId}")]
-        public async Task<ActionResult<EventInfoDTO>> UpdateEvent(
+        public async Task<ActionResult<EventInfoDto>> UpdateEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId, 
-            [FromBody] EventInfoDTO eventDto)
+            [FromBody] EventInfoDto eventDto)
         {
             // To Do: Check
 
@@ -176,7 +176,7 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
-        public async Task<ActionResult<EventInfoDTO>> AddAttendeeToEvent(
+        public async Task<ActionResult<EventInfoDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId)
 		{
@@ -193,7 +193,7 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{attendeeId}
         [HttpDelete("{eventId}/attendees/{userId}")]
-        public async Task<ActionResult<EventInfoDTO>> RemoveAttendeeFromEvent(Guid eventId, Guid attendeeId)
+        public async Task<ActionResult<EventInfoDto>> RemoveAttendeeFromEvent(Guid eventId, Guid attendeeId)
 		{
 			throw new NotImplementedException("This method is not implemented yet.");
         }
@@ -218,21 +218,21 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpPost("{eventId}/agenda")]
-        public async Task<ActionResult<EventInfoDTO>> AddAgendaToEvent(Guid eventId, Guid agendaId)
+        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(Guid eventId, Guid agendaId)
 		{
 			throw new NotImplementedException("This method is not implemented yet.");
         }
 
         // Put: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpPut("{eventId}/agenda/{agendaId}")]
-        public async Task<ActionResult<EventInfoDTO>> UpdateAgendaInEvent(Guid eventId, Guid agendaId)
+        public async Task<ActionResult<EventInfoDto>> UpdateAgendaInEvent(Guid eventId, Guid agendaId)
 		{
 			throw new NotImplementedException("This method is not implemented yet.");
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpDelete("{eventId}/agenda/{agendaId}")]
-        public async Task<ActionResult<EventInfoDTO>> RemoveAgendaFromEvent(Guid eventId, Guid agendaId)
+        public async Task<ActionResult<EventInfoDto>> RemoveAgendaFromEvent(Guid eventId, Guid agendaId)
 		{
             throw new NotImplementedException("This method is not implemented yet.");
         }
@@ -249,20 +249,20 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/files
         [HttpPost("{eventId}/files")]
-        public async Task<ActionResult<EventInfoDTO>> AddFileToEvent(Guid eventId, Guid fileId)
+        public async Task<ActionResult<EventInfoDto>> AddFileToEvent(Guid eventId, Guid fileId)
         {
             throw new NotImplementedException("This method is not implemented yet.");
         }
 
         // PUT: api/orgs/{orgId}/events/{eventId}/files/{fileId}
         [HttpPut("{eventId}/files/{fileId}")]
-        public async Task<ActionResult<EventInfoDTO>> UpdateFileInEvent(Guid eventId, Guid fileId)
+        public async Task<ActionResult<EventInfoDto>> UpdateFileInEvent(Guid eventId, Guid fileId)
 		{
 			throw new NotImplementedException("This method is not implemented yet.");
         }
         // DELETE: api/orgs/{orgId}/events/{eventId}/files/{fileId}
         [HttpDelete("{eventId}/files/{fileId}")]
-        public async Task<ActionResult<EventInfoDTO>> RemoveFileFromEvent(Guid eventId, Guid fileId)
+        public async Task<ActionResult<EventInfoDto>> RemoveFileFromEvent(Guid eventId, Guid fileId)
         {
             throw new NotImplementedException("This method is not implemented yet.");
         }

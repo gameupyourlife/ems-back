@@ -11,7 +11,6 @@ namespace ems_back.Repo.DTOs.Event
     public class EventCreateDto
     {
         public string Title { get; set; }
-        public Guid OrganizationId { get; set; } // evtl. nicht notwendig -> kommt aus Rute
         public string Description { get; set; }
         public string Category { get; set; }
         public string Location { get; set; }
@@ -21,8 +20,6 @@ namespace ems_back.Repo.DTOs.Event
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Guid UpdatedBy { get; set; }
         public Guid CreatedBy { get; set; }
-        public int MaxAttendees { get; set; } // Muss weg
     }
 }

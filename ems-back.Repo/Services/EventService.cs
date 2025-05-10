@@ -51,10 +51,9 @@ namespace ems_back.Repo.Services
             }	
 		}
 
-        public async Task<EventInfoDTO> CreateEventAsync(EventCreateDto eventDto, Guid orgId)
+        public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto)
         {
-
-            var eventInfo = new EventInfoDTO
+            var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,
                 OrganizationId = orgId,
@@ -69,7 +68,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = eventDto.CreatedAt,
                 UpdatedAt = eventDto.CreatedAt,
                 CreatedBy = eventDto.CreatedBy,
-                UpdatedBy = eventDto.UpdatedBy,
+                UpdatedBy = eventDto.CreatedBy,
                 AttendeeCount = 0
             };
 
@@ -82,15 +81,20 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event with title {Title} and start date {StartDate} already exists", eventInfo.Title, eventInfo.Start);
                 return null;
             }
-            else
-            {
-                _logger.LogInformation("Creating new event with title {Title}", eventInfo.Title);
+            
+            var eventId = await _eventRepository.CreateEventAsync(eventInfo);
 
-                return await _eventRepository.CreateEventAsync(eventDto);
+            if (eventId == null)
+            {
+                _logger.LogWarning("Failed to create event with title {Title}", eventInfo.Title);
+                return null;
             }
+
+            eventInfo.Id = eventId.Value;
+            return eventInfo;
         }
 
-        public async Task<EventInfoDTO> GetEventAsync(Guid orgId, Guid eventid)
+        public async Task<EventInfoDto> GetEventAsync(Guid orgId, Guid eventid)
         {
             var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventid);
             if (eventEntity == null)
@@ -100,7 +104,7 @@ namespace ems_back.Repo.Services
             return eventEntity;
         }
 
-        public async Task<EventInfoDTO> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDTO eventDto)
+        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
         {
 
             // To Do: Manuell prüfen
@@ -132,7 +136,7 @@ namespace ems_back.Repo.Services
             return await _eventRepository.DeleteAsync(eventId);
         }
 
-        public async Task<List<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId)
+        public async Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId)
         {
 
             var attendeeList = await _eventRepository.GetAllEventAttendeesAsync(eventId);
@@ -147,7 +151,10 @@ namespace ems_back.Repo.Services
             }
         }
 
-        public async Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendeeDto)
+        public async Task<EventAttendeeDto> AddAttendeeToEventAsync(
+            Guid orgId, 
+            Guid eventId, 
+            EventAttendeeDto attendeeDto)
         {
             throw new NotImplementedException();
         }
@@ -167,70 +174,57 @@ namespace ems_back.Repo.Services
         }
 
 
-		public async Task<List<AgendaEntry>> GetAgendaAsync(Guid id)
+		public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId)
 		{
 
-            var agenda = await _eventRepository.GetAgendaWithEventAsync(id);
+            var agenda = await _eventRepository.GetAgendaWithEventAsync(orgId, eventId);
 			if (agenda == null)
 			{
-				_logger.LogWarning("No agenda found for event with id {EventId}", id);
+				_logger.LogWarning("No agenda found for event with id {EventId}", eventId);
             }
             return agenda;
         }
 
-        Task<EventInfoDTO> IEventService.CreateEventAsync(Guid orgId, EventCreateDto eventDto)
+        public async Task<AgendaEntryDto> AddAgendaPointToEventAsync(
+            Guid orgId, 
+            Guid eventId, 
+            AgendaEntryDto agendaEntryDto)
         {
             throw new NotImplementedException();
         }
 
-        Task<IEnumerable<EventAttendeeDto>> IEventService.GetAllEventAttendeesAsync(Guid orgId, Guid eventId)
+        public async Task<AgendaEntryDto> UpdateAgendaPointAsync(
+            Guid orgId, 
+            Guid eventId, 
+            Guid agendaId, 
+            AgendaEntryDto agendaEntryDto)
         {
             throw new NotImplementedException();
         }
 
-        Task<IEnumerable<AgendaEntryDto>> IEventService.GetAgendaAsync(Guid orgId, Guid eventId)
+        public async Task<bool> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId)
         {
             throw new NotImplementedException();
         }
 
-        Task<AgendaEntryDto> IEventService.AddAgendaPointToEventAsync(Guid orgId, Guid eventId, AgendaEntryDto agendaEntryDto)
+        public async Task<IEnumerable<FileDto>> GetFilesFromEventAsync(Guid orgId, Guid eventId)
         {
             throw new NotImplementedException();
         }
 
-        Task<AgendaEntryDto> IEventService.UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntryDto)
+        public async Task<FileDto> AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file)
         {
             throw new NotImplementedException();
         }
 
-        Task<bool> IEventService.DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId)
+        public async Task<FileDto> UpdateFileAsync(Guid orgId, Guid eventId, Guid fileId, FileDto file)
         {
             throw new NotImplementedException();
         }
 
-        Task<IEnumerable<FileDto>> IEventService.GetFilesFromEventAsync(Guid orgId, Guid eventId)
+        public async Task<FileDto> DeleteFileAsync(Guid orgId, Guid eventId, Guid fileId)
         {
             throw new NotImplementedException();
-        }
-
-        Task<FileDto> IEventService.AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<FileDto> IEventService.UpdateFileAsync(Guid orgId, Guid eventId, Guid fileId, FileDto file)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<FileDto> IEventService.DeleteFileAsync(Guid orgId, Guid eventId, Guid fileId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<FileDto>> GetFilesFromEventAsync(Guid eventId)
-        {
-            return await _eventRepository.GetFilesFromEvent(eventId);
         }
     }
 }

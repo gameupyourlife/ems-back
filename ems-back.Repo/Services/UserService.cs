@@ -242,7 +242,7 @@ namespace ems_back.Services
             }
         }
 
-        public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
+        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
         {
             try
             {
