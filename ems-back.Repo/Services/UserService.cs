@@ -297,6 +297,21 @@ namespace ems_back.Services
             return await _userManager.AddToRoleAsync(user, role);
         }
 
+        public async Task<bool> UpdateUserRoleAsync(Guid userId, UserUpdateRoleDto userDto)
+        {
+            if (userId != userDto.userId)
+            {
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(UserRole), userDto.newRole))
+            {
+                return false;
+            }
+               
+            return await _userRepository.UpdateUserRoleAsync(userDto) != null;
+        }
+
         public async Task<SignInResult> CheckPasswordSignInAsync(User user, string password)
         {
             return await _signInManager.CheckPasswordSignInAsync(user, password, false);

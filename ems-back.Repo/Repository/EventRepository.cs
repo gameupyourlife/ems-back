@@ -88,7 +88,7 @@ namespace ems_back.Repo.Repository
 
             return eventEntity;
 		}
-
+    
         public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
         {
 
