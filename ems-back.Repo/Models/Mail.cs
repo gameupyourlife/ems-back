@@ -21,7 +21,7 @@ public class Mail
     public string Body { get; set; }
 
     [Required]
-    public IEnumerable<string> Recipients { get; set; }
+    public IEnumerable<Guid> Recipients { get; set; }
 
     public DateTime? ScheduledFor { get; set; }
 
