@@ -120,9 +120,9 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.AddAsync(eventDto);
 		}
 
-		public async Task<bool> UpdateEventAsync(Guid id, EventInfoDTO eventDto)
+		public async Task<bool> UpdateEventAsync(Guid eventId, EventUpdateDto eventDto)
 		{
-			if (id != eventDto.Id)
+			if (eventId != eventDto.Id)
 			{
 				return false;
 			}
@@ -134,9 +134,9 @@ namespace ems_back.Repo.Services
 			return await _eventRepository.UpdateStatusAsync(id, statusDto);
 		}
 
-		public async Task<bool> DeleteEventAsync(Guid id)
+		public async Task<bool> DeleteEventAsync(Guid eventId)
 		{
-			return await _eventRepository.DeleteAsync(id);
+			return await _eventRepository.DeleteAsync(eventId);
 		}
 
 		public async Task<int> GetAttendeeCountAsync(Guid id)

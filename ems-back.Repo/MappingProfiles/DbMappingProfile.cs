@@ -36,7 +36,9 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UserName,
 					opt => opt.MapFrom(src => src.Email))
 				.ForMember(dest => dest.EmailConfirmed,
-					opt => opt.MapFrom(src => false));
+					opt => opt.MapFrom(src => false))
+				.ForMember(dest => dest.Role,
+					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
 				.IncludeBase<User, UserDto>();
@@ -55,7 +57,9 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore());
 
-			CreateMap<Event, EventOverviewDto>()
+            CreateMap<EventUpdateDto, Event>();
+
+            CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
 
             // Related mappings

@@ -1,19 +1,23 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
+using Minio;
+
+using ems_back;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
 using ems_back.Repo.Repository;
-using ems_back.Repo.MappingProfiles;
-using ems_back.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Minio;
 using ems_back.Repo.Services;
-using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.MappingProfiles;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Services;
@@ -22,11 +26,11 @@ namespace ems_back
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
+			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
@@ -43,8 +47,8 @@ namespace ems_back
 			builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 			builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
 			builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 			builder.Services.AddScoped<IEventRepository, EventRepository>();
 			builder.Services.AddScoped<IFileRepository, FileRepository>();
 
@@ -56,47 +60,57 @@ namespace ems_back
 			builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 			builder.Services.AddScoped<IOrgFlowService, OrgFlowService>();
 			builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<ITokenService, TokenService>();
+			builder.Services.AddScoped<ITokenService, TokenService>();
+			builder.Services.AddScoped<IRoleService, RoleService>();
 
+			// Identity Configuration - supports GUIDs for users and roles
+			builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+			{
+				options.Password.RequireDigit = true;
+				options.Password.RequiredLength = 8;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = true;
+				options.Password.RequireLowercase = true;
+			})
+			.AddEntityFrameworkStores<ApplicationDbContext>()
+			.AddDefaultTokenProviders();
 
-            // Replace your current Identity configuration with this:
+			builder.Services.AddTransient<IRoleStore<IdentityRole<Guid>>, RoleStore<IdentityRole<Guid>, ApplicationDbContext, Guid>>();
+			builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 
-            // Identity Configuration
-            builder.Services.AddIdentityCore<User>(options =>
-				{
-					// Configure identity options if needed
-				})
-				.AddRoles<IdentityRole<Guid>>()
-				.AddEntityFrameworkStores<ApplicationDbContext>()
-				.AddSignInManager<SignInManager<User>>()  // Add this line
-				.AddDefaultTokenProviders();
-
-			// Add authentication services
+			// JWT Authentication
 			builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			.AddJwtBearer(options =>
+			{
+				options.TokenValidationParameters = new TokenValidationParameters
 				{
-					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-				})
-				.AddJwtBearer(options =>
-				{
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = true,
-						ValidateAudience = true,
-						ValidateLifetime = true,
-						ValidateIssuerSigningKey = true,
-						ValidIssuer = builder.Configuration["Jwt:Issuer"],
-						ValidAudience = builder.Configuration["Jwt:Audience"],
-						IssuerSigningKey = new SymmetricSecurityKey(
-							Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-					};
-				});
+					ValidateIssuer = true,
+					ValidateAudience = true,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					ValidIssuer = builder.Configuration["Jwt:Issuer"],
+					ValidAudience = builder.Configuration["Jwt:Audience"],
+					IssuerSigningKey = new SymmetricSecurityKey(
+						Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+				};
+			});
 
-			// Authorization
-			builder.Services.AddAuthorization();
+			// Authorization Policies
+			builder.Services.AddAuthorization(options =>
+			{
+				options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("ADMIN"));
+				options.AddPolicy("RequireOwnerRole", policy => policy.RequireRole("OWNER"));
+				options.AddPolicy("RequireEventOrganizerRole", policy => policy.RequireRole("EVENT-ORGANIZER"));
+				options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("ORGANIZER"));
+				options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
+			});
 
-			// MinIO Configuration
+			// MinIO Client Configuration
 			var minioConfig = builder.Configuration.GetSection("Minio");
 			builder.Services.AddMinio(configureClient => configureClient
 				.WithEndpoint(minioConfig["Endpoint"])
@@ -104,12 +118,16 @@ namespace ems_back
 				.WithSSL()
 				.Build());
 
-			// Auth Service
-			builder.Services.AddScoped<AuthService>();
-
 			var app = builder.Build();
 
-			// Configure the HTTP request pipeline.
+			// Initialize roles on startup
+			using (var scope = app.Services.CreateScope())
+			{
+				var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+				await roleService.EnsureRolesExist();
+			}
+
+			// Middleware
 			if (app.Environment.IsDevelopment())
 			{
 				app.UseSwagger();
@@ -121,7 +139,9 @@ namespace ems_back
 			app.UseAuthorization();
 
 			app.MapControllers();
-			app.Run();
+
+			await app.RunAsync();
 		}
 	}
+
 }
