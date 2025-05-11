@@ -13,8 +13,7 @@ namespace ems_back.Repo.DTOs.Flow
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
-        public Guid EventId { get; set; }
-        public List<TriggerDto> Triggers { get; set; }
-        public List<ActionDto> Actions { get; set; }
+        public List<TriggerOverviewDto> Triggers { get; set; }
+        public List<ActionOverviewDto> Actions { get; set; }
     }
 }

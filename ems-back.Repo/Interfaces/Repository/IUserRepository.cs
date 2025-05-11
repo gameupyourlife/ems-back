@@ -31,7 +31,7 @@ namespace ems_back.Repo.Interfaces.Repository
 		// Specialized queries
 		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);
 		Task<UserRole> GetUserRoleAsync(Guid userId);
-		Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId);
+		Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId);
 
 		// Internal use only (for authentication/authorization)
 		Task<User> GetUserEntityByIdAsync(Guid id);

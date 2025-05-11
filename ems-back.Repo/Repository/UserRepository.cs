@@ -235,7 +235,7 @@ namespace ems_back.Repo.Repository
             throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
         }
 
-        public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
+        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
         {
             //var events = await _context.EventAttendees
             //    .Where(ea => ea.UserId == userId)

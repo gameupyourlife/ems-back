@@ -18,14 +18,14 @@ public class FileRepository : IFileRepository
 		_mapper = mapper;
 	}
 
-	public async Task<FileDetailedDto> GetByIdAsync(string id)
+	public async Task<FileDto> GetByIdAsync(string id)
 	{
 		var file = await _context.Files
 			.Include(f => f.Uploader)
 			.AsNoTracking()
 			.FirstOrDefaultAsync(f => f.Id == id);
 
-		return _mapper.Map<FileDetailedDto>(file);
+		return _mapper.Map<FileDto>(file);
 	}
 
 	public async Task<IEnumerable<FileDto>> GetByUserAsync(Guid userId)
@@ -48,7 +48,7 @@ public class FileRepository : IFileRepository
 		return _mapper.Map<IEnumerable<FileDto>>(files);
 	}
 
-	public async Task<FileDetailedDto> AddAsync(FileCreateDto fileDto)
+	public async Task<FileDto> AddAsync(FileCreateDto fileDto)
 	{
 		var file = _mapper.Map<EventFile>(fileDto);
 		file.UploadedAt = DateTime.UtcNow;
@@ -59,7 +59,7 @@ public class FileRepository : IFileRepository
 		return await GetByIdAsync(file.Id);
 	}
 
-	public async Task<FileDetailedDto> UpdateAsync(FileUpdateDto fileDto)
+	public async Task<FileDto> UpdateAsync(FileUpdateDto fileDto)
 	{
 		var existingFile = await _context.Files.FindAsync(fileDto.Id);
 		if (existingFile == null) return null;
