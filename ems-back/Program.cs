@@ -85,7 +85,7 @@ namespace ems_back
 				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 				options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
-			.AddJwtBearer(options =>
+			/*.AddJwtBearer(options =>
 			{
 				options.TokenValidationParameters = new TokenValidationParameters
 				{
@@ -98,7 +98,7 @@ namespace ems_back
 					IssuerSigningKey = new SymmetricSecurityKey(
 						Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
 				};
-			});
+			})*/;
 
 			// Authorization Policies
 			builder.Services.AddAuthorization(options =>

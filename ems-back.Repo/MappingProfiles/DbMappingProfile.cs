@@ -57,7 +57,9 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore());
 
-			CreateMap<Event, EventOverviewDto>()
+            CreateMap<EventUpdateDto, Event>();
+
+            CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
 
             // Related mappings

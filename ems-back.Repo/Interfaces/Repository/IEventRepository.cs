@@ -15,9 +15,9 @@ public interface IEventRepository
 	Task<IEnumerable<EventInfoDTO>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
     Task<List<FileDto>> GetFilesFromEvent(Guid eventId);
     Task<EventDetailsDto> AddAsync(EventCreateDto eventDto);
-	Task<EventDetailsDto> UpdateAsync(EventInfoDTO eventDto);
+	Task<EventDetailsDto> UpdateAsync(EventUpdateDto eventDto);
 	Task<EventDetailsDto> UpdateStatusAsync(Guid eventId, EventInfoDTO statusDto);
-	Task<bool> DeleteAsync(Guid id);
+	Task<bool> DeleteAsync(Guid eventId);
 	Task<bool> ExistsAsync(Guid id);
 	Task<List<EventAttendeeDto>> GetEventAttendeesAsync(Guid eventId);
 	Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid eventId);

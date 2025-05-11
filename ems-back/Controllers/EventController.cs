@@ -173,36 +173,37 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPut("{eventId}")]
-		public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventInfoDTO eventDto)
+		[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+		public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] EventUpdateDto eventDto)
 		{
 			try
 			{
-				if (id != eventDto.Id)
+				if (eventId != eventDto.Id)
 				{
 					return BadRequest("ID mismatch");
 				}
 
-				var success = await _eventService.UpdateEventAsync(id, eventDto);
-				return success ? NoContent() : NotFound();
+				var success = await _eventService.UpdateEventAsync(eventId, eventDto);
+				return success ? Ok() : NotFound();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error updating event with id {EventId}", id);
+				_logger.LogError(ex, "Error updating event with id {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
 
 		[HttpDelete("{eventId}")]
-		public async Task<IActionResult> DeleteEvent(Guid id)
+		public async Task<IActionResult> DeleteEvent(Guid eventId)
 		{
 			try
 			{
-				var success = await _eventService.DeleteEventAsync(id);
-				return success ? NoContent() : NotFound();
+				var success = await _eventService.DeleteEventAsync(eventId);
+				return success ? Ok() : NotFound();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error deleting event with id {EventId}", id);
+				_logger.LogError(ex, "Error deleting event with id {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
