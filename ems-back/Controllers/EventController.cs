@@ -173,7 +173,7 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPut("{eventId}")]
-		[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+		//[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
 		public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] EventUpdateDto eventDto)
 		{
 			try
