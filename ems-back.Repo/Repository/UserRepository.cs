@@ -68,6 +68,26 @@ namespace ems_back.Repo.Repository
             return await GetUserByIdAsync(userId);
         }
 
+        public async Task<UserResponseDto> UpdateUserRoleAsync(UserUpdateRoleDto userDto)
+        {
+            var user = await _context.Users.FindAsync(userDto.userId);
+            if (user == null) return null;
+
+            user.Role = userDto.newRole;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // return await GetUserByIdAsync(userDto.userId);
+            // TODO: Ändern,  sobald Funktion tut
+            return new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Role = user.Role
+            };
+        }
+
         public async Task<bool> DeleteUserAsync(Guid id)
         {
             var user = await _context.Users.FindAsync(id);

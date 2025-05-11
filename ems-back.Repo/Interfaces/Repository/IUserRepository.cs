@@ -36,5 +36,6 @@ namespace ems_back.Repo.Interfaces.Repository
 		// Internal use only (for authentication/authorization)
 		Task<User> GetUserEntityByIdAsync(Guid id);
 		Task<User> GetUserEntityByEmailAsync(string email);
+		Task<UserResponseDto> UpdateUserRoleAsync(UserUpdateRoleDto userDto);
     }
 }
