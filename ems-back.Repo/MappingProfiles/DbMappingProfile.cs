@@ -78,6 +78,15 @@ namespace ems_back.Repo.MappingProfiles
             CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
 
+			// Agenda mappings
+
+			CreateMap<AgendaEntryDto, AgendaEntry>()
+				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
+				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId));
+
             // Related mappings
             CreateMap<EventAttendee, EventAttendeeDto>()
 				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
@@ -111,7 +120,7 @@ namespace ems_back.Repo.MappingProfiles
 				;
 
 			// Response mappings
-			CreateMap<Flow, FlowBasicDto>();
+			CreateMap<Flow, FlowDto>();
 
 			CreateMap<Flow, FlowResponseDto>()
 				.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))

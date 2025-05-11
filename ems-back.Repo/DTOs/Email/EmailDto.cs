@@ -10,10 +10,11 @@ namespace ems_back.Repo.DTOs.Email
 {
     public class EmailDto
     {
-        public string Id { get; set; } //  Evtl. in Guid umwandeln
-        public Guid EventId { get; set; }
+        public Guid MailId { get; set; }
+        public string Name { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
+        public bool IsUserCreated { get; set; }
         public List<Guid> Recipients { get; set; }
         public MailRunStatus Status { get; set; }
         public DateTime? Scheduledfor { get; set; }

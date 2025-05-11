@@ -54,11 +54,6 @@ namespace ems_back.Repo.Repository
 
         public async Task<Guid?> CreateEventAsync(EventInfoDto eventDto)
         {
-            if (eventDto == null)
-            {
-                return null;
-            }
-
             var eventObject = new Event();
             _mapper.Map(eventDto, eventObject);
             _context.Events.Add(eventObject);
@@ -138,6 +133,7 @@ namespace ems_back.Repo.Repository
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
                     ProfilePicture = a.User.ProfilePicture,
+                    Role = a.User.Role,
                     RegisteredAt = a.RegisteredAt,
                 })
                 .ToListAsync();
@@ -173,19 +169,13 @@ namespace ems_back.Repo.Repository
             return eventEntity;
         }
 
-        public async Task<AgendaEntryDto> AddAgendaPointToEventAsync(Guid orgId, Guid eventId, AgendaEntryDto agendaEntry)
+        public async Task<Guid> AddAgendaPointToEventAsync(AgendaEntryDto agendaEntry)
         {
-            var agenda = new AgendaEntry
-            {
-                Title = agendaEntry.Title,
-                Description = agendaEntry.Description,
-                Start = agendaEntry.Start,
-                End = agendaEntry.End,
-                EventId = eventId
-            };
-            _context.AgendaEntries.Add(agenda);
+            var entry = _mapper.Map<AgendaEntry>(agendaEntry);
+            _context.AgendaEntries.Add(entry);
             await _context.SaveChangesAsync();
-            return _mapper.Map<AgendaEntryDto>(agenda);
+
+            return entry.Id;
         }
 
         public async Task<AgendaEntryDto> UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntry)

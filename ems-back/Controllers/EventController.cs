@@ -8,6 +8,7 @@ using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Agenda;
 
 namespace ems_back.Controllers
 {
@@ -52,8 +53,8 @@ namespace ems_back.Controllers
         [HttpPost]  
         //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
         public async Task<ActionResult<EventInfoDto>> CreateEvent(
-			[FromBody] EventCreateDto eventDto, 
-			[FromRoute] Guid orgId)
+			[FromRoute] Guid orgId,
+            [FromBody] EventCreateDto eventDto)
         {
             try
             {
@@ -176,6 +177,7 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
+        //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
         public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId,
@@ -190,7 +192,6 @@ namespace ems_back.Controllers
 
             _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
             return Ok(createdAttendee);
-
         }
 
 
@@ -221,9 +222,19 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpPost("{eventId}/agenda")]
-        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(Guid eventId, Guid agendaId)
+        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(
+            [FromRoute] Guid orgId, 
+            [FromRoute] Guid eventId,
+            [FromBody] AgendaEntryCreateDto createDto)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+			var createdAgenda = await _eventService.AddAgendaPointToEventAsync(orgId, eventId, createDto);
+            if (createdAgenda == null)
+            {
+                _logger.LogWarning("Failed to add agenda");
+                return BadRequest("Failed to add agenda");
+            }
+            _logger.LogInformation("Agenda added successfully with id {AgendaId}", createdAgenda.Id);
+            return Ok(createdAgenda);
         }
 
         // Put: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}

@@ -7,7 +7,6 @@ using ems_back.Repo.DTOs.Event;
 
 namespace ems_back.Repo.DTOs.Agenda
 {
-    // Response DTO
     public class AgendaEntryDto
     {
         public Guid Id { get; set; }

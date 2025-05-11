@@ -1,4 +1,6 @@
 ﻿using ems_back.Repo.DTOs.Placeholder;
+using ems_back.Repo.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ems_back.Controllers
@@ -7,16 +9,29 @@ namespace ems_back.Controllers
     [ApiController]
     public class EventFlowController : ControllerBase
     {
-        public EventFlowController()
-        {
+        private readonly IEventFlowService _eventFlowService;
+        private readonly ILogger<EventFlowController> _logger;
 
+
+        public EventFlowController(
+            IEventFlowService eventFlowService,
+            ILogger<EventFlowController> logger)
+        {
+            _eventFlowService = eventFlowService;
+            _logger = logger;
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows
         [HttpGet]
-        public async Task<ActionResult<PlaceholderDTO>> GetFlows(Guid orgId, Guid eventId)
+        //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
+        public async Task<ActionResult<PlaceholderDTO>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
         {
-            throw new NotImplementedException();
+            var flowList = _eventFlowService.GetAllFlows(orgId, eventId);
+            if (flowList == null)
+            {
+                return NotFound();
+            }
+            return Ok(flowList);
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows
