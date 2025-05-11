@@ -25,13 +25,13 @@ namespace ems_back.Repo.Services
             _logger = logger;
         }
 
-        public Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId)
+        public async Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId)
         {
-            var flowList = _eventFlowRepository.GetAllFlows(orgId, eventId);
+            var flowList = await _eventFlowRepository.GetAllFlows(orgId, eventId);
             if (flowList == null)
             {
                 _logger.LogWarning("No flows found for organization with id {OrgId} and event with id {EventId}", orgId, eventId);
-                return Task.FromResult(Enumerable.Empty<FlowOverviewDto>());
+                return null;
             }
             return flowList;
         }

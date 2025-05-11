@@ -26,7 +26,7 @@ namespace ems_back.Controllers
         //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
         public async Task<ActionResult<PlaceholderDTO>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
         {
-            var flowList = _eventFlowService.GetAllFlows(orgId, eventId);
+            var flowList = await _eventFlowService.GetAllFlows(orgId, eventId);
             if (flowList == null)
             {
                 return NotFound();

@@ -49,7 +49,7 @@ namespace ems_back.Repo.Repository
                 .AsNoTracking()
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<EventOverviewDto>>(events);
+            return events;
         }
 
         public async Task<Guid?> CreateEventAsync(EventInfoDto eventDto)
