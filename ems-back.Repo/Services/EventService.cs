@@ -30,8 +30,19 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
-			// Anzahl der Teilnehmer müssen gezählt werden
-			return await _eventRepository.GetAllEventsAsync(orgId);
+			var events = await _eventRepository.GetAllEventsAsync(orgId);
+
+			if (events == null)
+			{
+                _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
+                return Enumerable.Empty<EventOverviewDto>();
+            }
+			else
+			{
+				return events;
+            }
+
+				
 		}
 
 		public async Task<IEnumerable<EventInfoDTO>> GetUpcomingEventsAsync(int days = 30)
@@ -41,9 +52,6 @@ namespace ems_back.Repo.Services
 
 		public async Task<EventDetailsDto> GetEventByIdAsync(Guid orgId, Guid eventid)
 		{
-
-
-
 			var eventEntity = await _eventRepository.GetByIdAsync(orgId, eventid);
 			if (eventEntity == null)
 			{
@@ -68,7 +76,13 @@ namespace ems_back.Repo.Services
 
 		public async Task<List<AgendaEntry>> GetAgendaWithEventAsync(Guid id)
 		{
-			return await _eventRepository.GetAgendaWithEventAsync(id);
+
+            var agenda = await _eventRepository.GetAgendaWithEventAsync(id);
+			if (agenda == null)
+			{
+				_logger.LogWarning("No agenda found for event with id {EventId}", id);
+			}
+            return await _eventRepository.GetAgendaWithEventAsync(id);
 		}
 
         public async Task<List<FileDto>> GetFilesFromEvent(Guid eventId)
