@@ -397,6 +397,7 @@ namespace ems_back.Services
         //    }
         //}
 
+        //todo: do not print Org Id instead print Org name
         public async Task HandleAutomaticOrganizationMembership(string email)
         {
 	        try
@@ -426,7 +427,7 @@ namespace ems_back.Services
 		        // Convert user.Id to Guid if needed
 		        var userId = user.Id is Guid ? (Guid)user.Id : Guid.Parse(user.Id.ToString());
 
-		        // Check if user is already a member
+		        // Check if user is already a member for verification
 		        if (await _orgMembershipRepo.ExistsAsync(userId, organizationDomain.OrganizationId))
 		        {
 			        _logger.LogInformation("User {UserId} already member of organization {OrgId}",
@@ -444,8 +445,8 @@ namespace ems_back.Services
 		        };
 
 		        await _orgMembershipRepo.AddAsync(newMembership);
-		        _logger.LogInformation("Added user {UserId} to organization {OrgId} via domain {Domain}",
-			        userId, organizationDomain.OrganizationId, domain);
+		        _logger.LogInformation("Added user {UserId}  via domain {Domain} to organization {OrgId}",
+			        userId, domain, organizationDomain.OrganizationId);
 	        }
 	        catch (Exception ex)
 	        {
