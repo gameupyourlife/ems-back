@@ -272,7 +272,7 @@ namespace ems_back.Services
             }
         }
 
-        public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
+        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
         {
             try
             {
@@ -326,6 +326,21 @@ namespace ems_back.Services
         public async Task<IdentityResult> AddToRoleAsync(User user, string role)
         {
             return await _userManager.AddToRoleAsync(user, role);
+        }
+
+        public async Task<bool> UpdateUserRoleAsync(Guid userId, UserUpdateRoleDto userDto)
+        {
+            if (userId != userDto.userId)
+            {
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(UserRole), userDto.newRole))
+            {
+                return false;
+            }
+               
+            return await _userRepository.UpdateUserRoleAsync(userDto) != null;
         }
 
         public async Task<SignInResult> CheckPasswordSignInAsync(User user, string password)

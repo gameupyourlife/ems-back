@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ems_back.Repo.Data;
@@ -11,9 +12,11 @@ using ems_back.Repo.Data;
 namespace ems_back.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250511143909_UpdatedTriggerAndActionsAttributesSummaryAndName")]
+    partial class UpdatedTriggerAndActionsAttributesSummaryAndName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +125,9 @@ namespace ems_back.Repo.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.PrimitiveCollection<Guid[]>("Recipients")
+                    b.PrimitiveCollection<string[]>("Recipients")
                         .IsRequired()
-                        .HasColumnType("uuid[]");
+                        .HasColumnType("text[]");
 
                     b.Property<DateTime?>("ScheduledFor")
                         .HasColumnType("timestamp with time zone");
@@ -639,6 +642,11 @@ namespace ems_back.Repo.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -663,31 +671,6 @@ namespace ems_back.Repo.Migrations
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("Organizations");
-                });
-
-            modelBuilder.Entity("ems_back.Repo.Models.OrganizationDomain", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Domain")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Domain")
-                        .IsUnique();
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("OrganizationDomain");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.OrganizationUser", b =>
@@ -1135,17 +1118,6 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ems_back.Repo.Models.OrganizationDomain", b =>
-                {
-                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
-                        .WithMany("AllowedDomains")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
             modelBuilder.Entity("ems_back.Repo.Models.OrganizationUser", b =>
                 {
                     b.HasOne("ems_back.Repo.Models.Organization", "Organization")
@@ -1220,8 +1192,6 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
                 {
-                    b.Navigation("AllowedDomains");
-
                     b.Navigation("Events");
 
                     b.Navigation("FlowTemplates");

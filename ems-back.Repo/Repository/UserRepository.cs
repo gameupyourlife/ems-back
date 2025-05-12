@@ -39,6 +39,7 @@ namespace ems_back.Repo.Repository
             user.UserName = userDto.Email;
             user.CreatedAt = DateTime.UtcNow;
             user.EmailConfirmed = false;
+            user.Role = UserRole.User; // Default role
 
             var result = await _userManager.CreateAsync(user, userDto.Password);
             if (!result.Succeeded)
@@ -75,7 +76,27 @@ namespace ems_back.Repo.Repository
 			return _mapper.Map<UserResponseDto>(user);
         }
 
-		public async Task<bool> DeleteUserAsync(Guid id)
+        public async Task<UserResponseDto> UpdateUserRoleAsync(UserUpdateRoleDto userDto)
+        {
+            var user = await _context.Users.FindAsync(userDto.userId);
+            if (user == null) return null;
+
+            user.Role = userDto.newRole;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // return await GetUserByIdAsync(userDto.userId);
+            // TODO: Ändern,  sobald Funktion tut
+            return new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Role = user.Role
+            };
+        }
+
+        public async Task<bool> DeleteUserAsync(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return false;
@@ -222,7 +243,7 @@ namespace ems_back.Repo.Repository
             throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
         }
 
-        public async Task<IEnumerable<EventInfoDTO>> GetUserEventsAsync(Guid userId)
+        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
         {
             //var events = await _context.EventAttendees
             //    .Where(ea => ea.UserId == userId)

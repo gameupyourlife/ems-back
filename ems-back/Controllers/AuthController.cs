@@ -108,6 +108,8 @@ namespace ems_back.Controllers
 				{
 					Message = "User registered successfully!",
 					Token = result.Token
+
+				
 				};
 
 				return Ok(response);

@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Agenda
 {
-    // For creating a new agenda entry
     public class AgendaEntryCreateDto
     {
-        [Required]
         [MaxLength(255)]
         public string Title { get; set; }
 
@@ -21,8 +19,5 @@ namespace ems_back.Repo.DTOs.Agenda
 
         [Required]
         public DateTime End { get; set; }
-
-        [Required]
-        public Guid EventId { get; set; }
     }
 }

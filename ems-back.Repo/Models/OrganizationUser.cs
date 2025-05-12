@@ -17,8 +17,7 @@ namespace ems_back.Repo.Models
 		public Guid UserId { get; set; }
 
 		[Required]
-		public UserRole UserRole { get; set; }
-
+		public UserRole UserRole { get; set; } = UserRole.User;
 		[Required]
 		public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 

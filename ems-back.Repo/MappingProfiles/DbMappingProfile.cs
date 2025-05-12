@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
-using ems_back.Repo.DTOs.Agency;
 using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.File;
@@ -28,6 +27,7 @@ namespace ems_back.Repo.MappingProfiles
 		public DbMappingProfile()
 		{
 			// User mappings
+
 			CreateMap<User, UserDto>()
 				.ForMember(dest => dest.FullName,
 					opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
@@ -36,12 +36,15 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UserName,
 					opt => opt.MapFrom(src => src.Email))
 				.ForMember(dest => dest.EmailConfirmed,
-					opt => opt.MapFrom(src => false));
+					opt => opt.MapFrom(src => false))
+				.ForMember(dest => dest.Role,
+					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
 				.IncludeBase<User, UserDto>();
 
 			// Organization mappings
+
 			CreateMap<OrganizationCreateDto, Organization>()
 				.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.CreatedBy));
 
@@ -50,13 +53,40 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<Organization, OrganizationOverviewDto>();
 
 			// Event mappings
+
 			CreateMap<EventCreateDto, Event>()
 				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore());
 
-			CreateMap<Event, EventOverviewDto>()
+			CreateMap<EventInfoDto, Event>()
+				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+				.ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
+				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
+				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
+				.ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
+				.ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
+				.ForMember(dest => dest.CreatedBy, opt => opt.MapFrom(src => src.CreatedBy))
+				.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.UpdatedBy))
+				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.AttendeeCount))
+				.ForMember(dest => dest.Capacity, opt => opt.MapFrom(src => src.Capacity))
+				.ForMember(dest => dest.OrganizationId, opt => opt.MapFrom(src => src.OrganizationId))
+				.ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
+
+            CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
+
+			// Agenda mappings
+
+			CreateMap<AgendaEntryDto, AgendaEntry>()
+				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
+				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId));
 
             // Related mappings
             CreateMap<EventAttendee, EventAttendeeDto>()
@@ -90,10 +120,8 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
 				;
 
-
-
 			// Response mappings
-			CreateMap<Flow, FlowBasicDto>();
+			CreateMap<Flow, FlowDto>();
 
 			CreateMap<Flow, FlowResponseDto>()
 				.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
@@ -129,7 +157,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
 
 			CreateMap<EventFile, FileDto>();
-			CreateMap<EventFile, FileDetailedDto>();
 
 			// Add these to your existing DbMappingProfile
 			CreateMap<AgendaEntryCreateDto, AgendaEntry>();

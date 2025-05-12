@@ -18,6 +18,11 @@ namespace ems_back.Repo.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
+        public string Name { get; set; }
+
+        public string? Summary { get; set; }
+
+        [Required]
 		[MaxLength(100)]
 		public ActionType Type { get; set; }
 

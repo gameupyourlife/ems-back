@@ -10,6 +10,6 @@ namespace ems_back.Repo.DTOs.Action
     // Detailed response DTO (with Flow information)
     public class ActionDetailedDto : ActionDto
     {
-        public FlowBasicDto Flow { get; set; }
+        public FlowDto Flow { get; set; }
     }
 }

@@ -16,6 +16,11 @@ namespace ems_back.Repo.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
+        public string Name { get; set; }
+
+        public string? Summary { get; set; }
+
+        [Required]
         public TriggerType Type { get; set; }
 
         [Required]
