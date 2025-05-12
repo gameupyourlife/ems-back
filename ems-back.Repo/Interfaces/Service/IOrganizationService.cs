@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 namespace ems_back.Repo.Interfaces.Service
 {
     public interface IOrganizationService
+
     {
+        Task HandleAutomaticOrganizationMembership(string email);
+
+
+
     }
 }

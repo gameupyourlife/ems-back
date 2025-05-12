@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ems_back.Repo.Data;
@@ -11,9 +12,11 @@ using ems_back.Repo.Data;
 namespace ems_back.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250509231656_CreateOrganizationDomainTableSingular")]
+    partial class CreateOrganizationDomainTableSingular
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,12 +31,6 @@ namespace ems_back.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<int>("AttendeeCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -106,49 +103,30 @@ namespace ems_back.Repo.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsUserCreated")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.PrimitiveCollection<Guid[]>("Recipients")
-                        .IsRequired()
-                        .HasColumnType("uuid[]");
-
-                    b.Property<DateTime?>("ScheduledFor")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("MailId");
 
-                    b.HasIndex("CreatedBy");
-
                     b.HasIndex("EventId");
-
-                    b.HasIndex("UpdatedBy");
 
                     b.ToTable("Mail");
                 });
@@ -332,13 +310,6 @@ namespace ems_back.Repo.Migrations
 
                     b.Property<Guid?>("FlowTemplateId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("text");
 
                     b.Property<int>("Type")
                         .HasMaxLength(100)
@@ -740,13 +711,6 @@ namespace ems_back.Repo.Migrations
                     b.Property<Guid?>("FlowTemplateId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("text");
-
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
@@ -885,27 +849,13 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("Mail", b =>
                 {
-                    b.HasOne("ems_back.Repo.Models.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Event", "Event")
                         .WithMany("Mails")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ems_back.Repo.Models.User", "Updater")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy");
-
-                    b.Navigation("Creator");
-
                     b.Navigation("Event");
-
-                    b.Navigation("Updater");
                 });
 
             modelBuilder.Entity("MailRun", b =>

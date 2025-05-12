@@ -11,17 +11,15 @@ namespace ems_back.Repo.DTOs.User
     public class UserUpdateDto
     {
         [StringLength(100)]
-        public string? FirstName { get; set; }
+        public string FirstName { get; set; }
 
         [StringLength(100)]
-        public string? LastName { get; set; }
+        public string LastName { get; set; }
 
-        [Url]
-        [StringLength(255)]
-        public string? ProfilePicture { get; set; }
+       public string ProfilePicture { get; set; }
 
-        [StringLength(100, MinimumLength = 8)]
-        [DataType(DataType.Password)]
-        public string? NewPassword { get; set; }
+        //[StringLength(100, MinimumLength = 8)]
+        //[DataType(DataType.Password)]
+        //public string? NewPassword { get; set; }
     }
 }

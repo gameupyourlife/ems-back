@@ -24,21 +24,96 @@ namespace ems_back.Repo.Repository
 
 		public async Task<OrganizationResponseDto> CreateOrganizationAsync(OrganizationCreateDto organizationDto)
 		{
-			var organization = _mapper.Map<Organization>(organizationDto);
-			organization.CreatedAt = DateTime.UtcNow;
-			organization.UpdatedAt = DateTime.UtcNow;
-			organization.UpdatedBy = organizationDto.CreatedBy;
+			using var transaction = await _context.Database.BeginTransactionAsync();
 
-			// Ensure ProfilePicture is nullable (only set if provided)
-			if (string.IsNullOrWhiteSpace(organizationDto.ProfilePicture))
+			try
 			{
-				organization.ProfilePicture = null; // Explicitly set to null
+				// Create the organization
+				var organization = _mapper.Map<Organization>(organizationDto);
+				organization.CreatedAt = DateTime.UtcNow;
+				organization.UpdatedAt = DateTime.UtcNow;
+				organization.UpdatedBy = organizationDto.CreatedBy;
+
+				if (string.IsNullOrWhiteSpace(organizationDto.ProfilePicture))
+				{
+					organization.ProfilePicture = null;
+				}
+
+				await _context.Organizations.AddAsync(organization);
+				await _context.SaveChangesAsync();
+
+				// Create the domain entry
+				var domain = new OrganizationDomain
+				{
+					Domain = organizationDto.Domain.ToLower().Trim(),
+					OrganizationId = organization.Id,
+					Organization = organization
+				};
+
+				await _context.OrganizationDomain.AddAsync(domain);
+				await _context.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+
+				return await GetOrganizationByIdAsync(organization.Id);
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+				throw;
+			}
+		}
+
+		// Add this new method to handle domain creation
+		public async Task<bool> AddDomainToOrganizationAsync(Guid organizationId, string domain)
+		{
+			var existingDomain = await _context.OrganizationDomain
+				.FirstOrDefaultAsync(d => d.Domain == domain.ToLower());
+
+			if (existingDomain != null)
+			{
+				return false; // Domain already exists
 			}
 
-			await _context.Organizations.AddAsync(organization);
-			await _context.SaveChangesAsync();
+			var newDomain = new OrganizationDomain
+			{
+				Domain = domain.ToLower().Trim(),
+				OrganizationId = organizationId
+			};
 
-			return await GetOrganizationByIdAsync(organization.Id);
+			await _context.OrganizationDomain.AddAsync(newDomain);
+			await _context.SaveChangesAsync();
+			return true;
+		}
+
+		public async Task<bool> IsDomainAvailableAsync(string domain, Guid? organizationId = null)
+		{
+			var query = _context.OrganizationDomain
+				.Where(d => d.Domain == domain.ToLower());
+
+			if (organizationId.HasValue)
+			{
+				query = query.Where(d => d.OrganizationId != organizationId.Value);
+			}
+
+			return !await query.AnyAsync();
+		}
+
+		public async Task<bool> DomainExistsAsync(string domain)
+		{
+			return await _context.OrganizationDomain
+				.AnyAsync(d => d.Domain == domain.ToLower());
+		}
+
+
+
+		// Add this method to get domains for an organization
+		public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId)
+		{
+			return await _context.OrganizationDomain
+				.Where(d => d.OrganizationId == organizationId)
+				.Select(d => d.Domain)
+				.ToListAsync();
 		}
 
 

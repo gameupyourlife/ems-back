@@ -34,13 +34,13 @@ namespace ems_back.Repo.Models
 		[MaxLength(255)]
 		public string? ProfilePicture { get; set; }
 
-		[Required]
-		[MaxLength(255)]
-		public string Domain { get; set; }
+		public ICollection<OrganizationDomain> AllowedDomains { get; set; }
 
-        // for navigation:
 
-        [ForeignKey("CreatedBy")]
+
+		// for navigation:
+
+		[ForeignKey("CreatedBy")]
 		public virtual User Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]

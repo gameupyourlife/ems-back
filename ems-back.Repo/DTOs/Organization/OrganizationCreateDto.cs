@@ -19,6 +19,9 @@ namespace ems_back.Repo.DTOs.Organization
 
         public string? Description { get; set; }
 
+        [Required]
+        public string Domain { get; set; }
+
         [Url]
         [StringLength(255)]
         public string? Website { get; set; }
