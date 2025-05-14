@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Trigger
 {
-    public class TriggerDto
+    public class TriggerOverviewDto
     {
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public TriggerType Type { get; set; }
-        public string Details { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Guid FlowId { get; set; }
-
-        public Guid OrganizationId { get; set; }
+        public string? Summary { get; set; }
     }
 }

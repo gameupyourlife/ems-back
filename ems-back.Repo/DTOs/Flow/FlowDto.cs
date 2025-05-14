@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Flow
 {
-    // Basic response (without navigation properties)
-    public class FlowBasicDto
+    public class FlowDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

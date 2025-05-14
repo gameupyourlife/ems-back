@@ -1,19 +1,23 @@
 ﻿using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
+using Minio;
+
+using ems_back;
 using ems_back.Repo;
 using ems_back.Repo.Data;
 using ems_back.Repo.Models;
 using ems_back.Repo.Repository;
-using ems_back.Repo.MappingProfiles;
-using ems_back.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Minio;
 using ems_back.Repo.Services;
-using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.MappingProfiles;
 using ems_back.Repo.Interfaces;
+using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Services;
@@ -22,7 +26,7 @@ namespace ems_back
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
@@ -134,4 +138,5 @@ app.MapControllers();
 app.Run();
 		}
 	}
+
 }

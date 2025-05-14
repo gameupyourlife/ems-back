@@ -8,6 +8,7 @@ using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs;
+using ems_back.Repo.DTOs.Agenda;
 
 namespace ems_back.Controllers
 {
@@ -49,11 +50,11 @@ namespace ems_back.Controllers
 		}
 
         // POST: api/orgs/{orgId}/events
-        [HttpPost]
-        [Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+        [HttpPost]  
+        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
         public async Task<ActionResult<EventInfoDto>> CreateEvent(
-			[FromBody] EventCreateDto eventDto, 
-			[FromRoute] Guid orgId)
+			[FromRoute] Guid orgId,
+            [FromBody] EventCreateDto eventDto)
         {
             try
             {
@@ -176,18 +177,21 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
-        public async Task<ActionResult<EventInfoDto>> AddAttendeeToEvent(
+        //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
+        public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
-			[FromRoute] Guid eventId)
+			[FromRoute] Guid eventId,
+            [FromBody] EventAttendeeDto attendee)
 		{
-			var attendeeList = await _eventService.GetAllEventAttendeesAsync(orgId, eventId);
-            if (attendeeList == null || !attendeeList.Any())
+			var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee);
+            if (createdAttendee == null)
             {
-                _logger.LogWarning("No attendees found for event with id {EventId}", eventId);
-                return NotFound("No attendees found");
+                _logger.LogWarning("Failed to add Attendee");
+                return BadRequest("Failed to add attendee");
             }
-            _logger.LogInformation("Attendees found for event with id {EventId}", eventId);
-            return Ok(attendeeList);
+
+            _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
+            return Ok(createdAttendee);
         }
 
 
@@ -218,9 +222,19 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpPost("{eventId}/agenda")]
-        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(Guid eventId, Guid agendaId)
+        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(
+            [FromRoute] Guid orgId, 
+            [FromRoute] Guid eventId,
+            [FromBody] AgendaEntryCreateDto createDto)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+			var createdAgenda = await _eventService.AddAgendaPointToEventAsync(orgId, eventId, createDto);
+            if (createdAgenda == null)
+            {
+                _logger.LogWarning("Failed to add agenda");
+                return BadRequest("Failed to add agenda");
+            }
+            _logger.LogInformation("Agenda added successfully with id {AgendaId}", createdAgenda.Id);
+            return Ok(createdAgenda);
         }
 
         // Put: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
@@ -239,12 +253,17 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/files
         [HttpGet("{eventId}/files")]
-        public async Task<ActionResult<List<FileDto>>> GetFilesfromEvent(
+        public async Task<ActionResult<IEnumerable<FileDto>>> GetFilesfromEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
 		{
 			var fileList = await _eventService.GetFilesFromEventAsync(orgId, eventId);
-            return fileList == null ? NotFound() : Ok(fileList);
+            if (fileList == null || !fileList.Any())
+            {
+                _logger.LogWarning("No files found for event with id {EventId}", eventId);
+                return NotFound("No files found");
+            }
+            return Ok(fileList);
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/files

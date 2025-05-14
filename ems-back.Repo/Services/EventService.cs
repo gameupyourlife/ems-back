@@ -83,13 +83,6 @@ namespace ems_back.Repo.Services
             }
             
             var eventId = await _eventRepository.CreateEventAsync(eventInfo);
-
-            if (eventId == null)
-            {
-                _logger.LogWarning("Failed to create event with title {Title}", eventInfo.Title);
-                return null;
-            }
-
             eventInfo.Id = eventId.Value;
             return eventInfo;
         }
@@ -157,9 +150,27 @@ namespace ems_back.Repo.Services
         public async Task<AgendaEntryDto> AddAgendaPointToEventAsync(
             Guid orgId, 
             Guid eventId, 
-            AgendaEntryDto agendaEntryDto)
+            AgendaEntryCreateDto agendaEntryDto)
         {
-            throw new NotImplementedException();
+            var agendaEntry = new AgendaEntryDto
+            {
+                Title = agendaEntryDto.Title,
+                Description = agendaEntryDto.Description,
+                Start = agendaEntryDto.Start,
+                End = agendaEntryDto.End,
+                EventId = eventId,
+            };
+
+            var agendaId = await _eventRepository.AddAgendaPointToEventAsync(agendaEntry);
+            if (agendaId == null)
+            {
+                _logger.LogWarning("Failed to add agenda point to event with id {EventId}", eventId);
+                return null;
+            }
+
+            agendaEntry.Id = agendaId;
+            _logger.LogInformation("Agenda point added to event with id {EventId}", eventId);
+            return agendaEntry;
         }
 
         public async Task<AgendaEntryDto> UpdateAgendaPointAsync(
@@ -178,7 +189,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<FileDto>> GetFilesFromEventAsync(Guid orgId, Guid eventId)
         {
-            throw new NotImplementedException();
+            return await _eventRepository.GetFilesFromEvent(orgId, eventId);
         }
 
         public async Task<FileDto> AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file)
