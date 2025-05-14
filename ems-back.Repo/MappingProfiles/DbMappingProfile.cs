@@ -74,6 +74,7 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.OrganizationId, opt => opt.MapFrom(src => src.OrganizationId))
 				.ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
 
+            CreateMap<EventUpdateDto, Event>();
 
             CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));

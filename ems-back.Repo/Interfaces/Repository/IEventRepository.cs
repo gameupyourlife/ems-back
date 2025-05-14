@@ -10,7 +10,7 @@ public interface IEventRepository
 	Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
 	Task<Guid?> CreateEventAsync(EventInfoDto eventDto);
 	Task<EventInfoDto> GetEventByIdAsync(Guid orgId, Guid eventId);
-	Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto);
+	Task<EventInfoDto> UpdateEventAsync(EventUpdateDto infoDto);
 	Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);
 	Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
     Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendee);

@@ -97,14 +97,20 @@ namespace ems_back.Repo.Services
             return eventEntity;
         }
 
-        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
+        public async Task<EventInfoDto> UpdateEventAsync(
+            Guid orgId, Guid eventId, EventUpdateDto eventDto)
         {
-            throw new NotImplementedException("UpdateEventAsync is not implemented yet");
+            if (eventId != eventDto.Id || orgId != eventDto.OrganizationId)
+            {
+                return null;
+            }
+
+            return await _eventRepository.UpdateEventAsync(eventDto);
         }
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
         {
-            throw new NotImplementedException("DeleteEventAsync is not implemented yet");
+            return await _eventRepository.DeleteEventAsync(orgId, eventId);
         }
 
         public async Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId)

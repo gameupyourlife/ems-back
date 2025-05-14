@@ -955,7 +955,7 @@ namespace ems_back.Repo.Migrations
                     b.HasOne("ems_back.Repo.Models.Flow", "Flow")
                         .WithMany("Actions")
                         .HasForeignKey("FlowId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ems_back.Repo.Models.FlowTemplate", "FlowTemplate")
                         .WithMany("Actions")
@@ -1139,7 +1139,7 @@ namespace ems_back.Repo.Migrations
                     b.HasOne("ems_back.Repo.Models.Flow", "Flow")
                         .WithMany("Triggers")
                         .HasForeignKey("FlowId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ems_back.Repo.Models.FlowTemplate", "FlowTemplate")
                         .WithMany("Triggers")

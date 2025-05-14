@@ -12,7 +12,7 @@ public interface IEventService
     Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
     Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto);
     Task<EventInfoDto> GetEventAsync(Guid orgId, Guid eventId);
-    Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto);
+    Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto);
     Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);
     Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
     Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendeeDto);

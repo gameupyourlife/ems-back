@@ -98,15 +98,13 @@ namespace ems_back.Controllers
 			}
 		}
 
-        // PUT: api/orgs/{orgId}/events/{eventId}
         [HttpPut("{eventId}")]
+        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
         public async Task<ActionResult<EventInfoDto>> UpdateEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId, 
-            [FromBody] EventInfoDto eventDto)
+            [FromBody] EventUpdateDto eventDto)
         {
-            // To Do: Check
-
             try
             {
                 if (eventId != eventDto.Id)
@@ -114,14 +112,15 @@ namespace ems_back.Controllers
                     return BadRequest("ID mismatch");
                 }
 
-                var updatedEvent = await _eventService.UpdateEventAsync(orgId, eventId, eventDto);
-                if (updatedEvent == null)
+                var success = await _eventService.UpdateEventAsync(orgId, eventId, eventDto);
+
+                if (success == null)
                 {
                     _logger.LogWarning("Failed to update event with id {EventId}", eventId);
-                    return NotFound("Event not found");
+                    return BadRequest("Failed to update event");
                 }
 
-                return Ok(updatedEvent);
+                return Ok(success);
             }
             catch (Exception ex)
             {
@@ -132,17 +131,20 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}
         [HttpDelete("{eventId}")]
-        public async Task<IActionResult> DeleteEvent(
+        public async Task<ActionResult<bool>> DeleteEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
         {
-
-            // To Do: Check
-
             try
             {
                 var success = await _eventService.DeleteEventAsync(orgId, eventId);
-                return success ? NoContent() : NotFound();
+
+                if (!success) {
+                    _logger.LogError("Failed to delete event with id {EventId}", eventId);
+                    return NotFound("Event not found");
+                }
+
+                return Ok(success);
             }
             catch (Exception ex)
             {

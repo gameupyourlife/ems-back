@@ -88,18 +88,29 @@ namespace ems_back.Repo.Repository
 
             return eventEntity;
 		}
-
-        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
+    
+        public async Task<EventInfoDto> UpdateEventAsync(EventUpdateDto eventDto)
         {
 
-            // To Do: Manuelle Überprüfung
-
             var existingEvent = await _context.Events.FindAsync(eventDto.Id);
-            if (existingEvent == null)
-                return null;
 
+            if (existingEvent == null)
+            {
+                return null;
+            }
+                
             _mapper.Map(eventDto, existingEvent);
-            existingEvent.UpdatedAt = DateTime.UtcNow;
+            existingEvent.UpdatedAt = new DateTime(
+                DateTime.UtcNow.Year,
+                DateTime.UtcNow.Month,
+                DateTime.UtcNow.Day,
+                DateTime.UtcNow.Hour,
+                DateTime.UtcNow.Minute,
+                DateTime.UtcNow.Second,
+                DateTimeKind.Utc
+            );
+
+            existingEvent.UpdatedBy = eventDto.UpdatedBy;
 
             _context.Events.Update(existingEvent);
             await _context.SaveChangesAsync();
@@ -109,8 +120,6 @@ namespace ems_back.Repo.Repository
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
         {
-
-            // To Do: Manuelle Überprüfung
 
             var eventEntity = await _context.Events.FindAsync(eventId);
             if (eventEntity == null)
