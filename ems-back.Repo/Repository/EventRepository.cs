@@ -81,8 +81,11 @@ namespace ems_back.Repo.Repository
                     UpdatedAt = e.UpdatedAt,
                     CreatedBy = e.CreatedBy,
                     CreatorName = e.Creator.FullName,
-                    UpdatedBy = e.UpdatedBy
-                    
+                    UpdatedBy = e.UpdatedBy,
+                    AttendeeCount = e.AttendeeCount,
+                    Capacity = e.Capacity,
+                    Image = e.Image,
+
                 })
 				.AsNoTracking()
                 .FirstOrDefaultAsync();
