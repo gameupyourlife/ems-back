@@ -160,7 +160,7 @@ namespace ems_back.Repo.Repository
 			return dto;
 		}
 
-		//only Admin should have this right
+		//only Admin should have this right to do this
 		public async Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync()
 		{
 			var organizations = await _context.Organizations
