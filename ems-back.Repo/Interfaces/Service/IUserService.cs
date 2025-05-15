@@ -28,8 +28,8 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<UserResponseDto> GetUserByEmailAsync(string email);
 
 	
-		Task<UserRole> GetUserRoleAsync(Guid userId);
-		Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role);
+
+
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
 
 		Task<User> FindByEmailAsync(string email);

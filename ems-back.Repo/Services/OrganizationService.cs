@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 public class OrganizationService : IOrganizationService
 {
@@ -16,12 +18,13 @@ public class OrganizationService : IOrganizationService
 	private readonly IOrganizationDomainRepository _orgDomainRepository;
 	private readonly UserManager<User> _userManager;
 	private readonly ILogger<OrganizationService> _logger;
+	private readonly IMapper _mapper;
 
 	public OrganizationService(
 		IOrganizationRepository organizationRepository,
 		IOrganizationUserRepository orgUserRepository,
 		IOrganizationDomainRepository orgDomainRepository,
-		UserManager<User> userManager,
+		UserManager<User> userManager, IMapper mapper,
 		ILogger<OrganizationService> logger)
 	{
 		_organizationRepository = organizationRepository;
@@ -29,6 +32,7 @@ public class OrganizationService : IOrganizationService
 		_orgDomainRepository = orgDomainRepository;
 		_userManager = userManager;
 		_logger = logger;
+		_mapper = mapper;
 	}
 
 	// Existing methods remain unchanged
@@ -57,14 +61,39 @@ public class OrganizationService : IOrganizationService
 		return await _organizationRepository.CreateOrganizationAsync(organizationDto);
 	}
 
-	public async Task<bool> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto)
+	public async Task<OrganizationResponseDto> UpdateOrganizationAsync(
+		Guid id,
+		OrganizationUpdateDto organizationDto,
+		Guid updatedByUserId)
 	{
-		return await _organizationRepository.UpdateOrganizationAsync(id, organizationDto) != null;
-	}
+		var organization = await _organizationRepository.GetByIdAsync(id, includes: q => q
+			.Include(o => o.Creator)
+			.Include(o => o.Updater));
 
-	public async Task<bool> DeleteOrganizationAsync(Guid id)
+		if (organization == null)
+		{
+			_logger.LogWarning("Organization {OrganizationId} not found", id);
+			return null;
+		}
+
+		_mapper.Map(organizationDto, organization);
+		organization.UpdatedAt = DateTime.UtcNow;
+		organization.UpdatedBy = updatedByUserId;
+
+		try
+		{
+			await _organizationRepository.UpdateAsync(organization);
+			return _mapper.Map<OrganizationResponseDto>(organization);
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Error updating organization {OrganizationId}", id);
+			throw new ApplicationException("Failed to update organization", ex);
+		}
+	}
+	public async Task<bool> DeleteOrganizationAsync(Guid id, Guid updatedByUserId)
 	{
-		return await _organizationRepository.DeleteOrganizationAsync(id);
+		return await _organizationRepository.DeleteOrganizationAsync(id, updatedByUserId);
 	}
 
 

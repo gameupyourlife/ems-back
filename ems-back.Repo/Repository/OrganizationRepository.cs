@@ -120,20 +120,30 @@ namespace ems_back.Repo.Repository
 
 
 		//only admin or Owner
-		public async Task<OrganizationResponseDto> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto)
+		public async Task<Organization> GetByIdAsync(
+			Guid id,
+			Func<IQueryable<Organization>, IQueryable<Organization>> includes = null)
 		{
-			var organization = await _context.Organizations.FindAsync(id);
-			if (organization == null) return null;
+			var query = _context.Organizations.AsQueryable();
 
-			_mapper.Map(organizationDto, organization);
-			organization.UpdatedAt = DateTime.UtcNow;
+			if (includes != null)
+			{
+				query = includes(query);
+			}
 
-			await _context.SaveChangesAsync();
-			return await GetOrganizationByIdAsync(id);
+			return await query.FirstOrDefaultAsync(e => e.Id == id);
 		}
 
+		public async Task UpdateAsync(Organization entity)
+		{
+			_context.Entry(entity).State = EntityState.Modified;
+			await _context.SaveChangesAsync();
+		}
+
+
+
 		//only admin or Owner
-		public async Task<bool> DeleteOrganizationAsync(Guid id)
+		public async Task<bool> DeleteOrganizationAsync(Guid id, Guid updatedByUserId)
 		{
 			var organization = await _context.Organizations.FindAsync(id);
 			if (organization == null) return false;
@@ -197,9 +207,5 @@ namespace ems_back.Repo.Repository
 			return await _context.Organizations.AnyAsync(o => o.Id == id);
 		}
 
-		public async Task<Organization> GetOrganizationEntityAsync(Guid id)
-		{
-			return await _context.Organizations.FindAsync(id);
-		}
 	}
 }

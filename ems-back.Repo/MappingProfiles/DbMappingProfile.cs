@@ -47,8 +47,16 @@ namespace ems_back.Repo.MappingProfiles
 
 
 			// Organization mappings
-			CreateMap<Organization, OrganizationDto>();
+			CreateMap<Organization, OrganizationDto>()
+				.ForMember(dest => dest.NumOfMembers,
+					opt => opt.MapFrom(src => src.OrganizationUsers.Count))
+				.ForMember(dest => dest.NumOfEvents,
+					opt => opt.MapFrom(src => src.Events.Count));
 
+			CreateMap<OrganizationUpdateDto, Organization>()
+				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+				.ForMember(dest => dest.UpdatedBy, opt => opt.Ignore()) // Set this separately
+				.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
 			CreateMap<OrganizationCreateDto, Organization>()
 				.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.CreatedBy));

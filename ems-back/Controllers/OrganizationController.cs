@@ -3,6 +3,11 @@ using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using ems_back.Repo.Interfaces.Service;
+using Microsoft.Extensions.Logging;
+using ems_back.Services;
 
 namespace ems_back.Controllers
 {
@@ -11,10 +16,14 @@ namespace ems_back.Controllers
 	public class OrganizationsController : ControllerBase
 	{
 		private readonly IOrganizationRepository _organizationRepository;
+		private readonly IOrganizationService _organizationService;
+		private readonly ILogger<OrganizationService> _logger;
 
-		public OrganizationsController(IOrganizationRepository organizationRepository)
+		public OrganizationsController(IOrganizationRepository organizationRepository, IOrganizationService organizationService, ILogger<OrganizationService> logger)
 		{
 			_organizationRepository = organizationRepository;
+			_organizationService = organizationService;
+			_logger = logger;
 		}
 
 		// GET: api/orgs
@@ -79,30 +88,73 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// PUT: api/orgs/{orgId}
+		// PUT: api/orgs/{orgId} calling Service not repo. SRprinzip begin
+		
 		[HttpPut("{orgId}")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> UpdateOrganization(
 			Guid orgId,
 			[FromBody] OrganizationUpdateDto organizationDto)
 		{
 			try
 			{
-				var result = await _organizationRepository.UpdateOrganizationAsync(orgId, organizationDto);
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
+
+				// Get current user ID from auth context
+				var updatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+				if (string.IsNullOrEmpty(updatedByUserId))
+				{
+					return Unauthorized("User not authenticated");
+				}
+
+				var result = await _organizationService.UpdateOrganizationAsync(
+					orgId,
+					organizationDto,
+					Guid.Parse(updatedByUserId));
+
 				return result == null ? NotFound() : NoContent();
+			}
+			catch (ArgumentException ex)
+			{
+				_logger.LogWarning(ex, "Invalid argument in organization update");
+				return BadRequest(ex.Message);
+			}
+			catch (DbUpdateException ex)
+			{
+				_logger.LogError(ex, "Database error while updating organization");
+				return StatusCode(500, "Failed to update organization due to database error");
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
+				_logger.LogError(ex, "Unexpected error updating organization");
+				return StatusCode(500, "An unexpected error occurred");
 			}
 		}
 
 		// DELETE: api/orgs/{orgId}
-		[HttpDelete("{orgId}")]
+			[HttpDelete("{orgId}")]
 		public async Task<IActionResult> DeleteOrganization(Guid orgId)
 		{
 			try
 			{
-				var success = await _organizationRepository.DeleteOrganizationAsync(orgId);
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}// Get current user ID from auth context
+				var updatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+				if (string.IsNullOrEmpty(updatedByUserId))
+				{
+					return Unauthorized("User not authenticated");
+				}
+
+				var success = await _organizationRepository.DeleteOrganizationAsync(orgId, Guid.Parse(updatedByUserId));
 				if (!success)
 					return NotFound(new { message = "Organization not found" });
 

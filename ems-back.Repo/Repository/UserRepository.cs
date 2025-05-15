@@ -235,26 +235,16 @@ namespace ems_back.Repo.Repository
 
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
-
-        public async Task<IEnumerable<Organization>> GetUserOrganizationEntitiesAsync(Guid userId)
+        public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
         {
-            return await _context.OrganizationUsers
-                .Where(ou => ou.UserId == userId)
-                .Include(ou => ou.Organization)  // Ensure Organization is loaded
-                .Select(ou => ou.Organization)
-                .AsNoTracking()
-                .ToListAsync();
-        }
 
-        public async Task<IEnumerable<Organization>> GetUserOrganizationsAsync(Guid userId)
-        {
 	        return await _context.OrganizationUsers
 		        .Where(ou => ou.UserId == userId)
-		        .Include(ou => ou.Organization)
-		        .Select(ou => ou.Organization)
+		        .Select(ou => ou.Organization) // Get just the Organization
+		        .ProjectTo<OrganizationDto>(_mapper.ConfigurationProvider)
 		        .AsNoTracking()
 		        .ToListAsync();
-        }
+		}
 
 		//public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
 		//      {
@@ -270,41 +260,13 @@ namespace ems_back.Repo.Repository
 		//          return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
 		//      }
 
-		public async Task<UserRole> GetUserRoleAsync(Guid userId)
-        {
-            //return await _context.Users
-            //    .Where(u => u.Id == userId)
-            //    .Select(u => u.Role)
-            //    .FirstOrDefaultAsync();
-
-            throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
-        }
-
-        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
-        {
-            //var events = await _context.EventAttendees
-            //    .Where(ea => ea.UserId == userId)
-            //    .Select(ea => ea.Event)
-            //    .Include(e => e.Creator)
-            //    .ThenInclude(c => _context.Organizations
-            //            .Where(o => o.Id == _context.OrganizationUsers
-            //                .Where(ou => ou.UserId == c.Id)
-            //                .Select(ou => ou.OrganizationId)
-            //                .FirstOrDefault())
-            //            .FirstOrDefault())
-            //    .AsNoTracking()
-            //    .ToListAsync();
-
-            //return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
-
-            throw new NotImplementedException("GetUserEventsAsync is not implemented yet.");
-        }
-
+		
         // Internal methods for authentication
         public async Task<User> GetUserEntityByIdAsync(Guid id)
         {
             return await _userManager.FindByIdAsync(id.ToString());
         }
+
 
         public async Task<User> GetUserEntityByEmailAsync(string email)
         {

@@ -156,7 +156,7 @@ namespace ems_back.Controllers
 
 
 		// DELETE: api/users/{userId}/admin-delete
-		[HttpDelete("admin-delete")]
+		[HttpDelete("UserAccount/delete")]
         public async Task<IActionResult> AdminDeleteUser([FromQuery] Guid? userId, [FromQuery] string? email)
         {
             try

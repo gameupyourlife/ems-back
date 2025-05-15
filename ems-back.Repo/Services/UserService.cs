@@ -275,44 +275,7 @@ namespace ems_back.Services
 	        }
         }
 
-		public async Task<UserRole> GetUserRoleAsync(Guid userId)
-        {
-            try
-            {
-                return await _userRepository.GetUserRoleAsync(userId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting role for user: {UserId}", userId);
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
-        {
-            try
-            {
-                return await _userRepository.GetUserEventsAsync(userId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting events for user: {UserId}", userId);
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role)
-        {
-            try
-            {
-                return await _userRepository.GetUsersByRoleAsync(role);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting users by role: {Role}", role);
-                throw;
-            }
-        }
+        
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
         {
@@ -404,30 +367,7 @@ namespace ems_back.Services
         }
 
 
-        //Reseting Password with UserId, Not sure if still needed
-        //public async Task ResetUserPasswordAsync(Guid id, string newPassword)
-        //{
-        //    try
-        //    {
-        //        var user = await _userManager.FindByIdAsync(id.ToString());
-        //        if (user == null)
-        //            throw new KeyNotFoundException("User with this Email not found");
-
-        //        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        //        var resetResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
-        //        if (!resetResult.Succeeded)
-        //        {
-        //            throw new InvalidOperationException(
-        //                string.Join(", ", resetResult.Errors.Select(e => e.Description)));
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error resetting password for user ID: {UserId}", id);
-        //        throw;
-        //    }
-        //}
-
+    
         //todo: do not print Org Id instead print Org name
         public async Task HandleAutomaticOrganizationMembership(string email)
         {

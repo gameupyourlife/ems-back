@@ -10,8 +10,19 @@ namespace ems_back.Repo.Interfaces.Repository
 	{
 		// CRUD Operations
 		Task<OrganizationResponseDto> CreateOrganizationAsync(OrganizationCreateDto organizationDto);
-		Task<OrganizationResponseDto> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto);
-		Task<bool> DeleteOrganizationAsync(Guid id);
+
+		//Task<OrganizationResponseDto> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto,
+		//	Guid updatedByUserId);
+		Task<bool> DeleteOrganizationAsync(Guid id, Guid updatedByUserId);
+
+		//BasicSetups
+		Task<Organization> GetByIdAsync(
+			Guid id,
+			Func<IQueryable<Organization>, IQueryable<Organization>> includes = null);
+
+		Task UpdateAsync(Organization entity);
+
+
 
 		// Query Methods
 		Task<OrganizationResponseDto> GetOrganizationByIdAsync(Guid id);
@@ -28,7 +39,5 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<bool> OrganizationExistsAsync(Guid id);
 		Task<int> GetMemberCountAsync(Guid organizationId);
 
-		// Internal Use
-		Task<Organization> GetOrganizationEntityAsync(Guid id);
 	}
 }
