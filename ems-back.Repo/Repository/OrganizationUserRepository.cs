@@ -1,19 +1,24 @@
-﻿using ems_back.Repo.Data;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using ems_back.Repo.Data;
+using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Repository
 {
 	public class OrganizationUserRepository : IOrganizationUserRepository
 	{
 		private readonly ApplicationDbContext _context;
-
-		public OrganizationUserRepository(ApplicationDbContext context)
+		private readonly IMapper _mapper;
+		public OrganizationUserRepository(ApplicationDbContext context, IMapper mapper)
 		{
 			_context = context;
+			_mapper = mapper;
 		}
 
 		public async Task<OrganizationUser?> GetAsync(Guid userId, Guid organizationId)
@@ -46,6 +51,23 @@ namespace ems_back.Repo.Repository
 		{
 			return await _context.OrganizationUsers
 				.AnyAsync(ou => ou.UserId == userId && ou.OrganizationId == organizationId);
+		}
+		public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
+		{
+			return await _context.OrganizationUsers
+				.Where(ou => ou.OrganizationId == organizationId)
+				.Select(ou => ou.User)
+				.ProjectTo<UserResponseDto>(_mapper.ConfigurationProvider)
+				.AsNoTracking()
+				.ToListAsync();
+		}
+
+		public async Task<bool> IsUserOrganizationOwner(Guid userId, Guid organizationId)
+		{
+			return await _context.OrganizationUsers
+				.AnyAsync(ou => ou.UserId == userId &&
+				                ou.OrganizationId == organizationId &&
+				                ou.UserRole == UserRole.Owner);
 		}
 	}
 }

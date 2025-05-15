@@ -1,4 +1,5 @@
-﻿using ems_back.Repo.Models;
+﻿using ems_back.Repo.DTOs.User;
+using ems_back.Repo.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,8 @@ namespace ems_back.Repo.Interfaces.Repository
 			Task<OrganizationUser?> GetAsync(Guid userId, Guid organizationId);
 			Task AddAsync(OrganizationUser membership);
 			Task RemoveAsync(OrganizationUser membership);
-			Task<bool> ExistsAsync(Guid userId, Guid organizationId);
-		
+		Task<bool> ExistsAsync(Guid userId, Guid organizationId);
+		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
+		Task<bool> IsUserOrganizationOwner(Guid userId, Guid organizationId);
 	}
 }
