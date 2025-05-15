@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace ems_back.Services
 {
@@ -25,6 +26,7 @@ namespace ems_back.Services
         private readonly ILogger<UserService> _logger;
         private readonly IOrganizationDomainRepository _orgDomainRepo;
         private readonly IOrganizationUserRepository _orgMembershipRepo;
+        private readonly IMapper _mapper;
 
 
 		public UserService(
@@ -33,13 +35,14 @@ namespace ems_back.Services
             IUserRepository userRepository,
 			   IOrganizationDomainRepository orgDomainRepo,
 			   IOrganizationUserRepository orgMembershipRepo,
-			ILogger<UserService> logger)
+			ILogger<UserService> logger, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
             _orgDomainRepo = orgDomainRepo;
             _orgMembershipRepo = orgMembershipRepo;
+            _mapper = mapper;
 
 			_logger = logger;
         }
@@ -246,20 +249,33 @@ namespace ems_back.Services
             }
         }
 
+
         public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
         {
-            try
-            {
-                return await _userRepository.GetUserOrganizationsAsync(userId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting organizations for user: {UserId}", userId);
-                throw;
-            }
+	        try
+	        {
+		        var organizations = await _userRepository.GetUserOrganizationsAsync(userId);
+
+		        if (!organizations.Any())
+		        {
+			        _logger.LogWarning("No organizations found for user {UserId}", userId);
+			        return Enumerable.Empty<OrganizationDto>();
+		        }
+
+		        var result = _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
+		        _logger.LogInformation("Retrieved {OrganizationCount} organizations for user {UserId}",
+			        result.Count(), userId);
+
+		        return result;
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error retrieving organizations for user {UserId}", userId);
+		        throw;
+	        }
         }
 
-        public async Task<UserRole> GetUserRoleAsync(Guid userId)
+		public async Task<UserRole> GetUserRoleAsync(Guid userId)
         {
             try
             {

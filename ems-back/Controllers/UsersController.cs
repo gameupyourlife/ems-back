@@ -120,25 +120,43 @@ namespace ems_back.Controllers
         }
 
         // GET: api/users/{userId}/orgs
+       
         [HttpGet("{userId}/orgs")]
+        [ProducesResponseType(typeof(IEnumerable<OrganizationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
         {
-            try
-            {
-                var organizations = await _userService.GetUserOrganizationsAsync(userId);
-                return Ok(organizations);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
-                return StatusCode(500, "Internal server error");
-            }
+	        try
+	        {
+		        var organizations = await _userService.GetUserOrganizationsAsync(userId);
+
+		        if (organizations == null || !organizations.Any())
+		        {
+			        _logger.LogInformation("No organizations found for user {UserId}", userId);
+			        return NotFound($"No organizations found for user {userId}");
+		        }
+
+		        _logger.LogInformation("Successfully retrieved {OrganizationCount} organizations for user {UserId}",
+			        organizations.Count(), userId);
+		        return Ok(organizations);
+	        }
+	        catch (KeyNotFoundException ex)
+	        {
+		        _logger.LogWarning(ex, "User not found: {UserId}", userId);
+		        return NotFound(ex.Message);
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
+		        return StatusCode(500, "Internal server error while processing your request");
+	        }
         }
 
 
 
-        // DELETE: api/users/admin-delete
-        [HttpDelete("admin-delete")]
+		// DELETE: api/users/{userId}/admin-delete
+		[HttpDelete("admin-delete")]
         public async Task<IActionResult> AdminDeleteUser([FromQuery] Guid? userId, [FromQuery] string? email)
         {
             try

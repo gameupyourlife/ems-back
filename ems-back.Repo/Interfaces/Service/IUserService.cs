@@ -16,8 +16,18 @@ namespace ems_back.Repo.Interfaces.Service
 		Task ResetPasswordAsync(PasswordResetDto resetDto);
 		Task<bool> UpdateUserRoleAsync(Guid userId, UserUpdateRoleDto userDto);
 		Task<bool> DeleteUserAsync(Guid id);
-		Task<UserResponseDto> GetUserByEmailAsync(string email);
+
+		//specialized queries
 		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);
+
+
+
+
+
+
+		Task<UserResponseDto> GetUserByEmailAsync(string email);
+
+	
 		Task<UserRole> GetUserRoleAsync(Guid userId);
 		Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role);
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);

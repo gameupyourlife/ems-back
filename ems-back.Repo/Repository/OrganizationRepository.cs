@@ -22,6 +22,7 @@ namespace ems_back.Repo.Repository
 			_mapper = mapper;
 		}
 
+		//only admin
 		public async Task<OrganizationResponseDto> CreateOrganizationAsync(OrganizationCreateDto organizationDto)
 		{
 			using var transaction = await _context.Database.BeginTransactionAsync();
@@ -30,6 +31,7 @@ namespace ems_back.Repo.Repository
 			{
 				// Create the organization
 				var organization = _mapper.Map<Organization>(organizationDto);
+				organization.CreatedBy = organizationDto.CreatedBy;
 				organization.CreatedAt = DateTime.UtcNow;
 				organization.UpdatedAt = DateTime.UtcNow;
 				organization.UpdatedBy = organizationDto.CreatedBy;
@@ -117,6 +119,7 @@ namespace ems_back.Repo.Repository
 		}
 
 
+		//only admin or Owner
 		public async Task<OrganizationResponseDto> UpdateOrganizationAsync(Guid id, OrganizationUpdateDto organizationDto)
 		{
 			var organization = await _context.Organizations.FindAsync(id);
@@ -129,6 +132,7 @@ namespace ems_back.Repo.Repository
 			return await GetOrganizationByIdAsync(id);
 		}
 
+		//only admin or Owner
 		public async Task<bool> DeleteOrganizationAsync(Guid id)
 		{
 			var organization = await _context.Organizations.FindAsync(id);
@@ -139,6 +143,7 @@ namespace ems_back.Repo.Repository
 			return true;
 		}
 
+		//Free for everyone
 		public async Task<OrganizationResponseDto> GetOrganizationByIdAsync(Guid id)
 		{
 			var organization = await _context.Organizations
@@ -155,6 +160,7 @@ namespace ems_back.Repo.Repository
 			return dto;
 		}
 
+		//only Admin should have this right
 		public async Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync()
 		{
 			var organizations = await _context.Organizations

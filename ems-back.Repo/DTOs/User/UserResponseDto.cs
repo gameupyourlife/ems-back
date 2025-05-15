@@ -12,7 +12,7 @@ namespace ems_back.Repo.DTOs.User
     public class UserResponseDto : UserDto
     {
         public DateTime CreatedAt { get; set; }
-      //  public OrganizationOverviewDto Organization { get; set; }
+       public OrganizationOverviewDto Organization { get; set; }
         public UserRole Role { get; set; }
     }
 

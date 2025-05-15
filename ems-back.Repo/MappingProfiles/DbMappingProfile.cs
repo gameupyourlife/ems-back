@@ -41,9 +41,14 @@ namespace ems_back.Repo.MappingProfiles
 					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
-				.IncludeBase<User, UserDto>();
+				.IncludeBase<User, UserDto>()
+				.ForMember(dest => dest.Organization,
+					opt => opt.MapFrom(src => src.OrganizationUsers.FirstOrDefault().Organization));
+
 
 			// Organization mappings
+			CreateMap<Organization, OrganizationDto>();
+
 
 			CreateMap<OrganizationCreateDto, Organization>()
 				.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.CreatedBy));

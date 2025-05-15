@@ -23,13 +23,14 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
 		Task<IEnumerable<UserResponseDto>> GetUsersByRoleAsync(UserRole role);
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
+		Task<IEnumerable<Organization>> GetUserOrganizationEntitiesAsync(Guid userId);
 
 		// Utility methods
 		Task<bool> UserExistsAsync(Guid id);
 		Task<bool> IsEmailUniqueAsync(string email, Guid? excludeUserId = null);
 
 		// Specialized queries
-		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);
+		Task<IEnumerable<Organization>> GetUserOrganizationsAsync(Guid userId);
 		Task<UserRole> GetUserRoleAsync(Guid userId);
 		Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId);
 
