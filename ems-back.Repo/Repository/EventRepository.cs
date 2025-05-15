@@ -41,7 +41,8 @@ namespace ems_back.Repo.Repository
                     Start = e.Start,
                     Location = e.Location,
                     Image = e.Image,
-                    Attendees = e.Attendees.Count,
+                    AttendeeCount = e.Attendees.Count,
+                    Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })
@@ -311,7 +312,8 @@ namespace ems_back.Repo.Repository
                     Category = e.Category,
                     Start = e.Start,
                     Location = e.Location,
-                    Attendees = e.Attendees.Count,
+                    AttendeeCount = e.Attendees.Count,
+                    Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })

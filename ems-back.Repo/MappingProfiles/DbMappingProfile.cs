@@ -79,7 +79,7 @@ namespace ems_back.Repo.MappingProfiles
             CreateMap<EventUpdateDto, Event>();
 
             CreateMap<Event, EventOverviewDto>()
-				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
+				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count));
 
             // Agenda mappings
 
