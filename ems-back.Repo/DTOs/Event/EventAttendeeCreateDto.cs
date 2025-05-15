@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Event
 {
-    public class EventAttendeeDto
+    public class EventAttendeeCreateDto
     {
         public Guid UserId { get; set; }
-        public string UserEmail { get; set; }
-        public string UserName { get; set; }
-        public AttendeeStatus Status { get; set; }
         public string ProfilePicture { get; set; }
-        //public UserRole Role { get; set; }
-        public DateTime RegisteredAt { get; set; }
     }
 }

@@ -21,4 +21,5 @@ public interface IOrganizationRepository
 
 	// Internal Use
 	Task<Organization> GetOrganizationEntityAsync(Guid id);
+    Task<OrganizationUserDto> GetOrganizationUserAsync(Guid orgId, Guid userId);
 }

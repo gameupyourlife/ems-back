@@ -131,6 +131,7 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}
         [HttpDelete("{eventId}")]
+        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
         public async Task<ActionResult<bool>> DeleteEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
@@ -183,7 +184,7 @@ namespace ems_back.Controllers
         public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId,
-            [FromBody] EventAttendeeDto attendee)
+            [FromBody] EventAttendeeCreateDto attendee)
 		{
 			var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee);
             if (createdAttendee == null)
@@ -199,16 +200,27 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{attendeeId}
         [HttpDelete("{eventId}/attendees/{userId}")]
-        public async Task<ActionResult<EventInfoDto>> RemoveAttendeeFromEvent(Guid eventId, Guid attendeeId)
+        public async Task<ActionResult<bool>> RemoveAttendeeFromEvent(
+            [FromRoute] Guid orgId,
+            [FromRoute] Guid eventId, 
+            [FromRoute] Guid attendeeId)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+			var isDeleted = await _eventService.RemoveAttendeeFromEventAsync(eventId, attendeeId, attendeeId);
+            if (!isDeleted)
+            {
+                _logger.LogWarning("Failed to remove attendee with id {AttendeeId}", attendeeId);
+                return NotFound("Attendee not found");
+            }
+
+            return Ok(isDeleted);
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
 		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(
             [FromRoute] Guid orgId, 
-            [FromRoute] Guid eventId)
+            [FromRoute] Guid eventId,
+            [FromRoute] Guid userId)
 		{
 			try
 			{

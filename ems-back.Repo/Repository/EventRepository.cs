@@ -52,7 +52,7 @@ namespace ems_back.Repo.Repository
             return events;
         }
 
-        public async Task<Guid?> CreateEventAsync(EventInfoDto eventDto)
+        public async Task<Guid> CreateEventAsync(EventInfoDto eventDto)
         {
             var eventObject = new Event();
             _mapper.Map(eventDto, eventObject);
@@ -80,6 +80,7 @@ namespace ems_back.Repo.Repository
                     CreatedAt = e.CreatedAt,
                     UpdatedAt = e.UpdatedAt,
                     CreatedBy = e.CreatedBy,
+                    CreatorName = e.Creator.FullName,
                     UpdatedBy = e.UpdatedBy
                     
                 })
@@ -142,7 +143,7 @@ namespace ems_back.Repo.Repository
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
                     ProfilePicture = a.User.ProfilePicture,
-                    Role = a.User.Role,
+                    //Role = a.User.Role,
                     RegisteredAt = a.RegisteredAt,
                 })
                 .ToListAsync();
@@ -150,14 +151,24 @@ namespace ems_back.Repo.Repository
             return attendeesList;
         }
 
-        public async Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendee)
+        public async Task<bool> AddAttendeeToEventAsync(EventAttendee attendee)
         {
-            throw new NotImplementedException("AddAttendeeToEventsAsync is not implemented yet");
+            _context.EventAttendees.Add(attendee);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId)
         {
-            throw new NotImplementedException("RemoveAttendeeFromEventAsync is not implemented yet");
+            var attendee = await _context.EventAttendees.FindAsync(orgId, userId);
+            if (attendee == null || attendee.EventId != eventId)
+            {
+                return false;
+            }
+
+            _context.EventAttendees.Remove(attendee);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid orgId, Guid eventId)

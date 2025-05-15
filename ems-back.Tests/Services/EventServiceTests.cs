@@ -17,15 +17,20 @@ namespace ems_back.Tests.Services
 	{
 		private readonly TestReportGenerator _report;
 		private readonly Mock<IEventRepository> _eventRepoMock;
-		private readonly EventService _eventService;
+        private readonly Mock<IOrganizationRepository> _orgRepoMock;
+        private readonly Mock<IUserRepository> _userRepoMock;
+        private readonly EventService _eventService;
 
         public EventServiceTests(ITestOutputHelper output)
         {
             _report = new TestReportGenerator(output);
             _eventRepoMock = new Mock<IEventRepository>();
+            _orgRepoMock = new Mock<IOrganizationRepository>();
+            _userRepoMock = new Mock<IUserRepository>();
             _eventService = new EventService(
             _eventRepoMock.Object,
-            Mock.Of<IUserRepository>(), // Added missing IUserRepository mock
+            _userRepoMock.Object,
+            _orgRepoMock.Object,
             Mock.Of<ILogger<EventService>>());
         }
 

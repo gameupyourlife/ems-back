@@ -18,16 +18,20 @@ namespace ems_back.Repo.Services
 	public class EventService : IEventService
 	{
 		private readonly IEventRepository _eventRepository;
-		private readonly ILogger<EventService> _logger;
-        private IEventRepository @object;
+        private readonly IUserRepository _userRepository;
+        private readonly IOrganizationRepository _organizationRepository;
+        private readonly ILogger<EventService> _logger;
 
         public EventService(
 			IEventRepository eventRepository,
 			IUserRepository userRepository,
+            IOrganizationRepository organizationRepository,
             ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
-			_logger = logger;
+            _userRepository = userRepository;
+            _organizationRepository = organizationRepository;
+            _logger = logger;
 		}
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
@@ -83,7 +87,7 @@ namespace ems_back.Repo.Services
             }
             
             var eventId = await _eventRepository.CreateEventAsync(eventInfo);
-            eventInfo.Id = eventId.Value;
+            eventInfo.Id = eventId;
             return eventInfo;
         }
 
@@ -131,14 +135,76 @@ namespace ems_back.Repo.Services
         public async Task<EventAttendeeDto> AddAttendeeToEventAsync(
             Guid orgId, 
             Guid eventId, 
-            EventAttendeeDto attendeeDto)
+            EventAttendeeCreateDto attendeeDto)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetUserByIdAsync(attendeeDto.UserId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {userId} does not exist", attendeeDto.UserId);
+                return null;
+            }
+
+            var eventInfo = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+
+            if (eventInfo == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return null;
+            }
+
+            if (eventInfo.OrganizationId != orgId)
+            {
+                _logger.LogWarning("Event with id {EventId} does not belong to organization with id {OrgId}", eventId, orgId);
+                return null;
+            }
+
+            var orgUser = await _organizationRepository.GetOrganizationUserAsync(orgId, attendeeDto.UserId);
+
+            if (orgUser == null)
+            {
+                _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", attendeeDto.UserId, orgId);
+                return null;
+            }
+
+            if (orgUser.OrganizationId != eventInfo.OrganizationId)
+            {
+                _logger.LogWarning("User with id {UserId} does not belong to organization with id {OrgId}", attendeeDto.UserId, orgId);
+                return null;
+            }
+
+            var attendee = new EventAttendee
+            {
+                UserId = attendeeDto.UserId,
+                EventId = eventId,
+                RegisteredAt = DateTime.UtcNow,
+                Status = AttendeeStatus.Pending,
+            };
+
+            var isCreated = await _eventRepository.AddAttendeeToEventAsync(attendee);
+            
+            if (!isCreated)
+            {
+                _logger.LogWarning("Failed to add attendee to event with id {EventId}", eventId);
+                return null;
+            }
+
+            var attendeeInfo = new EventAttendeeDto
+            {
+                UserId = attendee.UserId,
+                UserEmail = user.Email,
+                UserName = user.FullName,
+                Status = attendee.Status,
+                ProfilePicture = user.ProfilePicture,
+                RegisteredAt = attendee.RegisteredAt
+            };
+
+            _logger.LogInformation("Attendee added to event with id {EventId}", eventId);
+            return attendeeInfo;
         }
 
-        public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId, Guid attendeeId)
+        public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId)
         {
-            throw new NotImplementedException("RemoveAttendeeFromEventAsync is not implemented yet");
+            return await _eventRepository.RemoveAttendeeFromEventAsync(orgId, eventId, userId);
         }
 
 

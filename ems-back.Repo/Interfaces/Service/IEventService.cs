@@ -15,7 +15,7 @@ public interface IEventService
     Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto);
     Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);
     Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
-    Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendeeDto);
+    Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeCreateDto attendeeDto);
     Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId, Guid attendeeId);
     Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId);
     Task<AgendaEntryDto> AddAgendaPointToEventAsync(Guid orgId, Guid eventId, AgendaEntryCreateDto agendaEntryDto);
