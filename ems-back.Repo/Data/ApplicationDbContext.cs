@@ -120,7 +120,12 @@ namespace ems_back.Repo.Data
 				.HasForeignKey(e => e.EventId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// FlowRun relationships:
+            modelBuilder.Entity<Flow>()
+				.HasMany(f => f.Actions)
+				.WithOne(f => f.Flow)
+				.OnDelete(DeleteBehavior.Cascade);
+
+            // FlowRun relationships:
 
 			modelBuilder.Entity<FlowsRun>()
 				.HasOne(e => e.Flow)
@@ -289,7 +294,7 @@ namespace ems_back.Repo.Data
 				entity.HasOne(a => a.Flow)
 					  .WithMany(f => f.Actions)
 					  .HasForeignKey(a => a.FlowId)
-					  .OnDelete(DeleteBehavior.Restrict);
+					  .OnDelete(DeleteBehavior.Cascade);
 
 				entity.HasOne(a => a.FlowTemplate)
 					  .WithMany(f => f.Actions)
@@ -302,7 +307,7 @@ namespace ems_back.Repo.Data
 				entity.HasOne(a => a.Flow)
 					  .WithMany(f => f.Triggers)
 					  .HasForeignKey(a => a.FlowId)
-					  .OnDelete(DeleteBehavior.Restrict);
+					  .OnDelete(DeleteBehavior.Cascade);
 
 				entity.HasOne(a => a.FlowTemplate)
 					  .WithMany(f => f.Triggers)

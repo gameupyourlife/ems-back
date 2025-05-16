@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Microsoft.Extensions.Logging;
+using AutoMapper.QueryableExtensions;
 
 namespace ems_back.Repo.Repository
 {
@@ -108,25 +109,41 @@ namespace ems_back.Repo.Repository
 
         public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
         {
-            var user = await _context.Users
-                .AsNoTracking()
-                .Where(u => u.Id == id)
-                .Select(u => new
-                {
-                    User = u,
-                    Organization = _context.Organizations
-                        .Where(o => o.Id == _context.OrganizationUsers
-                            .Where(ou => ou.UserId == u.Id)
-                            .Select(ou => ou.OrganizationId)
-                            .FirstOrDefault())
-                        .FirstOrDefault()
-                })
-                .FirstOrDefaultAsync();
+	        try
+	        {
+		        var result = await _context.Users
+			        .AsNoTracking()
+			        .Where(u => u.Id == id)
+			        .ProjectTo<UserResponseDto>(_mapper.ConfigurationProvider)
+			        .FirstOrDefaultAsync();
 
-            return user == null ? null : _mapper.Map<UserResponseDto>(user);
+		        if (result != null)
+		        {
+			        _logger.LogInformation("Successfully retrieved user with properties: " +
+			                               "Email: {Email}, " +
+			                               "FirstName: {FirstName}, " +
+			                               "LastName: {LastName}, " +
+			                               "FullName: {FullName}",
+				        result.Email,
+				        result.FirstName,
+				        result.LastName,
+				        $"{result.FirstName} {result.LastName}");
+		        }
+		        else
+		        {
+			        _logger.LogWarning("User with ID {UserId} not found", id);
+		        }
+
+		        return result;
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error retrieving user with ID {UserId}", id);
+		        throw; // Or return null if you prefer to handle errors gracefully
+	        }
         }
 
-        public async Task<UserResponseDto> GetUserByEmailAsync(string email)
+		public async Task<UserResponseDto> GetUserByEmailAsync(string email)
         {
             var user = await _context.Users
                .AsNoTracking()
@@ -218,56 +235,38 @@ namespace ems_back.Repo.Repository
 
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
-
         public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
         {
-            var organizations = await _context.Users
-             .Where(u => u.Id == userId)
-             .SelectMany(u => _context.OrganizationUsers
-                 .Where(ou => ou.UserId == u.Id)
-                 .Select(ou => ou.Organization))
-             .Distinct()
-             .AsNoTracking()
-             .ToListAsync();
 
-            return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
-        }
+	        return await _context.OrganizationUsers
+		        .Where(ou => ou.UserId == userId)
+		        .Select(ou => ou.Organization) // Get just the Organization
+		        .ProjectTo<OrganizationDto>(_mapper.ConfigurationProvider)
+		        .AsNoTracking()
+		        .ToListAsync();
+		}
 
-        public async Task<UserRole> GetUserRoleAsync(Guid userId)
-        {
-            //return await _context.Users
-            //    .Where(u => u.Id == userId)
-            //    .Select(u => u.Role)
-            //    .FirstOrDefaultAsync();
+		//public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
+		//      {
+		//          var organizations = await _context.Users
+		//           .Where(u => u.Id == userId)
+		//           .SelectMany(u => _context.OrganizationUsers
+		//               .Where(ou => ou.UserId == u.Id)
+		//               .Select(ou => ou.Organization))
+		//           .Distinct()
+		//           .AsNoTracking()
+		//           .ToListAsync();
 
-            throw new NotImplementedException("GetUserRoleAsync is not implemented yet.");
-        }
+		//          return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
+		//      }
 
-        public async Task<IEnumerable<EventInfoDto>> GetUserEventsAsync(Guid userId)
-        {
-            //var events = await _context.EventAttendees
-            //    .Where(ea => ea.UserId == userId)
-            //    .Select(ea => ea.Event)
-            //    .Include(e => e.Creator)
-            //    .ThenInclude(c => _context.Organizations
-            //            .Where(o => o.Id == _context.OrganizationUsers
-            //                .Where(ou => ou.UserId == c.Id)
-            //                .Select(ou => ou.OrganizationId)
-            //                .FirstOrDefault())
-            //            .FirstOrDefault())
-            //    .AsNoTracking()
-            //    .ToListAsync();
-
-            //return _mapper.Map<IEnumerable<EventInfoDTO>>(events);
-
-            throw new NotImplementedException("GetUserEventsAsync is not implemented yet.");
-        }
-
+		
         // Internal methods for authentication
         public async Task<User> GetUserEntityByIdAsync(Guid id)
         {
             return await _userManager.FindByIdAsync(id.ToString());
         }
+
 
         public async Task<User> GetUserEntityByEmailAsync(string email)
         {

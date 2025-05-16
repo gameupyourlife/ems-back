@@ -41,7 +41,8 @@ namespace ems_back.Repo.Repository
                     Start = e.Start,
                     Location = e.Location,
                     Image = e.Image,
-                    Attendees = e.Attendees.Count,
+                    AttendeeCount = e.Attendees.Count,
+                    Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })
@@ -52,7 +53,7 @@ namespace ems_back.Repo.Repository
             return events;
         }
 
-        public async Task<Guid?> CreateEventAsync(EventInfoDto eventDto)
+        public async Task<Guid> CreateEventAsync(EventInfoDto eventDto)
         {
             var eventObject = new Event();
             _mapper.Map(eventDto, eventObject);
@@ -80,8 +81,12 @@ namespace ems_back.Repo.Repository
                     CreatedAt = e.CreatedAt,
                     UpdatedAt = e.UpdatedAt,
                     CreatedBy = e.CreatedBy,
-                    UpdatedBy = e.UpdatedBy
-                    
+                    CreatorName = e.Creator.FullName,
+                    UpdatedBy = e.UpdatedBy,
+                    AttendeeCount = e.AttendeeCount,
+                    Capacity = e.Capacity,
+                    Image = e.Image,
+
                 })
 				.AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -89,17 +94,28 @@ namespace ems_back.Repo.Repository
             return eventEntity;
 		}
     
-        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto)
+        public async Task<EventInfoDto> UpdateEventAsync(EventUpdateDto eventDto)
         {
 
-            // To Do: Manuelle Überprüfung
-
             var existingEvent = await _context.Events.FindAsync(eventDto.Id);
-            if (existingEvent == null)
-                return null;
 
+            if (existingEvent == null)
+            {
+                return null;
+            }
+                
             _mapper.Map(eventDto, existingEvent);
-            existingEvent.UpdatedAt = DateTime.UtcNow;
+            existingEvent.UpdatedAt = new DateTime(
+                DateTime.UtcNow.Year,
+                DateTime.UtcNow.Month,
+                DateTime.UtcNow.Day,
+                DateTime.UtcNow.Hour,
+                DateTime.UtcNow.Minute,
+                DateTime.UtcNow.Second,
+                DateTimeKind.Utc
+            );
+
+            existingEvent.UpdatedBy = eventDto.UpdatedBy;
 
             _context.Events.Update(existingEvent);
             await _context.SaveChangesAsync();
@@ -110,12 +126,12 @@ namespace ems_back.Repo.Repository
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
         {
 
-            // To Do: Manuelle Überprüfung
-
             var eventEntity = await _context.Events.FindAsync(eventId);
-            if (eventEntity == null)
+            if (eventEntity == null || eventEntity.OrganizationId != orgId)
+            {
                 return false;
-
+            }
+                
             _context.Events.Remove(eventEntity);
             await _context.SaveChangesAsync();
             return true;
@@ -133,7 +149,7 @@ namespace ems_back.Repo.Repository
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
                     ProfilePicture = a.User.ProfilePicture,
-                    Role = a.User.Role,
+                    //Role = a.User.Role,
                     RegisteredAt = a.RegisteredAt,
                 })
                 .ToListAsync();
@@ -141,14 +157,24 @@ namespace ems_back.Repo.Repository
             return attendeesList;
         }
 
-        public async Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendee)
+        public async Task<bool> AddAttendeeToEventAsync(EventAttendee attendee)
         {
-            throw new NotImplementedException("AddAttendeeToEventsAsync is not implemented yet");
+            _context.EventAttendees.Add(attendee);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId)
+        public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId)
         {
-            throw new NotImplementedException("RemoveAttendeeFromEventAsync is not implemented yet");
+            var attendee = await _context.EventAttendees.FindAsync(eventId, userId);
+            if (attendee == null)
+            {
+                return false;
+            }
+
+            _context.EventAttendees.Remove(attendee);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid orgId, Guid eventId)
@@ -187,40 +213,6 @@ namespace ems_back.Repo.Repository
         {
             throw new NotImplementedException("DeleteAgendaPointAsync is not implemented yet");
         }
-
-        public async Task<IEnumerable<FileDto>> GetFilesFromEvent(Guid orgId, Guid eventId)
-        {
-            var files = await _context.Files
-                .Where(e => e.Event.Id == eventId)
-                .Select(f => new FileDto
-                {
-                    Id = f.Id,
-                    Url = f.Url,
-                    Type = f.Type,
-                    UploadedAt = f.UploadedAt,
-                    UploadedBy = f.UploadedBy,
-                    Name = f.Name,
-                })
-                .ToListAsync();
-
-            return files;
-        }
-
-        public async Task<FileDto> AddFileToEvent(Guid orgId, Guid eventId, FileDto file)
-        {
-            throw new NotImplementedException("AddFileToEvent is not implemented yet");
-        }
-
-        public async Task<FileDto> UpdateFile(Guid orgId, Guid eventId, Guid fileId, FileDto file)
-        {
-            throw new NotImplementedException("UpdateFile is not implemented yet");
-        }
-
-        public async Task<FileDto> RemoveFileFromEvent(Guid orgId, Guid eventId, Guid fileId)
-        {
-            throw new NotImplementedException("RemoveFileFromEvent is not implemented yet");
-        }
-
 
         // Additional Methods:
 
@@ -288,7 +280,8 @@ namespace ems_back.Repo.Repository
                     Category = e.Category,
                     Start = e.Start,
                     Location = e.Location,
-                    Attendees = e.Attendees.Count,
+                    AttendeeCount = e.Attendees.Count,
+                    Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })

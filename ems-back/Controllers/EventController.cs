@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
+using System.Security.Claims;
 
 namespace ems_back.Controllers
 {
@@ -51,27 +52,41 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events
         [HttpPost]  
-        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventInfoDto>> CreateEvent(
 			[FromRoute] Guid orgId,
             [FromBody] EventCreateDto eventDto)
         {
             try
             {
-                var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("User ID not found in claims");
+                    return BadRequest("User ID not found");
+                }
+
+                var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto, Guid.Parse(userId));
                 if (createdEvent == null)
                 {
                     _logger.LogWarning("Failed to create event");
                     return BadRequest("Failed to create event");
                 }
-				_logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
+                _logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
                 return createdEvent;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access while creating event");
+                return Unauthorized("User is not authorized to create events");
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating event");
                 return StatusCode(500, "Internal server error");
             }
+            
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}
@@ -98,30 +113,36 @@ namespace ems_back.Controllers
 			}
 		}
 
-        // PUT: api/orgs/{orgId}/events/{eventId}
         [HttpPut("{eventId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventInfoDto>> UpdateEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId, 
-            [FromBody] EventInfoDto eventDto)
+            [FromBody] EventUpdateDto eventDto)
         {
-            // To Do: Check
-
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("User ID not found in claims");
+                    return BadRequest("User ID not found");
+                }
+
                 if (eventId != eventDto.Id)
                 {
                     return BadRequest("ID mismatch");
                 }
 
-                var updatedEvent = await _eventService.UpdateEventAsync(orgId, eventId, eventDto);
-                if (updatedEvent == null)
+                var success = await _eventService.UpdateEventAsync(orgId, eventId, eventDto, Guid.Parse(userId));
+
+                if (success == null)
                 {
                     _logger.LogWarning("Failed to update event with id {EventId}", eventId);
-                    return NotFound("Event not found");
+                    return BadRequest("Failed to update event");
                 }
 
-                return Ok(updatedEvent);
+                return Ok(success);
             }
             catch (Exception ex)
             {
@@ -132,17 +153,28 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}
         [HttpDelete("{eventId}")]
-        public async Task<IActionResult> DeleteEvent(
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
+        public async Task<ActionResult<bool>> DeleteEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
         {
-
-            // To Do: Check
-
             try
             {
-                var success = await _eventService.DeleteEventAsync(orgId, eventId);
-                return success ? NoContent() : NotFound();
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("User ID not found in claims");
+                    return BadRequest("User ID not found");
+                }
+
+                var success = await _eventService.DeleteEventAsync(orgId, eventId, Guid.Parse(userId));
+
+                if (!success) {
+                    _logger.LogError("Failed to delete event with id {EventId}", eventId);
+                    return NotFound("Event not found");
+                }
+
+                return Ok(success);
             }
             catch (Exception ex)
             {
@@ -177,13 +209,20 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
-        //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId,
-            [FromBody] EventAttendeeDto attendee)
+            [FromBody] EventAttendeeCreateDto attendee)
 		{
-			var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee, Guid.Parse(userId));
             if (createdAttendee == null)
             {
                 _logger.LogWarning("Failed to add Attendee");
@@ -195,18 +234,37 @@ namespace ems_back.Controllers
         }
 
 
-        // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{attendeeId}
-        [HttpDelete("{eventId}/attendees/{userId}")]
-        public async Task<ActionResult<EventInfoDto>> RemoveAttendeeFromEvent(Guid eventId, Guid attendeeId)
+        // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{userId}
+        [HttpDelete("{eventId}/attendees/{attendeeId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
+        public async Task<ActionResult<bool>> RemoveAttendeeFromEvent(
+            [FromRoute] Guid orgId,
+            [FromRoute] Guid eventId, 
+            [FromRoute] Guid attendeeId)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            var isDeleted = await _eventService.RemoveAttendeeFromEventAsync(orgId, eventId, attendeeId, Guid.Parse(userId));
+            if (!isDeleted)
+            {
+                _logger.LogWarning("Failed to remove attendee with id {AttendeeId}", attendeeId);
+                return NotFound("Attendee not found");
+            }
+
+            return Ok(isDeleted);
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
 		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(
             [FromRoute] Guid orgId, 
-            [FromRoute] Guid eventId)
+            [FromRoute] Guid eventId,
+            [FromRoute] Guid userId)
 		{
 			try
 			{
@@ -222,12 +280,20 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpPost("{eventId}/agenda")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId,
             [FromBody] AgendaEntryCreateDto createDto)
 		{
-			var createdAgenda = await _eventService.AddAgendaPointToEventAsync(orgId, eventId, createDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            var createdAgenda = await _eventService.AddAgendaPointToEventAsync(orgId, eventId, createDto, Guid.Parse(userId));
             if (createdAgenda == null)
             {
                 _logger.LogWarning("Failed to add agenda");
@@ -239,50 +305,30 @@ namespace ems_back.Controllers
 
         // Put: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpPut("{eventId}/agenda/{agendaId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventInfoDto>> UpdateAgendaInEvent(Guid eventId, Guid agendaId)
 		{
-			throw new NotImplementedException("This method is not implemented yet.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            throw new NotImplementedException("This method is not implemented yet.");
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpDelete("{eventId}/agenda/{agendaId}")]
         public async Task<ActionResult<EventInfoDto>> RemoveAgendaFromEvent(Guid eventId, Guid agendaId)
 		{
-            throw new NotImplementedException("This method is not implemented yet.");
-        }
-
-        // GET: api/orgs/{orgId}/events/{eventId}/files
-        [HttpGet("{eventId}/files")]
-        public async Task<ActionResult<IEnumerable<FileDto>>> GetFilesfromEvent(
-            [FromRoute] Guid orgId, 
-            [FromRoute] Guid eventId)
-		{
-			var fileList = await _eventService.GetFilesFromEventAsync(orgId, eventId);
-            if (fileList == null || !fileList.Any())
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                _logger.LogWarning("No files found for event with id {EventId}", eventId);
-                return NotFound("No files found");
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
             }
-            return Ok(fileList);
-        }
 
-        // POST: api/orgs/{orgId}/events/{eventId}/files
-        [HttpPost("{eventId}/files")]
-        public async Task<ActionResult<EventInfoDto>> AddFileToEvent(Guid eventId, Guid fileId)
-        {
-            throw new NotImplementedException("This method is not implemented yet.");
-        }
-
-        // PUT: api/orgs/{orgId}/events/{eventId}/files/{fileId}
-        [HttpPut("{eventId}/files/{fileId}")]
-        public async Task<ActionResult<EventInfoDto>> UpdateFileInEvent(Guid eventId, Guid fileId)
-		{
-			throw new NotImplementedException("This method is not implemented yet.");
-        }
-        // DELETE: api/orgs/{orgId}/events/{eventId}/files/{fileId}
-        [HttpDelete("{eventId}/files/{fileId}")]
-        public async Task<ActionResult<EventInfoDto>> RemoveFileFromEvent(Guid eventId, Guid fileId)
-        {
             throw new NotImplementedException("This method is not implemented yet.");
         }
 	}

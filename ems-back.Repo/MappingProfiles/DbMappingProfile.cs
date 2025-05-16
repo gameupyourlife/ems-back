@@ -41,9 +41,22 @@ namespace ems_back.Repo.MappingProfiles
 					opt => opt.MapFrom(src => UserRole.User)); // Default role
 
 			CreateMap<User, UserResponseDto>()
-				.IncludeBase<User, UserDto>();
+				.IncludeBase<User, UserDto>()
+				.ForMember(dest => dest.Organization,
+					opt => opt.MapFrom(src => src.OrganizationUsers.FirstOrDefault().Organization));
+
 
 			// Organization mappings
+			CreateMap<Organization, OrganizationDto>()
+				.ForMember(dest => dest.NumOfMembers,
+					opt => opt.MapFrom(src => src.OrganizationUsers.Count))
+				.ForMember(dest => dest.NumOfEvents,
+					opt => opt.MapFrom(src => src.Events.Count));
+
+			CreateMap<OrganizationUpdateDto, Organization>()
+				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+				.ForMember(dest => dest.UpdatedBy, opt => opt.Ignore()) // Set this separately
+				.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
 			CreateMap<OrganizationCreateDto, Organization>()
 				.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.CreatedBy));
@@ -76,12 +89,14 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.OrganizationId, opt => opt.MapFrom(src => src.OrganizationId))
 				.ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
 
+            CreateMap<EventUpdateDto, Event>();
+
             CreateMap<Event, EventOverviewDto>()
-				.ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees.Count));
+				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count));
 
-			// Agenda mappings
+            // Agenda mappings
 
-			CreateMap<AgendaEntryDto, AgendaEntry>()
+            CreateMap<AgendaEntryDto, AgendaEntry>()
 				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))

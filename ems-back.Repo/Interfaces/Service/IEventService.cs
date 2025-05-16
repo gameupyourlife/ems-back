@@ -10,19 +10,15 @@ using ems_back.Repo.DTOs.Agenda;
 public interface IEventService
 {
     Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
-    Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto);
+    Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId);
     Task<EventInfoDto> GetEventAsync(Guid orgId, Guid eventId);
-    Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventInfoDto eventDto);
-    Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);
+    Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto, Guid userId);
+    Task<bool> DeleteEventAsync(Guid orgId, Guid eventId, Guid userId);
     Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
-    Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeDto attendeeDto);
-    Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId, Guid attendeeId);
+    Task<EventAttendeeDto> AddAttendeeToEventAsync(Guid orgId, Guid eventId, EventAttendeeCreateDto attendeeDto, Guid userId);
+    Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid attendeeId, Guid userId);
     Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId);
-    Task<AgendaEntryDto> AddAgendaPointToEventAsync(Guid orgId, Guid eventId, AgendaEntryCreateDto agendaEntryDto);
+    Task<AgendaEntryDto> AddAgendaPointToEventAsync(Guid orgId, Guid eventId, AgendaEntryCreateDto agendaEntryDto, Guid userId);
     Task<AgendaEntryDto> UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntryDto);
     Task<bool> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId);
-    Task<IEnumerable<FileDto>> GetFilesFromEventAsync(Guid orgId, Guid eventId);
-    Task<FileDto> AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file);
-    Task<FileDto> UpdateFileAsync(Guid orgId, Guid eventId, Guid fileId, FileDto file);
-    Task<FileDto> DeleteFileAsync(Guid orgId, Guid eventId, Guid fileId);
 }
