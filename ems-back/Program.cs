@@ -115,7 +115,7 @@ namespace ems_back
             builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 
             // JWT Authentication
-            builder.Services.AddAuthentication(options =>
+            /*builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -134,7 +134,7 @@ namespace ems_back
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                 };
-            });
+            });*/
 
             // Authorization Policies
             builder.Services.AddAuthorization(options =>
@@ -172,8 +172,8 @@ namespace ems_back
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.MapControllers();
 
