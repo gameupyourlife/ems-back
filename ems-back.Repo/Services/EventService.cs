@@ -99,23 +99,6 @@ namespace ems_back.Repo.Services
         {
             var isAuthenticated = await IsAuthenticated(userId, true, true, true);
 
-            //var user = await _userManager.FindByIdAsync(userId.ToString());
-            //if (user == null)
-            //{
-            //    _logger.LogWarning("User with id {UserId} does not exist", userId);
-            //    throw new UnauthorizedAccessException("User not found");
-            //}
-
-            //var isAdmin = await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString());
-            //var isOwner = await _userManager.IsInRoleAsync(user, UserRole.Owner.ToString());
-            //var isOrganizer = await _userManager.IsInRoleAsync(user, UserRole.Organizer.ToString());
-
-            //if (!isAdmin && !isOwner && !isOrganizer)
-            //{
-            //    _logger.LogWarning("User with id {UserId} is not authorized to create events", userId);
-            //    throw new UnauthorizedAccessException("Insufficient permissions");
-            //}
-
             var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,
