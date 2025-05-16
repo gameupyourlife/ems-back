@@ -7,6 +7,7 @@ using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,40 @@ namespace ems_back.Repo.Services
             _userManager = userManager;
         }
 
+        private async Task<bool> IsAuthenticated(
+            Guid userId, 
+            bool shouldAdmin, 
+            bool shouldOwner, 
+            bool shouldOrganizer)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} does not exist", userId);
+                return false;
+            }
+
+            if (shouldAdmin)
+            {
+                var isAdmin = await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString());
+                if (isAdmin) return true;
+            }
+
+            if (shouldOwner)
+            {
+                var isOwner = await _userManager.IsInRoleAsync(user, UserRole.Owner.ToString());
+                if (isOwner) return true;
+            }
+
+            if (shouldOrganizer)
+            {
+                var isOrganizer = await _userManager.IsInRoleAsync(user, UserRole.Organizer.ToString());
+                if (isOrganizer) return true;
+            }
+
+            return false;
+        }
+
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
             if (!Guid.TryParse(orgId.ToString(), out Guid parsedOrgId))
@@ -62,22 +97,24 @@ namespace ems_back.Repo.Services
 
         public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-            {
-                _logger.LogWarning("User with id {UserId} does not exist", userId);
-                throw new UnauthorizedAccessException("User not found");
-            }
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
 
-            var isAdmin = await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString());
-            var isOwner = await _userManager.IsInRoleAsync(user, UserRole.Owner.ToString());
-            var isOrganizer = await _userManager.IsInRoleAsync(user, UserRole.Organizer.ToString());
+            //var user = await _userManager.FindByIdAsync(userId.ToString());
+            //if (user == null)
+            //{
+            //    _logger.LogWarning("User with id {UserId} does not exist", userId);
+            //    throw new UnauthorizedAccessException("User not found");
+            //}
 
-            if (!isAdmin && !isOwner && !isOrganizer)
-            {
-                _logger.LogWarning("User with id {UserId} is not authorized to create events", userId);
-                throw new UnauthorizedAccessException("Insufficient permissions");
-            }
+            //var isAdmin = await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString());
+            //var isOwner = await _userManager.IsInRoleAsync(user, UserRole.Owner.ToString());
+            //var isOrganizer = await _userManager.IsInRoleAsync(user, UserRole.Organizer.ToString());
+
+            //if (!isAdmin && !isOwner && !isOrganizer)
+            //{
+            //    _logger.LogWarning("User with id {UserId} is not authorized to create events", userId);
+            //    throw new UnauthorizedAccessException("Insufficient permissions");
+            //}
 
             var eventInfo = new EventInfoDto
             {
@@ -124,8 +161,19 @@ namespace ems_back.Repo.Services
         }
 
         public async Task<EventInfoDto> UpdateEventAsync(
-            Guid orgId, Guid eventId, EventUpdateDto eventDto)
+            Guid orgId, 
+            Guid eventId, 
+            EventUpdateDto eventDto,
+            Guid userId)
         {
+
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
+            if (!isAuthenticated)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to update events", userId);
+                return null;
+            }
+
             if (eventId != eventDto.Id || orgId != eventDto.OrganizationId)
             {
                 return null;
@@ -134,8 +182,15 @@ namespace ems_back.Repo.Services
             return await _eventRepository.UpdateEventAsync(eventDto);
         }
 
-        public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
+        public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId, Guid userId)
         {
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
+            if (!isAuthenticated)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to delete events", eventId);
+                return false;
+            }
+
             return await _eventRepository.DeleteEventAsync(orgId, eventId);
         }
 
@@ -157,8 +212,16 @@ namespace ems_back.Repo.Services
         public async Task<EventAttendeeDto> AddAttendeeToEventAsync(
             Guid orgId, 
             Guid eventId, 
-            EventAttendeeCreateDto attendeeDto)
+            EventAttendeeCreateDto attendeeDto,
+            Guid userId)
         {
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
+            if (!isAuthenticated)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to add attendees to events", attendeeDto.UserId);
+                return null;
+            }
+
             var user = await _userRepository.GetUserByIdAsync(attendeeDto.UserId);
             if (user == null)
             {
@@ -202,11 +265,20 @@ namespace ems_back.Repo.Services
                 Status = AttendeeStatus.Pending,
             };
 
-            var isCreated = await _eventRepository.AddAttendeeToEventAsync(attendee);
-            
-            if (!isCreated)
+            try
             {
-                _logger.LogWarning("Failed to add attendee to event with id {EventId}", eventId);
+                var isCreated = await _eventRepository.AddAttendeeToEventAsync(attendee);
+
+                if (!isCreated)
+                {
+                    _logger.LogWarning("Failed to add attendee to event with id {EventId}", eventId);
+                    return null;
+                }
+            }
+
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error adding attendee to event with id {EventId}", eventId);
                 return null;
             }
 
@@ -224,9 +296,23 @@ namespace ems_back.Repo.Services
             return attendeeInfo;
         }
 
-        public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId)
+        public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid attendeeId, Guid userId)
         {
-            return await _eventRepository.RemoveAttendeeFromEventAsync(orgId, eventId, userId);
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
+            if (!isAuthenticated)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to remove attendees from events", userId);
+                return false;
+            }
+
+            var eventInfo = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventInfo == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return false;
+            }
+
+            return await _eventRepository.RemoveAttendeeFromEventAsync(eventId, attendeeId);
         }
 
 
@@ -244,8 +330,16 @@ namespace ems_back.Repo.Services
         public async Task<AgendaEntryDto> AddAgendaPointToEventAsync(
             Guid orgId, 
             Guid eventId, 
-            AgendaEntryCreateDto agendaEntryDto)
+            AgendaEntryCreateDto agendaEntryDto,
+            Guid userId)
         {
+            var isAuthenticated = await IsAuthenticated(userId, true, true, true);
+            if (!isAuthenticated)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to add agenda points to events", userId);
+                return null;
+            }
+
             var agendaEntry = new AgendaEntryDto
             {
                 Title = agendaEntryDto.Title,
@@ -273,30 +367,11 @@ namespace ems_back.Repo.Services
             Guid agendaId, 
             AgendaEntryDto agendaEntryDto)
         {
+
             throw new NotImplementedException();
         }
 
         public async Task<bool> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<FileDto>> GetFilesFromEventAsync(Guid orgId, Guid eventId)
-        {
-            return await _eventRepository.GetFilesFromEvent(orgId, eventId);
-        }
-
-        public async Task<FileDto> AddFileToEventAsync(Guid orgId, Guid eventId, FileDto file)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<FileDto> UpdateFileAsync(Guid orgId, Guid eventId, Guid fileId, FileDto file)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<FileDto> DeleteFileAsync(Guid orgId, Guid eventId, Guid fileId)
         {
             throw new NotImplementedException();
         }

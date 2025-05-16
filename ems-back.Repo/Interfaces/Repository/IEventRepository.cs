@@ -14,15 +14,11 @@ public interface IEventRepository
 	Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);
 	Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
 	Task<bool> AddAttendeeToEventAsync(EventAttendee attendee);
-	Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId);
+	Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId);
 	Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid orgId, Guid eventId);
 	Task<Guid> AddAgendaPointToEventAsync(AgendaEntryDto agendaEntry);
 	Task<AgendaEntryDto> UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntry);
 	Task<AgendaEntryDto> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId);
-	Task<IEnumerable<FileDto>> GetFilesFromEvent(Guid orgId, Guid eventId);
-	Task<FileDto> AddFileToEvent(Guid orgId, Guid eventId, FileDto file);
-	Task<FileDto> UpdateFile(Guid orgId, Guid eventId, Guid fileId, FileDto file);
-	Task<FileDto> RemoveFileFromEvent(Guid orgId, Guid eventId, Guid fileId);
 
     // Additional methods
 

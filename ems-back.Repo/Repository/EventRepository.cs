@@ -127,9 +127,11 @@ namespace ems_back.Repo.Repository
         {
 
             var eventEntity = await _context.Events.FindAsync(eventId);
-            if (eventEntity == null)
+            if (eventEntity == null || eventEntity.OrganizationId != orgId)
+            {
                 return false;
-
+            }
+                
             _context.Events.Remove(eventEntity);
             await _context.SaveChangesAsync();
             return true;
@@ -162,10 +164,10 @@ namespace ems_back.Repo.Repository
             return true;
         }
 
-        public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid userId)
+        public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId)
         {
-            var attendee = await _context.EventAttendees.FindAsync(orgId, userId);
-            if (attendee == null || attendee.EventId != eventId)
+            var attendee = await _context.EventAttendees.FindAsync(eventId, userId);
+            if (attendee == null)
             {
                 return false;
             }
@@ -211,40 +213,6 @@ namespace ems_back.Repo.Repository
         {
             throw new NotImplementedException("DeleteAgendaPointAsync is not implemented yet");
         }
-
-        public async Task<IEnumerable<FileDto>> GetFilesFromEvent(Guid orgId, Guid eventId)
-        {
-            var files = await _context.Files
-                .Where(e => e.Event.Id == eventId)
-                .Select(f => new FileDto
-                {
-                    Id = f.Id,
-                    Url = f.Url,
-                    Type = f.Type,
-                    UploadedAt = f.UploadedAt,
-                    UploadedBy = f.UploadedBy,
-                    Name = f.Name,
-                })
-                .ToListAsync();
-
-            return files;
-        }
-
-        public async Task<FileDto> AddFileToEvent(Guid orgId, Guid eventId, FileDto file)
-        {
-            throw new NotImplementedException("AddFileToEvent is not implemented yet");
-        }
-
-        public async Task<FileDto> UpdateFile(Guid orgId, Guid eventId, Guid fileId, FileDto file)
-        {
-            throw new NotImplementedException("UpdateFile is not implemented yet");
-        }
-
-        public async Task<FileDto> RemoveFileFromEvent(Guid orgId, Guid eventId, Guid fileId)
-        {
-            throw new NotImplementedException("RemoveFileFromEvent is not implemented yet");
-        }
-
 
         // Additional Methods:
 
