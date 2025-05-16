@@ -5,6 +5,7 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using System;
@@ -21,18 +22,22 @@ namespace ems_back.Repo.Services
         private readonly IUserRepository _userRepository;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
+        private readonly UserManager<User> _userManager;
+
 
         public EventService(
 			IEventRepository eventRepository,
 			IUserRepository userRepository,
             IOrganizationRepository organizationRepository,
-            ILogger<EventService> logger)
+            ILogger<EventService> logger,
+            UserManager<User> userManager)
 		{
 			_eventRepository = eventRepository;
             _userRepository = userRepository;
             _organizationRepository = organizationRepository;
             _logger = logger;
-		}
+            _userManager = userManager;
+        }
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId)
 		{
@@ -55,8 +60,25 @@ namespace ems_back.Repo.Services
             }	
 		}
 
-        public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto)
+        public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId)
         {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} does not exist", userId);
+                throw new UnauthorizedAccessException("User not found");
+            }
+
+            var isAdmin = await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString());
+            var isOwner = await _userManager.IsInRoleAsync(user, UserRole.Owner.ToString());
+            var isOrganizer = await _userManager.IsInRoleAsync(user, UserRole.Organizer.ToString());
+
+            if (!isAdmin && !isOwner && !isOrganizer)
+            {
+                _logger.LogWarning("User with id {UserId} is not authorized to create events", userId);
+                throw new UnauthorizedAccessException("Insufficient permissions");
+            }
+
             var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,

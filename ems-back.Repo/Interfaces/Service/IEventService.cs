@@ -10,7 +10,7 @@ using ems_back.Repo.DTOs.Agenda;
 public interface IEventService
 {
     Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
-    Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto);
+    Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId);
     Task<EventInfoDto> GetEventAsync(Guid orgId, Guid eventId);
     Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto);
     Task<bool> DeleteEventAsync(Guid orgId, Guid eventId);

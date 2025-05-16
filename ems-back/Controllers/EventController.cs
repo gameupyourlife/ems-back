@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
+using System.Security.Claims;
 
 namespace ems_back.Controllers
 {
@@ -51,14 +52,22 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events
         [HttpPost]  
-        //[Authorize(Roles = "Organizer,Admin,EventOrganizer")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventInfoDto>> CreateEvent(
 			[FromRoute] Guid orgId,
             [FromBody] EventCreateDto eventDto)
         {
             try
             {
-                var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("User ID not found in claims");
+                    return BadRequest("User ID not found");
+                }
+
+
+                var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto, Guid.Parse(userId));
                 if (createdEvent == null)
                 {
                     _logger.LogWarning("Failed to create event");
