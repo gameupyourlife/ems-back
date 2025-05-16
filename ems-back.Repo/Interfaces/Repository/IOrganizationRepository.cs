@@ -23,7 +23,7 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<OrganizationResponseDto> GetOrganizationByIdAsync(Guid id);
 		Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync();
 		Task<IEnumerable<OrganizationOverviewDto>> GetOrganizationsByUserAsync(Guid userId);
-		
+
 
 		// Domain Management
 		Task<bool> AddDomainToOrganizationAsync(Guid organizationId, string domain);
@@ -33,10 +33,11 @@ namespace ems_back.Repo.Interfaces.Repository
 
 		// Validation Operations
 		Task<bool> OrganizationExistsAsync(Guid id);
-		
 
 
-	// Internal Use
-	Task<Organization> GetOrganizationEntityAsync(Guid id);
-    Task<OrganizationUserDto> GetOrganizationUserAsync(Guid orgId, Guid userId);
+
+		// Internal Use
+
+		Task<OrganizationUserDto> GetOrganizationUserAsync(Guid orgId, Guid userId);
+	}
 }

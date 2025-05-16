@@ -73,14 +73,21 @@ namespace ems_back.Controllers
                     _logger.LogWarning("Failed to create event");
                     return BadRequest("Failed to create event");
                 }
-				_logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
+                _logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
                 return createdEvent;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access while creating event");
+                return Unauthorized("User is not authorized to create events");
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating event");
                 return StatusCode(500, "Internal server error");
             }
+            
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}
