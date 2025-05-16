@@ -1,180 +1,231 @@
 ﻿using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
-using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+using ems_back.Repo.DTOs.Domain;
+using ems_back.Services;
+using Microsoft.AspNetCore.Authorization;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Controllers
 {
-    [Route("api/orgs")]
-    [ApiController]
-    public class OrganizationsController : ControllerBase
-    {
-        private readonly IOrganizationRepository _organizationRepository;
+	[Route("api/orgs")]
+	[ApiController]
+	public class OrganizationsController : ControllerBase
+	{
+		private readonly IOrganizationService _organizationService;
+		private readonly ILogger<OrganizationsController> _logger;
 
-        public OrganizationsController(IOrganizationRepository organizationRepository)
-        {
-            _organizationRepository = organizationRepository;
-        }
+		public OrganizationsController(
+			IOrganizationService organizationService,
+			ILogger<OrganizationsController> logger)
+		{
+			_organizationService = organizationService;
+			_logger = logger;
+		}
 
-        // GET: api/orgs
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrganizationResponseDto>>> GetOrganizations()
-        {
-            try
-            {
-                var organizations = await _organizationRepository.GetAllOrganizationsAsync();
-                return Ok(organizations);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+		private string? GetAuthenticatedUserId()
+		{
+			return User.FindFirstValue(ClaimTypes.NameIdentifier);
+		}
 
-        // POST: api/orgs
-        [HttpPost]
-        public async Task<ActionResult<OrganizationResponseDto>> CreateOrganization(
-            [FromBody] OrganizationCreateDto organizationDto)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+		// GET: api/orgs
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<OrganizationResponseDto>>> GetOrganizations()
+		{
+			try
+			{
+				var organizations = await _organizationService.GetAllOrganizationsAsync();
+				return Ok(organizations);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting all organizations");
+				return StatusCode(500, "Internal server error");
+			}
+		}
 
-                var createdOrg = await _organizationRepository.CreateOrganizationAsync(organizationDto);
-                return CreatedAtAction(nameof(GetOrganization), new { id = createdOrg.Id }, createdOrg);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+		// POST: api/orgs
+		[HttpPost]
+		public async Task<ActionResult<OrganizationResponseDto>> CreateOrganization(
+			[FromBody] OrganizationCreateDto organizationDto)
+		{
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
 
-        // GET: api/orgs/{orgId}
-        [HttpGet("{orgId}")]
-        public async Task<ActionResult<OrganizationResponseDto>> GetOrganization(Guid orgId)
-        {
-            try
-            {
-                var organization = await _organizationRepository.GetOrganizationByIdAsync(orgId);
-                return organization == null ? NotFound() : Ok(organization);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				var createdOrg = await _organizationService.CreateOrganizationAsync(organizationDto);
 
-        // PUT: api/orgs/{orgId}
-        [HttpPut("{orgId}")]
-        public async Task<IActionResult> UpdateOrganization(
-            Guid orgId,
-            [FromBody] OrganizationUpdateDto organizationDto)
-        {
-            try
-            {
-                var result = await _organizationRepository.UpdateOrganizationAsync(orgId, organizationDto);
-                return result == null ? NotFound() : NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				return CreatedAtAction(
+					nameof(GetOrganization),
+					new { orgId = createdOrg.Id },
+					createdOrg);
+			}
+			catch (DomainConflictException ex)
+			{
+				return Conflict(new { message = ex.Message });
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating organization");
+				return StatusCode(500, "Internal server error");
+			}
+		}
 
-        // DELETE: api/orgs/{orgId}
-        [HttpDelete("{orgId}")]
-        public async Task<IActionResult> DeleteOrganization(Guid orgId)
-        {
-            try
-            {
-                var success = await _organizationRepository.DeleteOrganizationAsync(orgId);
-                if (!success)
-                    return NotFound(new { message = "Organization not found" });
+		// GET: api/orgs/{orgId}
+		[HttpGet("{orgId}")]
+		public async Task<ActionResult<OrganizationResponseDto>> GetOrganization(Guid orgId)
+		{
+			try
+			{
+				var organization = await _organizationService.GetOrganizationByIdAsync(orgId);
+				return organization == null ? NotFound() : Ok(organization);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting organization {OrgId}", orgId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
 
-                return Ok(new { message = "Organization deleted successfully" }); // Change from NoContent() to Ok()
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
-            }
-        }
+		// PUT: api/orgs/{orgId}
+		[HttpPut("{orgId}")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+		public async Task<IActionResult> UpdateOrganization(
+			Guid orgId,
+			[FromBody] OrganizationUpdateDto organizationDto)
+		{
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
 
-        // GET: api/orgs/{orgId}/members
-        [HttpGet("{orgId}/members")]
-        public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetMembers(Guid orgId)
-        {
-            // Vom Copiloten erstellt und nicht geprüft
-            try
-            {
-                var members = await _organizationRepository.GetOrganizationsByUserAsync(orgId);
-                return Ok(members);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				var updatedByUserId = GetAuthenticatedUserId();
+				if (updatedByUserId == null)
+				{
+					return Unauthorized("User not authenticated");
+				}
 
-        // POST: api/orgs/{orgId}/members
-        [HttpPost("{orgId}/members")]
-        public async Task<ActionResult<IEnumerable<UserResponseDto>>> AddMembers(
-            Guid orgId,
-            [FromBody] IEnumerable<UserCreateDto> userDtos)
-        {
-            // Vom Copiloten erstellt und nicht geprüft
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-                var members = await _organizationRepository.GetOrganizationsByUserAsync(orgId);
-                return CreatedAtAction(nameof(GetMembers), new { orgId }, members);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				var result = await _organizationService.UpdateOrganizationAsync(
+					orgId,
+					organizationDto,
+					Guid.Parse(updatedByUserId));
 
-        // PUT: api/orgs/{orgId}/members/{userId}
-        [HttpPut("{orgId}/members/{userId}")]
-        public async Task<ActionResult<IEnumerable<UserResponseDto>>> UpdateMembers(
-            Guid orgId,
-            Guid userId,
-            [FromBody] UserUpdateDto userDto)
-        {
-            // Vom Copiloten erstellt und nicht geprüft
-            try
-            {
-                var members = await _organizationRepository.GetOrganizationsByUserAsync(orgId);
-                return Ok(members);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				return result == null ? NotFound() : NoContent();
+			}
+			catch (ArgumentException ex)
+			{
+				_logger.LogWarning(ex, "Invalid argument in organization update");
+				return BadRequest(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating organization {OrgId}", orgId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
 
-        // DELETE: api/orgs/{orgId}/members/{userId}
-        [HttpDelete("{orgId}/members/{userId}")]
-        public async Task<IActionResult> DeleteMember(Guid orgId, Guid userId)
-        {
-            // Vom Copiloten erstellt und nicht geprüft
-            try
-            {
-                var success = await _organizationRepository.DeleteOrganizationAsync(orgId);
-                if (!success)
-                    return NotFound(new { message = "Organization not found" });
-                return Ok(new { message = "Organization deleted successfully" }); // Change from NoContent() to Ok()
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
-            }
-        }
-    }
+		// DELETE: api/orgs/{orgId}
+		[HttpDelete("{orgId}")]
+		public async Task<IActionResult> DeleteOrganization(Guid orgId)
+		{
+			try
+			{
+				var updatedByUserId = GetAuthenticatedUserId();
+				if (updatedByUserId == null)
+				{
+					return Unauthorized("User not authenticated");
+				}
+
+				var success = await _organizationService.DeleteOrganizationAsync(orgId, Guid.Parse(updatedByUserId));
+				return success ? Ok(new { message = "Organization deleted successfully" }) : NotFound();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting organization {OrgId}", orgId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		// DOMAIN MANAGEMENT ENDPOINTS
+
+		// GET: api/orgs/{orgId}/domains
+		[HttpGet("{orgId}/domains")]
+		public async Task<ActionResult<IEnumerable<string>>> GetOrganizationDomains(Guid orgId)
+		{
+			try
+			{
+				var domains = await _organizationService.GetOrganizationDomainsAsync(orgId);
+				return Ok(domains);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting domains for organization {OrgId}", orgId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		// POST: api/orgs/{orgId}/domains
+		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)}")]
+
+		[HttpPost("{orgId}/domains")]
+		public async Task<IActionResult> AddDomainToOrganization(
+			Guid orgId,
+			[FromBody] AddDomainDto domainDto)
+		{
+			
+			try
+			{
+				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+				if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+				var result = await _organizationService.AddDomainToOrganizationAsync(
+					orgId,
+					domainDto.Domain,
+					Guid.Parse(userId));
+
+				return result
+					? CreatedAtAction(
+						nameof(GetOrganizationDomains),
+						new { orgId },
+						new { domain = domainDto.Domain })
+					: BadRequest("Failed to add domain");
+
+			}
+			catch (UnauthorizedAccessException) { return Forbid(); }
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error adding domain to organization {OrgId}, orgId");
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+		// MEMBER MANAGEMENT ENDPOINTS
+		[HttpGet("{orgId}/members")]
+		public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetMembers(Guid orgId)
+		{
+			try
+			{
+				var members = await _organizationService.GetOrganizationMembersAsync(orgId);
+				return Ok(members);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting members for organization {OrgId}", orgId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
+
+
+	}
 }

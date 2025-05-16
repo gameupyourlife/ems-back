@@ -4,6 +4,9 @@ using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Organization;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using ems_back.Repo.DTOs.Password;
 
 namespace ems_back.Controllers
 {
@@ -46,11 +49,19 @@ namespace ems_back.Controllers
         }
 
         // PUT: api/users/{userId}
-        [HttpPut("{userId}")]
-        public async Task<ActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateDto userDto)
+        [Authorize]
+        [HttpPut("update-user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try
             {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized("Invalid user identity.");
+                }
+
                 var updatedUser = await _userService.UpdateUserAsync(userId, userDto);
                 if (updatedUser == null)
                 {
@@ -61,7 +72,7 @@ namespace ems_back.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating user with id {UserId}", userId);
+                _logger.LogError(ex, "Error updating current user");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -87,7 +98,6 @@ namespace ems_back.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
         // DELETE: api/users/{userId}
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
@@ -110,25 +120,43 @@ namespace ems_back.Controllers
         }
 
         // GET: api/users/{userId}/orgs
+       
         [HttpGet("{userId}/orgs")]
+        [ProducesResponseType(typeof(IEnumerable<OrganizationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
         {
-            try
-            {
-                var organizations = await _userService.GetUserOrganizationsAsync(userId);
-                return Ok(organizations);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
-                return StatusCode(500, "Internal server error");
-            }
+	        try
+	        {
+		        var organizations = await _userService.GetUserOrganizationsAsync(userId);
+
+		        if (organizations == null || !organizations.Any())
+		        {
+			        _logger.LogInformation("No organizations found for user {UserId}", userId);
+			        return NotFound($"No organizations found for user {userId}");
+		        }
+
+		        _logger.LogInformation("Successfully retrieved {OrganizationCount} organizations for user {UserId}",
+			        organizations.Count(), userId);
+		        return Ok(organizations);
+	        }
+	        catch (KeyNotFoundException ex)
+	        {
+		        _logger.LogWarning(ex, "User not found: {UserId}", userId);
+		        return NotFound(ex.Message);
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
+		        return StatusCode(500, "Internal server error while processing your request");
+	        }
         }
 
 
 
-        // DELETE: api/users/admin-delete
-        [HttpDelete("admin-delete")]
+		// DELETE: api/users/{userId}/admin-delete
+		[HttpDelete("UserAccount/delete")]
         public async Task<IActionResult> AdminDeleteUser([FromQuery] Guid? userId, [FromQuery] string? email)
         {
             try
@@ -152,5 +180,32 @@ namespace ems_back.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-    }
+
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)
+        {
+	        try
+	        {
+		        await _userService.ResetPasswordAsync(resetDto);
+		        return Ok(new { Message = "Password reset successful" });
+	        }
+	        catch (KeyNotFoundException ex)
+	        {
+		        return NotFound(new { Error = ex.Message });
+	        }
+	        catch (ArgumentException ex)
+	        {
+		        return BadRequest(new { Error = ex.Message });
+	        }
+	        catch (InvalidOperationException ex)
+	        {
+		        return BadRequest(new { Error = ex.Message });
+	        }
+	        catch (Exception ex)
+	        {
+		        return StatusCode(500, new { Error = "An unexpected error occurred" });
+	        }
+        }
+	}
 }
