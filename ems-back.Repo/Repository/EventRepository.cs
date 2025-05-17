@@ -94,11 +94,12 @@ namespace ems_back.Repo.Repository
             return eventEntity;
 		}
     
-        public async Task<EventInfoDto> UpdateEventAsync(EventUpdateDto eventDto)
+        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto, Guid userId)
         {
 
-            var existingEvent = await _context.Events.FindAsync(eventDto.Id);
-
+            var existingEvent = await _context.Events
+                .Where(e => e.OrganizationId == orgId && e.Id == eventId)
+                .FirstOrDefaultAsync();
             if (existingEvent == null)
             {
                 return null;
@@ -114,13 +115,12 @@ namespace ems_back.Repo.Repository
                 DateTime.UtcNow.Second,
                 DateTimeKind.Utc
             );
-
-            existingEvent.UpdatedBy = eventDto.UpdatedBy;
+            existingEvent.UpdatedBy = userId;
 
             _context.Events.Update(existingEvent);
             await _context.SaveChangesAsync();
 
-            return await GetEventByIdAsync(eventDto.OrganizationId, eventDto.Id);
+            return await GetEventByIdAsync(orgId, eventId);
         }
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
@@ -160,8 +160,12 @@ namespace ems_back.Repo.Repository
         public async Task<bool> AddAttendeeToEventAsync(EventAttendee attendee)
         {
             _context.EventAttendees.Add(attendee);
-            await _context.SaveChangesAsync();
-            return true;
+            if (await IncreaseAttendeeCount(attendee.EventId))
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId)
@@ -177,7 +181,44 @@ namespace ems_back.Repo.Repository
             return true;
         }
 
-        public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid orgId, Guid eventId)
+        public async Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null || eventEntity.OrganizationId != orgId)
+            {
+                return false;
+            }
+            var organizer = await _context.Users.FindAsync(organizerId);
+            if (organizer == null)
+            {
+                return false;
+            }
+
+            var eventOrganizer = new EventOrganizer
+            {
+                EventId = eventId,
+                UserId = organizerId
+            };
+
+            eventEntity.Organizers.Add(eventOrganizer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var organizer = await _context.EventOrganizers.FindAsync(eventId, organizerId);
+            if (organizer == null)
+            {
+                return false;
+            }
+
+            _context.EventOrganizers.Remove(organizer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid eventId)
         {
             var eventEntity = await _context.AgendaEntries
                 .Where(e => e.EventId == eventId)
@@ -289,6 +330,19 @@ namespace ems_back.Repo.Repository
                 .FirstOrDefaultAsync(); 
 
             return eventEntity;
+        }
+
+        private async Task<bool> IncreaseAttendeeCount(Guid eventId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+            eventEntity.AttendeeCount++;
+            _context.Events.Update(eventEntity);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
