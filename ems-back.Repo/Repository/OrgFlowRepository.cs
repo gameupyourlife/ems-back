@@ -8,6 +8,8 @@ using ems_back.Repo.Models.Types;
 using ems_back.Repo.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ems_back.Repo.DTOs.Action;
+using System.Text.Json;
 
 namespace ems_back.Repo.Repository
 {
@@ -105,6 +107,115 @@ namespace ems_back.Repo.Repository
             await _dbContext.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<IEnumerable<ActionDto>> GetActionsForTemplateAsync(Guid orgId, Guid templateId)
+        {
+            var actions = await _dbContext.Actions
+                .Where(a => a.FlowTemplateId == templateId && a.FlowTemplate.OrganizationId == orgId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var actionDtos = actions.Select(a => new ActionDto
+            {
+                Id = a.Id,
+                Type = a.Type,
+                Details = string.IsNullOrWhiteSpace(a.Details)
+                    ? JsonDocument.Parse("{}").RootElement
+                    : JsonDocument.Parse(a.Details).RootElement,
+                CreatedAt = a.CreatedAt,
+                FlowTemplateId = a.FlowTemplateId,
+                Name = a.Name,
+                Summary = a.Summary
+            });
+
+            return actionDtos;
+        }
+
+        public async Task<ActionDto> CreateActionAsync(Models.Action action)
+        {
+            _dbContext.Actions.Add(action);
+            await _dbContext.SaveChangesAsync();
+
+            return new ActionDto
+            {
+                Id = action.Id,
+                Type = action.Type,
+                Details = string.IsNullOrWhiteSpace(action.Details)
+                    ? JsonDocument.Parse("{}").RootElement
+                    : JsonDocument.Parse(action.Details).RootElement,
+                CreatedAt = action.CreatedAt,
+                FlowTemplateId = action.FlowTemplateId,
+                Name = action.Name,
+                Summary = action.Summary
+            };
+        }
+
+        public async Task<ActionDto?> GetActionByIdAsync(Guid orgId, Guid templateId, Guid actionId)
+        {
+            var action = await _dbContext.Actions
+                .Where(a => a.FlowTemplateId == templateId && a.Id == actionId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (action == null) return null;
+
+            var detailsJson = string.IsNullOrWhiteSpace(action.Details)
+                ? JsonDocument.Parse("{}").RootElement
+                : JsonDocument.Parse(action.Details).RootElement;
+
+            var actionDto = new ActionDto
+            {
+                Id = action.Id,
+                Type = action.Type,
+                Details = detailsJson,
+                CreatedAt = action.CreatedAt,
+                FlowTemplateId = action.FlowTemplateId,
+                Name = action.Name,
+                Summary = action.Summary
+            };
+
+            return actionDto;
+        }
+
+        public async Task<ActionDto> UpdateActionAsync(Guid actionId, ActionUpdateDto dto)
+        {
+            var existing = await _dbContext.Actions.FindAsync(actionId);
+            if (existing == null)
+                throw new KeyNotFoundException("Action not found");
+
+            existing.Type = dto.Type;
+            existing.Details = dto.Details;  // JsonElement -> JSON-String
+            existing.Name = dto.Name;
+            existing.Summary = dto.Summary;
+
+            await _dbContext.SaveChangesAsync();
+
+            return new ActionDto
+            {
+                Id = existing.Id,
+                Type = existing.Type,
+                Details = JsonDocument.Parse(existing.Details).RootElement,
+                CreatedAt = existing.CreatedAt,
+                FlowTemplateId = existing.FlowTemplateId,
+                Name = existing.Name,
+                Summary = existing.Summary
+            };
+        }
+
+        public async Task<bool> DeleteActionAsync(Guid actionId)
+        {
+            var action = await _dbContext.Actions.FindAsync(actionId);
+            if (action != null)
+            {
+                _dbContext.Actions.Remove(action);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }

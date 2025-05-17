@@ -1,9 +1,11 @@
-﻿using ems_back.Repo.DTOs.Flow;
+﻿using ems_back.Repo.DTOs.Action;
+using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
 using ems_back.Repo.DTOs.Placeholder;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using ems_back.Repo.Services;
 using ems_back.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -149,37 +151,125 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/flows/{flowId}/actions
         [HttpGet("{templateId}/actions")]
-        public async Task<ActionResult<PlaceholderDTO>> GetActions(Guid orgId, Guid flowId)
+        public async Task<ActionResult<IEnumerable<ActionDto>>> GetActions(Guid orgId, Guid templateId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var actions = await _orgFlowService.GetActionsForTemplateAsync(orgId, templateId);
+
+                if (actions == null || !actions.Any())
+                {
+                    _logger.LogWarning("No actions found for template {TemplateId} in organization {OrgId}", templateId, orgId);
+                    return NotFound("No actions found for this template");
+                }
+
+                _logger.LogInformation("Returned actions for template {TemplateId} in organization {OrgId}", templateId, orgId);
+                return Ok(actions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving actions for template {TemplateId}", templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/flows/{flowId}/actions
         [HttpPost("{templateId}/actions")]
-        public async Task<ActionResult<PlaceholderDTO>> CreateAction(Guid orgId, Guid flowId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<ActionDto>> CreateAction([FromRoute] Guid orgId, [FromRoute] Guid templateId, 
+            [FromBody] ActionCreateDto actionCreateDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (actionCreateDto == null)
+                {
+                    return BadRequest("Action data is required.");
+                }
+
+                if (!Enum.IsDefined(typeof(ActionType), actionCreateDto.Type))
+                {
+                    return BadRequest("Action type is invalid.");
+                }
+
+                var createdAction = await _orgFlowService.CreateActionAsync(orgId, templateId, actionCreateDto);
+
+                return createdAction;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating action for template {TemplateId}", templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
         // GET: api/orgs/{orgId}/flows/{flowId}/actions/{actionId}
         [HttpGet("{templateId}/actions/{actionId}")]
-        public async Task<ActionResult<PlaceholderDTO>> GetActionDetails(Guid orgId, Guid flowId, Guid actionId)
+        public async Task<ActionResult<ActionDto>> GetActionDetails(Guid orgId, Guid templateId, Guid actionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var action = await _orgFlowService.GetActionByIdAsync(orgId, templateId, actionId);
+
+                if (action == null)
+                {
+                    _logger.LogWarning("Action with ID {ActionId} not found for template {TemplateId} in organization {OrgId}", actionId, templateId, orgId);
+                    return NotFound("Action not found for this template");
+                }
+
+                _logger.LogInformation("Returned action with ID {ActionId} for template {TemplateId} in organization {OrgId}", actionId, templateId, orgId);
+                return Ok(action);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving action with ID {ActionId} for template {TemplateId}", actionId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
         // PUT: api/orgs/{orgId}/flows/{flowId}/actions/{actionId}
         [HttpPut("{templateId}/actions/{actionId}")]
-        public async Task<ActionResult> UpdateAction(Guid orgId, Guid flowId, Guid actionId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<ActionDto>> UpdateAction(Guid orgId, Guid templateId, Guid actionId, [FromBody] ActionUpdateDto dto)
         {
-            throw new NotImplementedException();
+            if (dto == null)
+                return BadRequest("Action data is required.");
+
+            try
+            {
+                var updatedAction = await _orgFlowService.UpdateActionAsync(orgId, templateId, actionId, dto);
+                return Ok(updatedAction); // <- GIBT aktualisierte ActionDto zurück
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating action {ActionId} for template {TemplateId}", actionId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
         // DELETE: api/orgs/{orgId}/flows/{flowId}/actions/{actionId}
         [HttpDelete("{templateId}/actions/{actionId}")]
-        public async Task<ActionResult> DeleteAction(Guid orgId, Guid flowId, Guid actionId)
+        public async Task<ActionResult> DeleteAction(Guid orgId, Guid templateId, Guid actionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _orgFlowService.DeleteActionAsync(orgId, templateId, actionId);
+                if (!result)
+                {
+                    return NotFound(new { message = $"Action with ID {actionId} not found in template {templateId}." });
+                }
+
+                return Ok(new { message = $"Action with ID {actionId} was successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting action with ID {ActionId} for template {TemplateId}", actionId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/flows/{flowId}/triggers

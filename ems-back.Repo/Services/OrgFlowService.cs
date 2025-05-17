@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
+using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
 using ems_back.Repo.DTOs.User;
@@ -12,6 +14,9 @@ using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.Models;
 using ems_back.Repo.Repository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 
 namespace ems_back.Repo.Services
@@ -149,6 +154,60 @@ namespace ems_back.Repo.Services
             }
         }
 
+        public async Task<IEnumerable<ActionDto>> GetActionsForTemplateAsync(Guid orgId, Guid templateId)
+        {
+            return await _orgFlowRepository.GetActionsForTemplateAsync(orgId, templateId);
+        }
+
+        public async Task<ActionDto> CreateActionAsync(Guid orgId, Guid templateId, ActionCreateDto dto)
+        {
+            var newAction = new Models.Action
+            {
+                Id = Guid.NewGuid(),
+                Type = dto.Type,
+                Details = dto.Details, // raw JSON
+                CreatedAt = DateTime.UtcNow,
+                FlowTemplateId = templateId,
+                Name = dto.Name,
+                Summary = dto.Summary ?? null
+            };
+
+            var createdAction = await _orgFlowRepository.CreateActionAsync(newAction);
+            return createdAction;
+        }
+
+        public async Task<ActionDto?> GetActionByIdAsync(Guid orgId, Guid templateId, Guid actionId)
+        {
+            var action = await _orgFlowRepository.GetActionByIdAsync(orgId, templateId, actionId);
+            return action;
+        }
+
+        public async Task<ActionDto> UpdateActionAsync(Guid orgId, Guid templateId, Guid actionId, ActionUpdateDto dto)
+        {
+            // Prüfung, ob Action existiert im Repository (optional, falls im Repo erledigt)
+            var existing = await _orgFlowRepository.GetActionByIdAsync(orgId, templateId, actionId);
+            if (existing == null)
+                throw new KeyNotFoundException("Action not found");
+
+            // UpdateDto direkt ans Repository weitergeben
+            var updatedAction = await _orgFlowRepository.UpdateActionAsync(actionId, dto);
+
+            return updatedAction;
+        }
+
+        public async Task<bool> DeleteActionAsync(Guid orgId, Guid templateId, Guid actionId)
+        {
+            // Hole die Action inkl. Template & Org zum Check
+            var action = await _orgFlowRepository.GetActionByIdAsync(orgId, templateId, actionId);
+
+            if (action == null || action.FlowTemplateId != templateId)
+            {
+                return false;
+            }
+
+            await _orgFlowRepository.DeleteActionAsync(actionId);
+            return true;
+        }
 
     }
 }
