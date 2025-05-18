@@ -25,9 +25,6 @@ namespace ems_back.Repo.DTOs.Flow
 
 		[Required]
         public Guid CreatedBy { get; set; }
-
-        [Required]
-        public Guid UpdatedBy { get; set; }
     }
 
 }

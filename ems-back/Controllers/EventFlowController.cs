@@ -1,5 +1,9 @@
-﻿using ems_back.Repo.DTOs.Placeholder;
+﻿using ems_back.Repo.DTOs.Action;
+using ems_back.Repo.DTOs.Flow;
+using ems_back.Repo.DTOs.Placeholder;
+using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,112 +28,325 @@ namespace ems_back.Controllers
         // GET: api/orgs/{orgId}/events/{eventId}/flows
         [HttpGet]
         //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
-        public async Task<ActionResult<PlaceholderDTO>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
+        public async Task<ActionResult<IEnumerable<FlowOverviewDto>>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
         {
-            var flowList = await _eventFlowService.GetAllFlows(orgId, eventId);
-            if (flowList == null)
+            try
             {
-                return NotFound();
+                var flows = await _eventFlowService.GetAllFlows(orgId, eventId);
+
+                if (flows == null || !flows.Any())
+                {
+                    _logger.LogWarning("No flows found for event {EventId} in organization {OrgId}", eventId, orgId);
+                    return NotFound("No flows found");
+                }
+
+                _logger.LogInformation("Flows retrieved for event {EventId} in organization {OrgId}", eventId, orgId);
+                return Ok(flows);
             }
-            return Ok(flowList);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving flows for event {EventId}", eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows
         [HttpPost]
-        public async Task<ActionResult<PlaceholderDTO>> CreateFlow(Guid orgId, Guid eventId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<FlowOverviewDto>> CreateFlow(Guid orgId, Guid eventId, [FromBody] FlowCreateDto flowDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var createdFlow = await _eventFlowService.CreateFlowAsync(orgId, eventId, flowDto);
+                if (createdFlow == null)
+                {
+                    _logger.LogWarning("Failed to create flow for event {EventId}", eventId);
+                    return BadRequest("Flow creation failed");
+                }
+
+                _logger.LogInformation("Flow created successfully for event {EventId}", eventId);
+                return CreatedAtAction(nameof(GetFlowDetails), new { orgId, eventId, flowId = createdFlow.Id }, createdFlow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating flow for event {EventId}", eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpGet("{flowId}")]
-        public async Task<ActionResult<PlaceholderDTO>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<ActionResult<object>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var flow = await _eventFlowService.GetFlowByIdAsync(orgId, eventId, flowId);
+                if (flow == null)
+                {
+                    _logger.LogWarning("Flow {FlowId} not found for event {EventId}", flowId, eventId);
+                    return NotFound($"Flow {flowId} not found.");
+                }
+
+                _logger.LogInformation("Flow {FlowId} retrieved for event {EventId}", flowId, eventId);
+                return Ok(flow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving flow {FlowId} for event {EventId}", flowId, eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpPut("{flowId}")]
-        public async Task<ActionResult> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<object>> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] FlowUpdateDto updateDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var updated = await _eventFlowService.UpdateFlow(orgId, eventId, flowId, updateDto);
+                if (updated == null)
+                {
+                    _logger.LogWarning("Flow {FlowId} not found for update in event {EventId}", flowId, eventId);
+                    return NotFound($"Flow {flowId} not found.");
+                }
+
+                _logger.LogInformation("Flow {FlowId} updated for event {EventId}", flowId, eventId);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating flow {FlowId} for event {EventId}", flowId, eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpDelete("{flowId}")]
         public async Task<ActionResult> DeleteFlow(Guid orgId, Guid eventId, Guid flowId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _eventFlowService.DeleteFlow(orgId, eventId, flowId);
+                if (!result)
+                {
+                    _logger.LogWarning("Flow {FlowId} not found for deletion in event {EventId}", flowId, eventId);
+                    return NotFound(new { message = $"Flow {flowId} not found." });
+                }
+
+                _logger.LogInformation("Flow {FlowId} deleted from event {EventId}", flowId, eventId);
+                return Ok(new { message = $"Flow {flowId} was successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting flow {FlowId} from event {EventId}", flowId, eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions
         [HttpGet("{flowId}/actions")]
-        public async Task<ActionResult<PlaceholderDTO>> GetActions(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<ActionResult<IEnumerable<ActionDto>>> GetActions(Guid orgId, Guid eventId, Guid flowId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var actions = await _eventFlowService.GetActionsForFlowAsync(eventId, flowId);
+                if (actions == null || !actions.Any())
+                {
+                    _logger.LogWarning("No actions found for flow {FlowId} in event {EventId}", flowId, eventId);
+                    return NotFound("No actions found.");
+                }
+
+                _logger.LogInformation("Actions retrieved for flow {FlowId} in event {EventId}", flowId, eventId);
+                return Ok(actions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving actions for flow {FlowId}", flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions
         [HttpPost("{flowId}/actions")]
-        public async Task<ActionResult<PlaceholderDTO>> CreateAction(Guid orgId, Guid eventId, Guid flowId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<ActionDto>> CreateAction(Guid orgId, Guid eventId, Guid flowId, [FromBody] ActionCreateDto actionDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (!Enum.IsDefined(typeof(ActionType), actionDto.Type))
+                {
+                    return BadRequest("Invalid action type.");
+                }
+
+                var createdAction = await _eventFlowService.CreateActionAsync(eventId, flowId, actionDto);
+                _logger.LogInformation("Action created for flow {FlowId} in event {EventId}", flowId, eventId);
+
+                return CreatedAtAction(nameof(GetActionDetails), new { orgId, eventId, flowId, actionId = createdAction.Id }, createdAction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating action for flow {FlowId}", flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpGet("{flowId}/actions/{actionId}")]
-        public async Task<ActionResult<PlaceholderDTO>> GetActionDetails(Guid orgId, Guid eventId, Guid flowId, Guid actionId)
+        public async Task<ActionResult<ActionDto>> GetActionDetails(Guid orgId, Guid eventId, Guid flowId, Guid actionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var action = await _eventFlowService.GetActionByIdAsync(eventId, flowId, actionId);
+                if (action == null)
+                {
+                    return NotFound("Action not found.");
+                }
+
+                return Ok(action);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving action {ActionId} for flow {FlowId}", actionId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpPut("{flowId}/actions/{actionId}")]
-        public async Task<ActionResult> UpdateAction(Guid orgId, Guid eventId, Guid flowId, Guid actionId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<ActionDto>> UpdateAction(Guid orgId, Guid eventId, Guid flowId, Guid actionId, [FromBody] ActionUpdateDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var updated = await _eventFlowService.UpdateActionAsync(eventId, flowId, actionId, dto);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating action {ActionId} for flow {FlowId}", actionId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpDelete("{flowId}/actions/{actionId}")]
         public async Task<ActionResult> DeleteAction(Guid orgId, Guid eventId, Guid flowId, Guid actionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _eventFlowService.DeleteActionAsync(eventId, flowId, actionId);
+                if (!result)
+                {
+                    return NotFound(new { message = $"Action {actionId} not found in flow {flowId}." });
+                }
+
+                return Ok(new { message = $"Action {actionId} successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting action {ActionId} for flow {FlowId}", actionId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers
         [HttpGet("{flowId}/triggers")]
-        public async Task<ActionResult<PlaceholderDTO>> GetTriggers(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<ActionResult<IEnumerable<TriggerDto>>> GetTriggers(Guid orgId, Guid eventId, Guid flowId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var triggers = await _eventFlowService.GetTriggersForFlowAsync(orgId, eventId, flowId);
+                if (triggers == null || !triggers.Any())
+                {
+                    return NotFound("No triggers found.");
+                }
+
+                return Ok(triggers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving triggers for flow {FlowId}", flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers
         [HttpPost("{flowId}/triggers")]
-        public async Task<ActionResult<PlaceholderDTO>> CreateTrigger(Guid orgId, Guid eventId, Guid flowId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<TriggerDto>> CreateTrigger(Guid orgId, Guid eventId, Guid flowId, [FromBody] TriggerCreateDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var created = await _eventFlowService.CreateTriggerAsync(eventId, flowId, dto);
+                return CreatedAtAction(nameof(GetTriggerDetails), new { orgId, eventId, flowId, triggerId = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating trigger for flow {FlowId}", flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers/{triggerId}
         [HttpGet("{flowId}/triggers/{triggerId}")]
-        public async Task<ActionResult<PlaceholderDTO>> GetTriggerDetails(Guid orgId, Guid eventId, Guid flowId, Guid triggerId)
+        public async Task<ActionResult<TriggerDto>> GetTriggerDetails(Guid orgId, Guid eventId, Guid flowId, Guid triggerId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var trigger = await _eventFlowService.GetTriggerByIdAsync(eventId, flowId, triggerId);
+                if (trigger == null)
+                {
+                    return NotFound("Trigger not found.");
+                }
+
+                return Ok(trigger);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving trigger {TriggerId} for flow {FlowId}", triggerId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers/{triggerId}
         [HttpPut("{flowId}/triggers/{triggerId}")]
-        public async Task<ActionResult> UpdateTrigger(Guid orgId, Guid eventId, Guid flowId, Guid triggerId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<TriggerDto>> UpdateTrigger(Guid orgId, Guid eventId, Guid flowId, Guid triggerId, [FromBody] TriggerUpdateDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var updated = await _eventFlowService.UpdateTriggerAsync(eventId, flowId, triggerId, dto);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating trigger {TriggerId} for flow {FlowId}", triggerId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers/{triggerId}
         [HttpDelete("{flowId}/triggers/{triggerId}")]
         public async Task<ActionResult> DeleteTrigger(Guid orgId, Guid eventId, Guid flowId, Guid triggerId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _eventFlowService.DeleteTriggerAsync(eventId, flowId, triggerId);
+                if (!result)
+                {
+                    return NotFound(new { message = $"Trigger {triggerId} not found." });
+                }
+
+                return Ok(new { message = $"Trigger {triggerId} successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting trigger {TriggerId} from flow {FlowId}", triggerId, flowId);
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

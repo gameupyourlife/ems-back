@@ -80,7 +80,9 @@ namespace ems_back.Repo.Services
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = flowTemplateCreateDto.CreatedBy,
                     UpdatedAt = DateTime.UtcNow,
-                    UpdatedBy = flowTemplateCreateDto.CreatedBy
+                    UpdatedBy = flowTemplateCreateDto.CreatedBy,
+                    Triggers = new List<Trigger>(),
+                    Actions = new List<Models.Action>()
                 };
 
                 // 2. Persistieren
@@ -88,7 +90,7 @@ namespace ems_back.Repo.Services
 
                 _logger.LogInformation("Successfully created template with ID: {TemplateId}", createdTemplate.FlowTemplateId);
 
-                // 3. Mapping Entity -> ResponseDto
+                // 3. Mapping Entity -> ResponseDto (initial leere Listen)
                 return new FlowTemplateResponseDto
                 {
                     FlowTemplateId = createdTemplate.FlowTemplateId,
@@ -96,7 +98,11 @@ namespace ems_back.Repo.Services
                     Description = createdTemplate.Description,
                     OrganizationId = createdTemplate.OrganizationId,
                     CreatedAt = createdTemplate.CreatedAt,
-                    UpdatedAt = createdTemplate.UpdatedAt
+                    UpdatedAt = createdTemplate.UpdatedAt,
+                    CreatedBy = createdTemplate.CreatedBy,
+                    UpdatedBy = createdTemplate.UpdatedBy,
+                    Triggers = new List<TriggerOverviewDto>(),
+                    Actions = new List<ActionOverviewDto>()
                 };
             }
             catch (Exception ex)
@@ -105,6 +111,7 @@ namespace ems_back.Repo.Services
                 throw;
             }
         }
+
 
         public async Task<FlowTemplateResponseDto?> GetFlowTemplateByIdAsync(Guid orgId, Guid templateId)
         {

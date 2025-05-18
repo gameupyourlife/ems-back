@@ -29,6 +29,8 @@ namespace ems_back.Repo.Repository
         {
             var flowTemplates = await _dbContext.FlowTemplates
                 .Where(e => e.OrganizationId == orgId)
+                .Include(e => e.Triggers)
+                .Include(e => e.Actions)
                 .Select(e => new FlowTemplateResponseDto
                 {
                     FlowTemplateId = e.FlowTemplateId,
@@ -36,15 +38,27 @@ namespace ems_back.Repo.Repository
                     Description = e.Description,
                     OrganizationId = e.OrganizationId,
                     CreatedAt = e.CreatedAt,
-                    CreatedBy = e.CreatedBy,
-                    UpdatedAt = e.UpdatedAt,
-                    UpdatedBy = e.UpdatedBy
+                    Triggers = e.Triggers.Select(t => new TriggerOverviewDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Summary = t.Summary,
+                        Type = t.Type
+                    }).ToList(),
+                    Actions = e.Actions.Select(a => new ActionOverviewDto
+                    {
+                        Id = a.Id,
+                        Name = a.Name,
+                        Summary = a.Summary,
+                        Type = a.Type
+                    }).ToList()
                 })
                 .AsNoTracking()
                 .ToListAsync();
 
             return flowTemplates;
         }
+
 
         public async Task<FlowTemplate> CreateFlowTemplateAsync(FlowTemplate flowTemplate)
         {
@@ -64,6 +78,8 @@ namespace ems_back.Repo.Repository
         {
             var templateDto = await _dbContext.FlowTemplates
                 .Where(t => t.OrganizationId == orgId && t.FlowTemplateId == templateId)
+                .Include(t => t.Triggers)
+                .Include(t => t.Actions)
                 .Select(t => new FlowTemplateResponseDto
                 {
                     FlowTemplateId = t.FlowTemplateId,
@@ -71,13 +87,30 @@ namespace ems_back.Repo.Repository
                     Description = t.Description,
                     OrganizationId = t.OrganizationId,
                     CreatedAt = t.CreatedAt,
-                    UpdatedAt = t.UpdatedAt
+                    UpdatedAt = t.UpdatedAt,
+                    CreatedBy = t.CreatedBy,
+                    UpdatedBy = t.UpdatedBy,
+                    Triggers = t.Triggers.Select(tr => new TriggerOverviewDto
+                    {
+                        Id = tr.Id,
+                        Name = tr.Name,
+                        Summary = tr.Summary,
+                        Type = tr.Type
+                    }).ToList(),
+                    Actions = t.Actions.Select(a => new ActionOverviewDto
+                    {
+                        Id = a.Id,
+                        Name = a.Name,
+                        Summary = a.Summary,
+                        Type = a.Type
+                    }).ToList()
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
             return templateDto;
         }
+
 
         public async Task<FlowTemplateResponseDto> UpdateFlowTemplateAsync(FlowTemplateResponseDto updatedTemplate)
         {
