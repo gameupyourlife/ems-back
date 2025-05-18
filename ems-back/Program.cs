@@ -20,6 +20,7 @@ using ems_back.Repo.Services;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
+using System.Net;
 
 namespace ems_back
 {
@@ -27,6 +28,11 @@ namespace ems_back
     {
         public static async Task Main(string[] args)
         {
+            // Deaktivieren der Zertifikatsüberprüfung in der Entwicklungsumgebung
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, certificate, chain, sslPolicyErrors) => true;
+
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container
@@ -66,6 +72,16 @@ namespace ems_back
                         Array.Empty<string>()
                     }
                 });
+            });
+
+            // Add CORS services
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
             });
 
             // Database Context
@@ -171,6 +187,7 @@ namespace ems_back
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowSpecificOrigin");
 
             app.UseAuthentication();
             app.UseAuthorization();
