@@ -2,6 +2,7 @@
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
 using ems_back.Repo.DTOs.Placeholder;
+using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.Models;
@@ -274,38 +275,120 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/flows/{flowId}/triggers
         [HttpGet("{templateId}/triggers")]
-        public async Task<ActionResult<PlaceholderDTO>> GetTriggers(Guid orgId, Guid flowId)
+        public async Task<ActionResult<IEnumerable<TriggerDto>>> GetTriggers(Guid orgId, Guid templateId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var triggers = await _orgFlowService.GetTriggersForTemplateAsync(orgId, templateId);
+
+                if (triggers == null || !triggers.Any())
+                {
+                    _logger.LogWarning("No triggers found for template {TemplateId} in organization {OrgId}", templateId, orgId);
+                    return NotFound("No triggers found for this template.");
+                }
+
+                _logger.LogInformation("Returned triggers for template {TemplateId} in organization {OrgId}", templateId, orgId);
+                return Ok(triggers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving triggers for template {TemplateId}", templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/flows/{flowId}/triggers
         [HttpPost("{templateId}/triggers")]
-        public async Task<ActionResult<PlaceholderDTO>> CreateTrigger(Guid orgId, Guid flowId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<TriggerDto>> CreateTrigger(Guid orgId, Guid templateId, [FromBody] TriggerCreateDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (dto == null)
+                    return BadRequest("Trigger data is required.");
+
+                var createdTrigger = await _orgFlowService.CreateTriggerAsync(orgId, templateId, dto);
+
+                _logger.LogInformation("Created trigger {TriggerId} for template {TemplateId} in organization {OrgId}", createdTrigger.Id, templateId, orgId);
+
+                return CreatedAtAction(nameof(GetTriggerDetails), new { orgId, templateId, triggerId = createdTrigger.Id }, createdTrigger);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating trigger for template {TemplateId}", templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/orgs/{orgId}/flows/{flowId}/triggers/{triggerId}
         [HttpGet("{templateId}/triggers/{triggerId}")]
-        public async Task<ActionResult<PlaceholderDTO>> GetTriggerDetails(Guid orgId, Guid flowId, Guid triggerId)
+        public async Task<ActionResult<TriggerDto>> GetTriggerDetails(Guid orgId, Guid templateId, Guid triggerId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var trigger = await _orgFlowService.GetTriggerByIdAsync(orgId, templateId, triggerId);
+
+                if (trigger == null)
+                {
+                    _logger.LogWarning("Trigger {TriggerId} not found for template {TemplateId} in organization {OrgId}", triggerId, templateId, orgId);
+                    return NotFound("Trigger not found for this template.");
+                }
+
+                _logger.LogInformation("Returned trigger {TriggerId} for template {TemplateId} in organization {OrgId}", triggerId, templateId, orgId);
+                return Ok(trigger);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving trigger {TriggerId} for template {TemplateId}", triggerId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // PUT: api/orgs/{orgId}/flows/{flowId}/triggers/{triggerId}
         [HttpPut("{templateId}/triggers/{triggerId}")]
-        public async Task<ActionResult> UpdateTrigger(Guid orgId, Guid flowId, Guid triggerId, [FromBody] PlaceholderDTO dtoName)
+        public async Task<ActionResult<TriggerDto>> UpdateTrigger(Guid orgId, Guid templateId, Guid triggerId, [FromBody] TriggerUpdateDto dto)
         {
-            throw new NotImplementedException();
+            if (dto == null)
+                return BadRequest("Trigger data is required.");
+
+            try
+            {
+                var updated = await _orgFlowService.UpdateTriggersAsync(orgId, templateId, triggerId, dto);
+                _logger.LogInformation("Updated trigger {TriggerId} for template {TemplateId} in organization {OrgId}", triggerId, templateId, orgId);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                _logger.LogWarning("Trigger {TriggerId} not found for update in template {TemplateId}", triggerId, templateId);
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating trigger {TriggerId} for template {TemplateId}", triggerId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE: api/orgs/{orgId}/flows/{flowId}/triggers/{triggerId}
         [HttpDelete("{templateId}/triggers/{triggerId}")]
-        public async Task<ActionResult> DeleteTrigger(Guid orgId, Guid flowId, Guid triggerId)
+        public async Task<ActionResult> DeleteTrigger(Guid orgId, Guid templateId, Guid triggerId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _orgFlowService.DeleteTriggerAsync(orgId, templateId, triggerId);
+                if (!result)
+                {
+                    _logger.LogWarning("Trigger {TriggerId} not found for deletion in template {TemplateId}", triggerId, templateId);
+                    return NotFound(new { message = $"Trigger with ID {triggerId} not found in template {templateId}." });
+                }
 
+                _logger.LogInformation("Deleted trigger {TriggerId} from template {TemplateId}", triggerId, templateId);
+                return Ok(new { message = $"Trigger with ID {triggerId} was successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting trigger {TriggerId} from template {TemplateId}", triggerId, templateId);
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

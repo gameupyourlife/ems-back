@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ems_back.Repo.DTOs.Action;
 using System.Text.Json;
+using ems_back.Repo.DTOs.Trigger;
 
 namespace ems_back.Repo.Repository
 {
@@ -209,6 +210,117 @@ namespace ems_back.Repo.Repository
             if (action != null)
             {
                 _dbContext.Actions.Remove(action);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //Hier beginnt für Triggers
+        //anpassen
+        public async Task<IEnumerable<TriggerDto>> GetTriggersForTemplateAsync(Guid orgId, Guid templateId)
+        {
+            var triggers = await _dbContext.Triggers
+                .Where(a => a.FlowTemplateId == templateId && a.FlowTemplate.OrganizationId == orgId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var triggersDto = triggers.Select(a => new TriggerDto
+            {
+                Id = a.Id,
+                Type = a.Type,
+                Details = string.IsNullOrWhiteSpace(a.Details)
+                    ? JsonDocument.Parse("{}").RootElement
+                    : JsonDocument.Parse(a.Details).RootElement,
+                CreatedAt = a.CreatedAt,
+                FlowTemplateId = a.FlowTemplateId,
+                Name = a.Name,
+                Summary = a.Summary
+            });
+
+            return triggersDto;
+        }
+
+        public async Task<TriggerDto> CreateTriggerAsync(Trigger trigger)
+        {
+            _dbContext.Triggers.Add(trigger);
+            await _dbContext.SaveChangesAsync();
+
+            return new TriggerDto
+            {
+                Id = trigger.Id,
+                Type = trigger.Type,
+                Details = string.IsNullOrWhiteSpace(trigger.Details)
+                    ? JsonDocument.Parse("{}").RootElement
+                    : JsonDocument.Parse(trigger.Details).RootElement,
+                CreatedAt = trigger.CreatedAt,
+                FlowTemplateId = trigger.FlowTemplateId,
+                Name = trigger.Name,
+                Summary = trigger.Summary
+            };
+        }
+
+        public async Task<TriggerDto?> GetTriggerByIdAsync(Guid orgId, Guid templateId, Guid triggerId)
+        {
+            var trigger = await _dbContext.Triggers
+                .Where(t => t.FlowTemplateId == templateId && t.Id == triggerId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (trigger == null) return null;
+
+            var detailsJson = string.IsNullOrWhiteSpace(trigger.Details)
+                ? JsonDocument.Parse("{}").RootElement
+                : JsonDocument.Parse(trigger.Details).RootElement;
+
+            var triggerDto = new TriggerDto
+            {
+                Id = trigger.Id,
+                Type = trigger.Type,
+                Details = detailsJson,
+                CreatedAt = trigger.CreatedAt,
+                FlowTemplateId = trigger.FlowTemplateId,
+                Name = trigger.Name,
+                Summary = trigger.Summary
+            };
+
+            return triggerDto;
+        }
+
+        public async Task<TriggerDto> UpdateTriggerAsync(Guid triggerId, TriggerUpdateDto dto)
+        {
+            var existing = await _dbContext.Triggers.FindAsync(triggerId);
+            if (existing == null)
+                throw new KeyNotFoundException("Trigger not found");
+
+            existing.Type = dto.Type;
+            existing.Details = dto.Details ?? "{}"; // Ensure Details is not null
+            existing.Name = dto.Name ?? existing.Name; // Fix for CS8601: Use existing.Name if dto.Name is null
+            existing.Summary = dto.Summary ?? existing.Summary; // Fix for CS8601: Use existing.Summary if dto.Summary is null
+
+            await _dbContext.SaveChangesAsync();
+
+            return new TriggerDto
+            {
+                Id = existing.Id,
+                Type = existing.Type,
+                Details = JsonDocument.Parse(existing.Details).RootElement,
+                CreatedAt = existing.CreatedAt,
+                FlowTemplateId = existing.FlowTemplateId,
+                Name = existing.Name,
+                Summary = existing.Summary
+            };
+        }
+
+        public async Task<bool> DeleteTriggerAsync(Guid triggerId)
+        {
+            var trigger = await _dbContext.Triggers.FindAsync(triggerId);
+            if (trigger != null)
+            {
+                _dbContext.Triggers.Remove(trigger);
                 await _dbContext.SaveChangesAsync();
                 return true;
             }

@@ -8,6 +8,7 @@ using AutoMapper;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
+using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
@@ -165,11 +166,11 @@ namespace ems_back.Repo.Services
             {
                 Id = Guid.NewGuid(),
                 Type = dto.Type,
-                Details = dto.Details, // raw JSON
+                Details = dto.Details ?? string.Empty, // raw JSON, ensure non-null value
                 CreatedAt = DateTime.UtcNow,
                 FlowTemplateId = templateId,
                 Name = dto.Name,
-                Summary = dto.Summary ?? null
+                Summary = dto.Summary ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _orgFlowRepository.CreateActionAsync(newAction);
@@ -209,5 +210,62 @@ namespace ems_back.Repo.Services
             return true;
         }
 
+        // Hier beginnt die Anpassung für Trigger
+        //ab hier anpassen
+        public async Task<IEnumerable<TriggerDto>> GetTriggersForTemplateAsync(Guid orgId, Guid templateId)
+        {
+            var triggers = await _orgFlowRepository.GetTriggersForTemplateAsync(orgId, templateId);
+            return triggers;
+        }
+
+        public async Task<TriggerDto> CreateTriggerAsync(Guid orgId, Guid templateId, TriggerCreateDto dto)
+        {
+            var newAction = new Trigger
+            {
+                Id = Guid.NewGuid(),
+                Type = dto.Type,
+                Details = dto.Details ?? string.Empty, // raw JSON, ensure non-null value
+                CreatedAt = DateTime.UtcNow,
+                FlowTemplateId = templateId,
+                Name = dto.Name ?? string.Empty,
+                Summary = dto.Summary ?? string.Empty // ensure non-null value
+            };
+
+            var createdTrigger = await _orgFlowRepository.CreateTriggerAsync(newAction);
+            return createdTrigger;
+        }
+
+        public async Task<TriggerDto?> GetTriggerByIdAsync(Guid orgId, Guid templateId, Guid triggerId)
+        {
+            var trigger = await _orgFlowRepository.GetTriggerByIdAsync(orgId, templateId, triggerId);
+            return trigger;
+        }
+
+        public async Task<TriggerDto> UpdateTriggersAsync(Guid orgId, Guid templateId, Guid triggerId, TriggerUpdateDto dto)
+        {
+            // Prüfung, ob Action existiert im Repository (optional, falls im Repo erledigt)
+            var existing = await _orgFlowRepository.GetTriggerByIdAsync(orgId, templateId, triggerId);
+            if (existing == null)
+                throw new KeyNotFoundException("Trigger not found");
+
+            // UpdateDto direkt ans Repository weitergeben
+            var updatedTrigger = await _orgFlowRepository.UpdateTriggerAsync(triggerId, dto);
+
+            return updatedTrigger;
+        }
+
+        public async Task<bool> DeleteTriggerAsync(Guid orgId, Guid templateId, Guid triggerId)
+        {
+            // Hole die Action inkl. Template & Org zum Check
+            var trigger = await _orgFlowRepository.GetTriggerByIdAsync(orgId, templateId, triggerId);
+
+            if (trigger == null || trigger.FlowTemplateId != templateId)
+            {
+                return false;
+            }
+
+            await _orgFlowRepository.DeleteTriggerAsync(triggerId);
+            return true;
+        }
     }
 }

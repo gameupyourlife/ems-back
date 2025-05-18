@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
+using ems_back.Repo.DTOs.Trigger;
 
 namespace ems_back.Repo.Interfaces.Service
 {
@@ -20,5 +21,10 @@ namespace ems_back.Repo.Interfaces.Service
         Task<ActionDto?> GetActionByIdAsync(Guid orgId, Guid templateId, Guid actionId);
         Task<ActionDto> UpdateActionAsync(Guid orgId, Guid templateId, Guid actionId, ActionUpdateDto dto);
         Task<bool> DeleteActionAsync(Guid orgId, Guid templateId, Guid actionId);
+        Task<IEnumerable<TriggerDto>> GetTriggersForTemplateAsync(Guid orgId, Guid templateId);
+        Task<TriggerDto?> GetTriggerByIdAsync(Guid orgId, Guid templateId, Guid triggerId);
+        Task<TriggerDto> CreateTriggerAsync(Guid orgId, Guid templateId, TriggerCreateDto dto);
+        Task<TriggerDto> UpdateTriggersAsync(Guid orgId, Guid templateId, Guid triggerId, TriggerUpdateDto dto);
+        Task<bool> DeleteTriggerAsync(Guid orgId, Guid templateId, Guid triggerId);
     }
 }

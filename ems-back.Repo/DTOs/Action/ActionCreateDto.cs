@@ -17,7 +17,7 @@ namespace ems_back.Repo.DTOs.Action
         public ActionType Type { get; set; }
 
         [Required]
-        public String Details { get; set; }
+        public String? Details { get; set; }
         public Guid? FlowId { get; set; }
         public Guid? FlowTemplateId { get; set; }
         public String Name { get; set; }
