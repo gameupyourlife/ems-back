@@ -15,13 +15,13 @@ public interface IEventRepository
 	Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId);
 	Task<bool> AddAttendeeToEventAsync(EventAttendee attendee);
 	Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId);
-    // Task<EventOrganizer> GetEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId);
-    Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId);
+    
+	Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId);
     Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId);
     Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid eventId);
-	Task<Guid> AddAgendaPointToEventAsync(AgendaEntryDto agendaEntry);
-	Task<AgendaEntryDto> UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntry);
-	Task<AgendaEntryDto> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId);
+	Task<Guid> AddAgendaEntryToEventAsync(AgendaEntryDto agendaEntry);
+	Task<bool> UpdateAgendaEntryAsync(Guid agendaId, Guid eventId, AgendaEntryDto agendaEntry);
+	Task<bool> DeleteAgendaEntryAsync(Guid agendaId);
 
     // Additional methods
 
@@ -31,4 +31,8 @@ public interface IEventRepository
 	Task<EventInfoDto> UpdateEventStatusAsync(Guid eventId, EventInfoDto statusDto);
 	Task<int> GetAttendeeCountAsync(Guid eventId);
 	Task<EventOverviewDto> GetEventByTitleAndDateAsync(string title, DateTime start, Guid orgId);
+	Task<EventAttendeeDto> GetEventAttendeeByIdAsync(Guid eventId, Guid userId);
+	Task<EventOrganizer> GetEventOrganizerAsync(Guid eventId, Guid organizerId);
+	Task<AgendaEntry> GetAgendaEntryByIdAsync(Guid agendaId);
 }
+

@@ -11,6 +11,7 @@ using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
 using System.Security.Claims;
 using System.Diagnostics.Eventing.Reader;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Controllers
 {
@@ -40,6 +41,11 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _eventService.ExistsOrg(orgId)) {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
 				var events = await _eventService.GetAllEventsAsync(orgId, Guid.Parse(userId));
@@ -65,14 +71,22 @@ namespace ems_back.Controllers
 			[FromRoute] Guid orgId,
             [FromBody] EventCreateDto eventDto)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    _logger.LogWarning("User ID not found in claims");
-                    return BadRequest("User ID not found");
-                }
+                
 
                 var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto, Guid.Parse(userId));
                 if (createdEvent == null)
@@ -103,15 +117,20 @@ namespace ems_back.Controllers
 			[FromRoute] Guid orgId,
 			[FromRoute] Guid eventId)
 		{
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            if(!await _eventService.ExistsOrg(orgId)) {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    _logger.LogWarning("User ID not found in claims");
-                    return BadRequest("User ID not found");
-                }
-
                 var eventEntity = await _eventService.GetEventAsync(orgId, eventId, Guid.Parse(userId));
 				if (eventEntity == null)
 				{
@@ -135,14 +154,22 @@ namespace ems_back.Controllers
             [FromRoute] Guid eventId, 
             [FromBody] EventUpdateDto eventDto)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    _logger.LogWarning("User ID not found in claims");
-                    return BadRequest("User ID not found");
-                }
+                
 
                 var success = await _eventService.UpdateEventAsync(orgId, eventId, eventDto, Guid.Parse(userId));
 
@@ -168,15 +195,21 @@ namespace ems_back.Controllers
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    _logger.LogWarning("User ID not found in claims");
-                    return BadRequest("User ID not found");
-                }
-
                 var success = await _eventService.DeleteEventAsync(orgId, eventId, Guid.Parse(userId));
 
                 if (!success) {
@@ -199,9 +232,22 @@ namespace ems_back.Controllers
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId)
 		{
-			try
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
+            try
 			{
-				var eventEntity = await _eventService.GetAllEventAttendeesAsync(orgId ,eventId);
+				var eventEntity = await _eventService.GetAllEventAttendeesAsync(orgId ,eventId, Guid.Parse(userId));
                 if (eventEntity == null || !eventEntity.Any())
                 {
                     _logger.LogWarning("No attendees found for event with id {EventId}", eventId);
@@ -232,15 +278,43 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
-            var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee, Guid.Parse(userId));
-            if (createdAttendee == null)
+            try
             {
-                _logger.LogWarning("Failed to add Attendee");
-                return BadRequest("Failed to add attendee");
-            }
+                var createdAttendee = await _eventService.AddAttendeeToEventAsync(orgId, eventId, attendee, Guid.Parse(userId));
+                if (createdAttendee == null)
+                {
+                    _logger.LogWarning("Failed to add Attendee");
+                    return BadRequest("Failed to add attendee");
+                }
 
-            _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
-            return Ok(createdAttendee);
+                _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
+                return Ok(createdAttendee);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access while adding attendee");
+                return Unauthorized("User is not authorized to add attendees");
+            }
+            catch (AlreadyExistsException ex)
+            {
+                _logger.LogWarning(ex, "Attendee with id {AttendeeId} already exists", attendee.UserId);
+                return BadRequest("Attendee already exists");
+            }
+            catch (NoCapacityException ex)
+            {
+                _logger.LogWarning(ex, "Event with id {EventId} has no capacity", eventId);
+                return BadRequest("Event has no capacity");
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Event with id {EventId} not found", eventId);
+                return NotFound("Event not found");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting event attendees for event {EventId}", eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 
@@ -259,14 +333,28 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
-            var isDeleted = await _eventService.RemoveAttendeeFromEventAsync(orgId, eventId, attendeeId, Guid.Parse(userId));
-            if (!isDeleted)
+            if (!await _eventService.ExistsOrg(orgId))
             {
-                _logger.LogWarning("Failed to remove attendee with id {AttendeeId}", attendeeId);
-                return NotFound("Attendee not found");
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
             }
 
-            return Ok(isDeleted);
+            try
+            {
+                var isDeleted = await _eventService.RemoveAttendeeFromEventAsync(orgId, eventId, attendeeId, Guid.Parse(userId));
+                if (!isDeleted)
+                {
+                    _logger.LogWarning("Failed to remove attendee with id {AttendeeId}", attendeeId);
+                    return NotFound("Attendee not found");
+                }
+
+                return Ok(isDeleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing attendee with id {AttendeeId} from event {EventId}", attendeeId, eventId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST: api/orgs/{orgId}/events/{eventId}/eventOrganizer/{organizerId}
@@ -285,6 +373,12 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
                 var isCreated = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, Guid.Parse(userId));
@@ -296,6 +390,11 @@ namespace ems_back.Controllers
 
                 return Ok(isCreated);
 
+            }
+            catch (AlreadyExistsException ex)
+            {
+                _logger.LogWarning(ex, "Event organizer with id {OrganizerId} already exists", organizerId);
+                return BadRequest("Event organizer already exists");
             }
             catch (Exception ex)
             {
@@ -319,6 +418,13 @@ namespace ems_back.Controllers
                 _logger.LogWarning("User ID not found in claims");
                 return BadRequest("User ID not found");
             }
+
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
                 var isDeleted = await _eventService.RemoveEventOrganizerAsync(orgId, eventId, organizerId, Guid.Parse(userId));
@@ -349,12 +455,23 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
 				var eventEntity = await _eventService.GetAgendaAsync(orgId, eventId, Guid.Parse(userId));
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
-			catch (Exception ex)
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error getting event agenda for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
@@ -376,21 +493,50 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
-            var createdAgenda = await _eventService.AddAgendaPointToEventAsync(orgId, eventId, createDto, Guid.Parse(userId));
-            if (createdAgenda == null)
+            if (!await _eventService.ExistsOrg(orgId))
             {
-                _logger.LogWarning("Failed to add agenda");
-                return BadRequest("Failed to add agenda");
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
             }
-            _logger.LogInformation("Agenda added successfully with id {AgendaId}", createdAgenda.Id);
-            return Ok(createdAgenda);
+
+            try
+            {
+                var createdAgenda = await _eventService.AddAgendaEntryToEventAsync(orgId, eventId, createDto, Guid.Parse(userId));
+                if (createdAgenda == null)
+                {
+                    _logger.LogWarning("Failed to add agenda");
+                    return BadRequest("Failed to add agenda");
+                }
+                _logger.LogInformation("Agenda added successfully with id {AgendaId}", createdAgenda.Id);
+                return Ok(createdAgenda);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding agenda to event");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // Put: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpPut("{eventId}/agenda/{agendaId}")]
-        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
-        public async Task<ActionResult<EventInfoDto>> UpdateAgendaInEvent(Guid eventId, Guid agendaId)
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<AgendaEntryDto>> UpdateAgendaInEvent(
+            [FromRoute] Guid orgId,
+            [FromRoute] Guid eventId, 
+            [FromRoute] Guid agendaId,
+            [FromBody] AgendaEntryCreateDto entry)
 		{
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
@@ -398,12 +544,41 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
-            throw new NotImplementedException("This method is not implemented yet.");
+            try
+            {
+                var updatedAgenda = await _eventService.UpdateAgendaEntryAsync(orgId, eventId, agendaId, entry, Guid.Parse(userId));
+                if (updatedAgenda == null)
+                {
+                    _logger.LogWarning("Failed to update agenda with id {AgendaId}", agendaId);
+                    return BadRequest("Failed to update agenda");
+                }
+                _logger.LogInformation("Agenda updated successfully with id {AgendaId}", updatedAgenda.Id);
+                return Ok(updatedAgenda);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating agenda in event");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/agenda/{agendaId}
         [HttpDelete("{eventId}/agenda/{agendaId}")]
-        public async Task<ActionResult<EventInfoDto>> RemoveAgendaFromEvent(Guid eventId, Guid agendaId)
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<EventInfoDto>> RemoveAgendaFromEvent(
+            [FromRoute] Guid orgId,
+            [FromRoute] Guid eventId, 
+            [FromRoute] Guid agendaId)
 		{
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -412,7 +587,34 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
-            throw new NotImplementedException("This method is not implemented yet.");
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
+            try
+            {
+                var deletedAgenda = await _eventService.DeleteAgendaEntryAsync(orgId, eventId, agendaId, Guid.Parse(userId));
+                if (!deletedAgenda)
+                {
+                    _logger.LogWarning("Failed to delete agenda with id {AgendaId}", agendaId);
+                    return BadRequest("Failed to delete agenda");
+                }
+                _logger.LogInformation("Agenda deleted successfully");
+                return Ok(deletedAgenda);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting agenda from event");
+                return StatusCode(500, "Internal server error");
+
+            }
         }
 	}
 }

@@ -18,6 +18,7 @@ namespace ems_back.Tests.Services
 		private readonly TestReportGenerator _report;
 		private readonly Mock<IEventRepository> _eventRepoMock;
         private readonly Mock<IOrganizationUserRepository> _orgRepoMock;
+        private readonly Mock<IOrganizationRepository> _org2RepoMock;
         private readonly Mock<IUserRepository> _userRepoMock;
         private readonly EventService _eventService;
 
@@ -31,6 +32,7 @@ namespace ems_back.Tests.Services
             _eventRepoMock.Object,
             _userRepoMock.Object,
             _orgRepoMock.Object,
+            _org2RepoMock.Object,
             Mock.Of<ILogger<EventService>>(),
             null);
         }
