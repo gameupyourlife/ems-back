@@ -29,16 +29,36 @@ namespace ems_back.Controllers
 		private string? GetAuthenticatedUserId()
 		{
 			return User.FindFirstValue(ClaimTypes.NameIdentifier);
-		}
-
+		} 
+		
 		// GET: api/orgs
 		[HttpGet]
+		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)}")]
 		public async Task<ActionResult<IEnumerable<OrganizationResponseDto>>> GetOrganizations()
 		{
 			try
 			{
-				var organizations = await _organizationService.GetAllOrganizationsAsync();
+				var userIdStr = GetAuthenticatedUserId();
+				if (string.IsNullOrEmpty(userIdStr))
+				{
+					_logger.LogWarning("Unauthorized access attempt to GetOrganizations");
+					return Unauthorized();
+				}
+
+				var userId = Guid.Parse(userIdStr);
+
+				_logger.LogInformation("User {UserId} requested organization list", userId);
+
+				var organizations = await _organizationService.GetAllOrganizationsAsync(userId);
+
+				_logger.LogInformation("User {UserId} retrieved {Count} organizations", userId, organizations.Count());
+
 				return Ok(organizations);
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				_logger.LogWarning(ex, "Unauthorized access in GetOrganizations");
+				return Forbid();
 			}
 			catch (Exception ex)
 			{
@@ -137,40 +157,83 @@ namespace ems_back.Controllers
 
 		// DELETE: api/orgs/{orgId}
 		[HttpDelete("{orgId}")]
+		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)}")]
 		public async Task<IActionResult> DeleteOrganization(Guid orgId)
 		{
 			try
 			{
-				var updatedByUserId = GetAuthenticatedUserId();
-				if (updatedByUserId == null)
+				var userIdStr = GetAuthenticatedUserId();
+				if (string.IsNullOrEmpty(userIdStr))
 				{
+					_logger.LogWarning("Unauthorized delete attempt for organization {OrgId}", orgId);
 					return Unauthorized("User not authenticated");
 				}
 
-				var success = await _organizationService.DeleteOrganizationAsync(orgId, Guid.Parse(updatedByUserId));
-				return success ? Ok(new { message = "Organization deleted successfully" }) : NotFound();
+				var userId = Guid.Parse(userIdStr);
+
+				_logger.LogInformation("User {UserId} is attempting to delete organization {OrgId}", userId, orgId);
+
+				var success = await _organizationService.DeleteOrganizationAsync(userId, orgId);
+
+				if (success)
+				{
+					_logger.LogInformation("Organization {OrgId} was successfully deleted by user {UserId}", orgId, userId);
+					return Ok(new { message = "Organization deleted successfully" });
+				}
+				else
+				{
+					_logger.LogWarning("Attempt to delete organization {OrgId} by user {UserId} failed: Not found", orgId, userId);
+					return NotFound();
+				}
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				_logger.LogWarning(ex, "Unauthorized delete attempt for organization {OrgId}", orgId);
+				return Forbid();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error deleting organization {OrgId}", orgId);
-				return StatusCode(500, "Internal server error");
+				_logger.LogError(ex, "Unexpected error deleting organization {OrgId}", orgId);
+				return Unauthorized("Organization cannot be deleted");
 			}
 		}
+
 
 		// DOMAIN MANAGEMENT ENDPOINTS
 
 		// GET: api/orgs/{orgId}/domains
 		[HttpGet("{orgId}/domains")]
+		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)}")]
 		public async Task<ActionResult<IEnumerable<string>>> GetOrganizationDomains(Guid orgId)
 		{
 			try
 			{
-				var domains = await _organizationService.GetOrganizationDomainsAsync(orgId);
+				var userIdStr = GetAuthenticatedUserId();
+				if (string.IsNullOrEmpty(userIdStr))
+				{
+					_logger.LogWarning("Unauthorized domain access attempt for organization {OrgId}", orgId);
+					return Unauthorized("User not authenticated");
+				}
+
+				var userId = Guid.Parse(userIdStr);
+				_logger.LogInformation("User {UserId} is attempting to fetch domains for organization {OrgId}", userId, orgId);
+
+				var domains = await _organizationService.GetOrganizationDomainsAsync(orgId, userId);
+				if (domains == null)
+				{
+					return NotFound($"Organization with ID {orgId} not found.");
+				}
+
 				return Ok(domains);
+			}
+			catch (UnauthorizedAccessException)
+			{
+				_logger.LogWarning("User not authorized to access domains of organization {OrgId}", orgId);
+				return Forbid(); // 403
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting domains for organization {OrgId}", orgId);
+				_logger.LogError(ex, "Error retrieving domains for organization {OrgId}", orgId);
 				return StatusCode(500, "Internal server error");
 			}
 		}
@@ -194,13 +257,13 @@ namespace ems_back.Controllers
 					domainDto.Domain,
 					Guid.Parse(userId));
 
+
 				return result
 					? CreatedAtAction(
 						nameof(GetOrganizationDomains),
 						new { orgId },
 						new { domain = domainDto.Domain })
 					: BadRequest("Failed to add domain");
-
 			}
 			catch (UnauthorizedAccessException) { return Forbid(); }
 			catch (Exception ex)

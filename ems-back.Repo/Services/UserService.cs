@@ -100,8 +100,6 @@ namespace ems_back.Services
                     LastName = userDto.LastName,
                     Email = userDto.Email,
                     UserName = userDto.Email,
-                    //Role = UserRole.User
-                    // Default role
                 };
 
                 var identityResult = await _userManager.CreateAsync(user, userDto.Password);
@@ -121,7 +119,9 @@ namespace ems_back.Services
                     FirstName = user.FirstName,
                     LastName = user.LastName,
 
-                };
+
+
+				};
 
                 var createdUser = await _userRepository.CreateUserAsync(repositoryDto);
 
@@ -132,9 +132,11 @@ namespace ems_back.Services
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
+                    Role = UserRole.User
 
-                    //Role = user.Role
-                };
+
+					//Role = user.Role
+				};
             }
             catch (Exception ex)
             {
@@ -318,11 +320,13 @@ namespace ems_back.Services
             {
                 return false;
             }
-               
-            return await _userRepository.UpdateUserRoleAsync(userDto) != null;
-        }
+	        _logger.LogWarning("Upgraded (UserId: {userId}, to Role: {userDto})", userId, userDto);
 
-        public async Task<SignInResult> CheckPasswordSignInAsync(User user, string password)
+            return await _userRepository.UpdateUserRoleAsync(userDto) != null;
+
+		}
+
+		public async Task<SignInResult> CheckPasswordSignInAsync(User user, string password)
         {
             return await _signInManager.CheckPasswordSignInAsync(user, password, false);
         }

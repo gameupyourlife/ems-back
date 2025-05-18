@@ -93,7 +93,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("Mail", b =>
@@ -150,7 +150,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("Mail");
+                    b.ToTable("Mail", (string)null);
                 });
 
             modelBuilder.Entity("MailRun", b =>
@@ -177,7 +177,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("MailId");
 
-                    b.ToTable("MailRun");
+                    b.ToTable("MailRun", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -350,7 +350,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("FlowTemplateId");
 
-                    b.ToTable("Actions");
+                    b.ToTable("Actions", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.AgendaEntry", b =>
@@ -381,7 +381,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("AgendaEntries");
+                    b.ToTable("AgendaEntries", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.EventAttendee", b =>
@@ -407,7 +407,7 @@ namespace ems_back.Repo.Migrations
                     b.HasIndex("EventId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("EventAttendees");
+                    b.ToTable("EventAttendees", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.EventFile", b =>
@@ -447,7 +447,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UploadedBy");
 
-                    b.ToTable("Files");
+                    b.ToTable("Files", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Flow", b =>
@@ -505,7 +505,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("Flows");
+                    b.ToTable("Flows", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.FlowTemplate", b =>
@@ -550,7 +550,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("FlowTemplates");
+                    b.ToTable("FlowTemplates", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.FlowsRun", b =>
@@ -579,7 +579,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("FlowId");
 
-                    b.ToTable("FlowsRun");
+                    b.ToTable("FlowsRun", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.MailTemplate", b =>
@@ -614,7 +614,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("MailTemplates");
+                    b.ToTable("MailTemplates", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
@@ -639,6 +639,11 @@ namespace ems_back.Repo.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -662,32 +667,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.ToTable("Organizations");
-                });
-
-            modelBuilder.Entity("ems_back.Repo.Models.OrganizationDomain", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Domain")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Domain")
-                        .IsUnique();
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("OrganizationDomain");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.OrganizationUser", b =>
@@ -715,7 +695,7 @@ namespace ems_back.Repo.Migrations
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("Organisation_User");
+                    b.ToTable("Organisation_User", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Trigger", b =>
@@ -756,7 +736,7 @@ namespace ems_back.Repo.Migrations
 
                     b.HasIndex("FlowTemplateId");
 
-                    b.ToTable("Triggers");
+                    b.ToTable("Triggers", (string)null);
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.User", b =>
@@ -1135,17 +1115,6 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ems_back.Repo.Models.OrganizationDomain", b =>
-                {
-                    b.HasOne("ems_back.Repo.Models.Organization", "Organization")
-                        .WithMany("AllowedDomains")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
             modelBuilder.Entity("ems_back.Repo.Models.OrganizationUser", b =>
                 {
                     b.HasOne("ems_back.Repo.Models.Organization", "Organization")
@@ -1220,8 +1189,6 @@ namespace ems_back.Repo.Migrations
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
                 {
-                    b.Navigation("AllowedDomains");
-
                     b.Navigation("Events");
 
                     b.Navigation("FlowTemplates");

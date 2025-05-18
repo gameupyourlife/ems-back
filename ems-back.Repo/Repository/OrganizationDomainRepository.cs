@@ -20,7 +20,7 @@ namespace ems_back.Repo.Repository
 		}
 
 		public async Task<OrganizationDomain> GetByDomainAsync(string domain)
-		{
+		{ 
 			return await _context.OrganizationDomain
 				.Include(od => od.Organization)
 				.FirstOrDefaultAsync(od => od.Domain == domain.ToLower());

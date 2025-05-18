@@ -10,7 +10,7 @@ namespace ems_back.Repo.DTOs.User
     public class UserUpdateRoleDto
     {
         public Guid userId { get; set; }
-        public Guid OrganizationId { get; set; }
+        public Guid? OrganizationId { get; set; }
         public UserRole newRole { get; set; }
 
     }
