@@ -19,7 +19,5 @@ namespace ems_back.Repo.DTOs.Event
         public EventStatus Status { get; set; }
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Guid CreatedBy { get; set; }
     }
 }

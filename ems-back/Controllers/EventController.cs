@@ -49,14 +49,17 @@ namespace ems_back.Controllers
             try
 			{
 				var events = await _eventService.GetAllEventsAsync(orgId, Guid.Parse(userId));
-                if (events == null || !events.Any())
-                {
-                    _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
-                    return NotFound("No events found");
-                }
-                    _logger.LogInformation("Events found for organization with id {OrgId}", orgId);
-					return Ok(events);
+                _logger.LogInformation("Events found for organization with id {OrgId}", orgId);
+				return Ok(events);
 			}
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error getting all events");
@@ -96,6 +99,14 @@ namespace ems_back.Controllers
                 }
                 _logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
                 return createdEvent;
+            }
+            catch (AlreadyExistsException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -140,6 +151,14 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Event with id {EventId} found", eventId);
                 return Ok(eventEntity);
 			}
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error getting event with id {EventId}", eventId);
@@ -169,17 +188,21 @@ namespace ems_back.Controllers
 
             try
             {
-                
-
                 var success = await _eventService.UpdateEventAsync(orgId, eventId, eventDto, Guid.Parse(userId));
-
                 if (success == null)
                 {
                     _logger.LogWarning("Failed to update event with id {EventId}", eventId);
                     return BadRequest("Failed to update event");
                 }
-
                 return Ok(success);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -219,6 +242,14 @@ namespace ems_back.Controllers
 
                 return Ok(success);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting event with id {EventId}", eventId);
@@ -256,7 +287,15 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Attendees found for event with id {EventId}", eventId);
                 return Ok(eventEntity);
 			}
-			catch (Exception ex)
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error getting event attendees for event {EventId}", eventId);
 				return StatusCode(500, "Internal server error");
@@ -290,25 +329,25 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Attendee added successfully with id {AttendeeId}", createdAttendee.UserId);
                 return Ok(createdAttendee);
             }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogWarning(ex, "Unauthorized access while adding attendee");
-                return Unauthorized("User is not authorized to add attendees");
+                return Unauthorized(ex.Message);
             }
             catch (AlreadyExistsException ex)
             {
-                _logger.LogWarning(ex, "Attendee with id {AttendeeId} already exists", attendee.UserId);
-                return BadRequest("Attendee already exists");
+                return BadRequest(ex.Message);
             }
             catch (NoCapacityException ex)
             {
-                _logger.LogWarning(ex, "Event with id {EventId} has no capacity", eventId);
-                return BadRequest("Event has no capacity");
+                return BadRequest(ex.Message);
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Event with id {EventId} not found", eventId);
-                return NotFound("Event not found");
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -349,6 +388,18 @@ namespace ems_back.Controllers
                 }
 
                 return Ok(isDeleted);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -391,9 +442,20 @@ namespace ems_back.Controllers
                 return Ok(isCreated);
 
             }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (AlreadyExistsException ex)
             {
-                _logger.LogWarning(ex, "Event organizer with id {OrganizerId} already exists", organizerId);
                 return BadRequest("Event organizer already exists");
             }
             catch (Exception ex)
@@ -435,6 +497,14 @@ namespace ems_back.Controllers
                 }
                 return Ok(isDeleted);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing event organizer");
@@ -466,9 +536,12 @@ namespace ems_back.Controllers
 				var eventEntity = await _eventService.GetAgendaAsync(orgId, eventId, Guid.Parse(userId));
 				return eventEntity == null ? NotFound() : Ok(eventEntity);
 			}
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -509,6 +582,14 @@ namespace ems_back.Controllers
                 }
                 _logger.LogInformation("Agenda added successfully with id {AgendaId}", createdAgenda.Id);
                 return Ok(createdAgenda);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NotFoundException ex)
             {
@@ -555,14 +636,16 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Agenda updated successfully with id {AgendaId}", updatedAgenda.Id);
                 return Ok(updatedAgenda);
             }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogWarning(ex.Message);
                 return Unauthorized(ex.Message);
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -604,9 +687,16 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Agenda deleted successfully");
                 return Ok(deletedAgenda);
             }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
