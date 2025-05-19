@@ -17,7 +17,8 @@ namespace ems_back.Tests.Services
 	{
 		private readonly TestReportGenerator _report;
 		private readonly Mock<IEventRepository> _eventRepoMock;
-        private readonly Mock<IOrganizationRepository> _orgRepoMock;
+        private readonly Mock<IOrganizationUserRepository> _orgRepoMock;
+        private readonly Mock<IOrganizationRepository> _org2RepoMock;
         private readonly Mock<IUserRepository> _userRepoMock;
         private readonly EventService _eventService;
 
@@ -25,12 +26,13 @@ namespace ems_back.Tests.Services
         {
             _report = new TestReportGenerator(output);
             _eventRepoMock = new Mock<IEventRepository>();
-            _orgRepoMock = new Mock<IOrganizationRepository>();
+            _orgRepoMock = new Mock<IOrganizationUserRepository>();
             _userRepoMock = new Mock<IUserRepository>();
             _eventService = new EventService(
             _eventRepoMock.Object,
             _userRepoMock.Object,
             _orgRepoMock.Object,
+            _org2RepoMock.Object,
             Mock.Of<ILogger<EventService>>(),
             null);
         }
@@ -48,6 +50,7 @@ namespace ems_back.Tests.Services
                 // Arrange
                 var eventId = Guid.NewGuid();
                 var orgId = Guid.NewGuid();
+                var userId = Guid.NewGuid();
                 var expectedEvent = new EventInfoDto
                 {
                     Title = "New Event",
@@ -59,7 +62,7 @@ namespace ems_back.Tests.Services
                 _eventRepoMock.Setup(x => x.GetEventByIdAsync(orgId, eventId)).ReturnsAsync(expectedEvent);
 
                 // Act
-                var result = await _eventService.GetEventAsync(orgId, eventId);
+                var result = await _eventService.GetEventAsync(orgId, eventId, userId);
 
                 // Assert
                 result.Should().NotBeNull();

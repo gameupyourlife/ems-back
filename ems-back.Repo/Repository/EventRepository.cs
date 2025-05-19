@@ -94,11 +94,12 @@ namespace ems_back.Repo.Repository
             return eventEntity;
 		}
     
-        public async Task<EventInfoDto> UpdateEventAsync(EventUpdateDto eventDto)
+        public async Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto eventDto, Guid userId)
         {
 
-            var existingEvent = await _context.Events.FindAsync(eventDto.Id);
-
+            var existingEvent = await _context.Events
+                .Where(e => e.OrganizationId == orgId && e.Id == eventId)
+                .FirstOrDefaultAsync();
             if (existingEvent == null)
             {
                 return null;
@@ -114,13 +115,12 @@ namespace ems_back.Repo.Repository
                 DateTime.UtcNow.Second,
                 DateTimeKind.Utc
             );
-
-            existingEvent.UpdatedBy = eventDto.UpdatedBy;
+            existingEvent.UpdatedBy = userId;
 
             _context.Events.Update(existingEvent);
             await _context.SaveChangesAsync();
 
-            return await GetEventByIdAsync(eventDto.OrganizationId, eventDto.Id);
+            return await GetEventByIdAsync(orgId, eventId);
         }
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId)
@@ -149,7 +149,6 @@ namespace ems_back.Repo.Repository
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
                     ProfilePicture = a.User.ProfilePicture,
-                    //Role = a.User.Role,
                     RegisteredAt = a.RegisteredAt,
                 })
                 .ToListAsync();
@@ -160,8 +159,12 @@ namespace ems_back.Repo.Repository
         public async Task<bool> AddAttendeeToEventAsync(EventAttendee attendee)
         {
             _context.EventAttendees.Add(attendee);
-            await _context.SaveChangesAsync();
-            return true;
+            if (await IncreaseAttendeeCount(attendee.EventId))
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid eventId, Guid userId)
@@ -177,7 +180,44 @@ namespace ems_back.Repo.Repository
             return true;
         }
 
-        public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid orgId, Guid eventId)
+        public async Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null || eventEntity.OrganizationId != orgId)
+            {
+                return false;
+            }
+            var organizer = await _context.Users.FindAsync(organizerId);
+            if (organizer == null)
+            {
+                return false;
+            }
+
+            var eventOrganizer = new EventOrganizer
+            {
+                EventId = eventId,
+                UserId = organizerId
+            };
+
+            eventEntity.Organizers.Add(eventOrganizer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var organizer = await _context.EventOrganizers.FindAsync(eventId, organizerId);
+            if (organizer == null)
+            {
+                return false;
+            }
+
+            _context.EventOrganizers.Remove(organizer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<AgendaEntryDto>> GetAgendaByEventIdAsync(Guid eventId)
         {
             var eventEntity = await _context.AgendaEntries
                 .Where(e => e.EventId == eventId)
@@ -195,7 +235,7 @@ namespace ems_back.Repo.Repository
             return eventEntity;
         }
 
-        public async Task<Guid> AddAgendaPointToEventAsync(AgendaEntryDto agendaEntry)
+        public async Task<Guid> AddAgendaEntryToEventAsync(AgendaEntryDto agendaEntry)
         {
             var entry = _mapper.Map<AgendaEntry>(agendaEntry);
             _context.AgendaEntries.Add(entry);
@@ -204,14 +244,37 @@ namespace ems_back.Repo.Repository
             return entry.Id;
         }
 
-        public async Task<AgendaEntryDto> UpdateAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId, AgendaEntryDto agendaEntry)
+        public async Task<bool> UpdateAgendaEntryAsync(Guid agendaId, Guid eventId, AgendaEntryDto agendaEntry)
         {
-            throw new NotImplementedException("UpdateAgendaPointAsync is not implemented yet");
+            var existingEntry = await _context.AgendaEntries
+                .FirstOrDefaultAsync(e => e.Id == agendaId && e.EventId == eventId);
+
+            if (existingEntry == null)
+            {
+                return false;
+            }
+
+            existingEntry.Title = agendaEntry.Title;
+            existingEntry.Description = agendaEntry.Description;
+            existingEntry.Start = agendaEntry.Start;
+            existingEntry.End = agendaEntry.End;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<AgendaEntryDto> DeleteAgendaPointAsync(Guid orgId, Guid eventId, Guid agendaId)
+
+        public async Task<bool> DeleteAgendaEntryAsync(Guid agendaId)
         {
-            throw new NotImplementedException("DeleteAgendaPointAsync is not implemented yet");
+            var entry = await _context.AgendaEntries.FindAsync(agendaId);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            _context.AgendaEntries.Remove(entry);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         // Additional Methods:
@@ -289,6 +352,54 @@ namespace ems_back.Repo.Repository
                 .FirstOrDefaultAsync(); 
 
             return eventEntity;
+        }
+
+        private async Task<bool> IncreaseAttendeeCount(Guid eventId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+            eventEntity.AttendeeCount++;
+            _context.Events.Update(eventEntity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<EventAttendeeDto> GetEventAttendeeByIdAsync(Guid eventId, Guid userId)
+        {
+            var attendee = await _context.EventAttendees
+                .Where(ea => ea.EventId == eventId && ea.UserId == userId)
+                .Select(ea => new EventAttendeeDto
+                {
+                    UserId = ea.UserId,
+                    UserEmail = ea.User.Email,
+                    UserName = ea.User.FirstName + " " + ea.User.LastName,
+                    Status = ea.Status,
+                    ProfilePicture = ea.User.ProfilePicture,
+                    RegisteredAt = ea.RegisteredAt,
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            return attendee;
+        }
+
+        public Task<EventOrganizer> GetEventOrganizerAsync(Guid eventId, Guid organizerId)
+        {
+            var organizer = _context.EventOrganizers
+                .Where(eo => eo.EventId == eventId && eo.UserId == organizerId)
+                .Include(eo => eo.User)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            return organizer;
+        }
+
+        public async Task<AgendaEntry> GetAgendaEntryByIdAsync(Guid agendaId)
+        {
+            return await _context.AgendaEntries.FindAsync(agendaId);
         }
     }
 }

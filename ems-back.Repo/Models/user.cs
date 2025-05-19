@@ -42,7 +42,7 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
-
         public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
+        public virtual ICollection<EventOrganizer> AssignedEvents { get; set; } = new List<EventOrganizer>();
     }
 }

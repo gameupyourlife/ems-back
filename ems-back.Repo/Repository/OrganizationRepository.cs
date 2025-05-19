@@ -343,20 +343,5 @@ namespace ems_back.Repo.Repository
 				throw;
 			}
 		}
-
-		public async Task<OrganizationUserDto> GetOrganizationUserAsync(Guid orgId, Guid userId)
-        {
-            return await _context.OrganizationUsers
-                .Where(ou => ou.UserId == userId && ou.OrganizationId == orgId)
-                .Select(ou => new OrganizationUserDto
-                {
-                    UserId = ou.UserId,
-                    OrganizationId = ou.OrganizationId,
-                    UserRole = ou.UserRole,
-                    JoinedAt = ou.JoinedAt
-                })
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-        }
     }
 }

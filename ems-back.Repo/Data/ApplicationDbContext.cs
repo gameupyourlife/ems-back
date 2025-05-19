@@ -34,6 +34,7 @@ namespace ems_back.Repo.Data
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<Mail> Mail { get; set; }
         public DbSet<MailRun> MailRun { get; set; }
+		public DbSet<EventOrganizer> EventOrganizers { get; set; }
 
         public DbSet<OrganizationDomain> OrganizationDomain { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -93,11 +94,17 @@ namespace ems_back.Repo.Data
 				.HasOne(e => e.Organization)
 				.WithMany(o => o.Events)
 				.HasForeignKey(e => e.OrganizationId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.Restrict);
 
-			// Flow Relationships:
+            modelBuilder.Entity<Event>()
+                .HasMany(e => e.Organizers)
+                .WithOne(o => o.Event)
+                .HasForeignKey(o => o.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Flow>()
+            // Flow Relationships:
+
+            modelBuilder.Entity<Flow>()
 				.HasOne(f => f.FlowTemplate)
 				.WithMany(f => f.Flows)
 				.HasForeignKey(f => f.FlowTemplateId)
@@ -119,16 +126,16 @@ namespace ems_back.Repo.Data
 				.HasOne(e => e.Event)
 				.WithMany(o => o.Flows)
 				.HasForeignKey(e => e.EventId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Flow>()
 				.HasMany(f => f.Actions)
 				.WithOne(f => f.Flow)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.Restrict);
 
             // FlowRun relationships:
 
-			modelBuilder.Entity<FlowsRun>()
+            modelBuilder.Entity<FlowsRun>()
 				.HasOne(e => e.Flow)
 				.WithMany(o => o.FlowsRuns)
 				.HasForeignKey(e => e.FlowId)
@@ -192,9 +199,16 @@ namespace ems_back.Repo.Data
 				.HasForeignKey(e => e.UserId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			// Organization relationships:
+			modelBuilder.Entity<User>()
+				.HasMany(e => e.AssignedEvents)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Organization>(b =>
+
+            // Organization relationships:
+
+            modelBuilder.Entity<Organization>(b =>
 			{
 				b.HasOne(o => o.Creator)
 					.WithMany()
@@ -259,10 +273,13 @@ namespace ems_back.Repo.Data
 			modelBuilder.Entity<OrganizationUser>()
 				.HasKey(ea => new { ea.UserId, ea.OrganizationId });
 
-			// Configure enum conversions
+            modelBuilder.Entity<EventOrganizer>()
+				.HasKey(eo => new { eo.EventId, eo.UserId });
 
-			// Configure enum conversions
-			modelBuilder.Entity<User>()
+            // Configure enum conversions
+
+            // Configure enum conversions
+            modelBuilder.Entity<User>()
 				.Property(u => u.Role)
 				.HasConversion<string>()
 				.HasMaxLength(20);

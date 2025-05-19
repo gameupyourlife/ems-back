@@ -37,7 +37,5 @@ namespace ems_back.Repo.Interfaces.Repository
 
 
 		// Internal Use
-
-		Task<OrganizationUserDto> GetOrganizationUserAsync(Guid orgId, Guid userId);
 	}
 }

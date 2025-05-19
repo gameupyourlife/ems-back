@@ -71,4 +71,5 @@ public class Event
     public virtual ICollection<Mail> Mails { get; set; } = new List<Mail>();
     public virtual ICollection<AgendaEntry> AgendaEntries { get; set; } = new List<AgendaEntry>();
     public virtual ICollection<Flow> Flows { get; set; } = new List<Flow>();
+    public virtual ICollection<EventOrganizer> Organizers { get; set; } = new List<EventOrganizer>();
 }
