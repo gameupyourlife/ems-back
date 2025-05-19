@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.DTOs.User
 {
@@ -13,7 +14,7 @@ namespace ems_back.Repo.DTOs.User
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Password { get; set; } // Only for creation
+		public string Password { get; set; } // Only for creation
        
 	}
 }

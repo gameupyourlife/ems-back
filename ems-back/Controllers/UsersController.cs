@@ -25,6 +25,7 @@ namespace ems_back.Controllers
             _logger = logger;
         }
 
+        
         // GET: api/users/{userId}
         [HttpGet("{userId}")]
         public async Task<ActionResult<UserResponseDto>> GetUser(Guid userId)
@@ -50,7 +51,7 @@ namespace ems_back.Controllers
 
         // PUT: api/users/{userId}
         [Authorize]
-        [HttpPut("update-user")]
+        [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try

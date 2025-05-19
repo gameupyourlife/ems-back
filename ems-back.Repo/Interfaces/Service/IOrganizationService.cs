@@ -15,18 +15,18 @@ namespace ems_back.Repo.Interfaces.Service
 	    Task HandleAutomaticOrganizationMembership(string email);
 
 	    // Organization CRUD operations
-	    Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync();
+	    Task<IEnumerable<OrganizationResponseDto>> GetAllOrganizationsAsync(Guid userId);
 	    Task<OrganizationResponseDto> GetOrganizationByIdAsync(Guid id);
 	    Task<OrganizationResponseDto> CreateOrganizationAsync(OrganizationCreateDto organizationDto);
 	    Task<OrganizationResponseDto> UpdateOrganizationAsync(
 		    Guid id,
 		    OrganizationUpdateDto organizationDto,
 		    Guid updatedByUserId);
-	    Task<bool> DeleteOrganizationAsync(Guid id, Guid updatedByUserId);
+	    Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId);
 
 		// Domain operations
 		Task<IEnumerable<UserResponseDto>> GetOrganizationMembersAsync(Guid organizationId);
-		Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId);
+		Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId, Guid userId);
 		
 		Task<bool> AddDomainToOrganizationAsync(Guid orgId, string domain, Guid userId);
 

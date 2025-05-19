@@ -36,6 +36,9 @@ namespace ems_back.Repo.Repository
 
         public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto)
         {
+	        var fullName = $"{userDto.FirstName} {userDto.LastName}";
+            _logger.LogInformation("Starting user creation for {FullName} ({Email})", fullName, userDto.Email);
+
             var user = _mapper.Map<User>(userDto);
             user.UserName = userDto.Email;
             user.CreatedAt = DateTime.UtcNow;
@@ -45,10 +48,14 @@ namespace ems_back.Repo.Repository
             var result = await _userManager.CreateAsync(user, userDto.Password);
             if (!result.Succeeded)
             {
-                throw new ApplicationException(string.Join(", ", result.Errors.Select(e => e.Description)));
+                var errorDescriptions = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogWarning("User creation failed for {FullName} ({Email}). Errors: {Errors}", fullName, userDto.Email, errorDescriptions);
+                throw new ApplicationException(errorDescriptions);
             }
+            _logger.LogInformation("User created successfully for {FullName} ({Email}), UserId: {UserId}", fullName, user.Email, user.Id);
 
-            return _mapper.Map<UserResponseDto>(user);
+
+			return _mapper.Map<UserResponseDto>(user);
         }
 
         public async Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto)

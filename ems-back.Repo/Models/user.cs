@@ -25,7 +25,8 @@ namespace ems_back.Repo.Models
         public string LastName { get; set; }
 
         [Required]
-        public UserRole Role { get; set; }
+        public UserRole Role { get; set; } = UserRole.User;  // Default here
+
 
         public bool IsEmailConfirmed { get; set; } = false;
 
