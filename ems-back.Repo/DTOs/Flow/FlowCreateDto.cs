@@ -18,11 +18,6 @@ namespace ems_back.Repo.DTOs.Flow
         public bool stillPending { get; set; } = false;
         public bool multipleRuns { get; set; } = false;
 
-        [Required]
-        public Guid OrganizationId { get; set; }
-        [Required]
-		public Guid EventId { get; set; } // <-- Important!
-
 		[Required]
         public Guid CreatedBy { get; set; }
     }

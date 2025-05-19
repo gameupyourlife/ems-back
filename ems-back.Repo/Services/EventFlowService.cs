@@ -17,18 +17,28 @@ namespace ems_back.Repo.Services
     public class EventFlowService : IEventFlowService
     {
         private readonly IEventFlowRepository _eventFlowRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly ILogger<EventFlowService> _logger;
 
         public EventFlowService(
             IEventFlowRepository eventFlowRepository,
+            IEventRepository eventRepository,
             ILogger<EventFlowService> logger)
         {
             _eventFlowRepository = eventFlowRepository;
             _logger = logger;
+            _eventRepository = eventRepository;
         }
 
         public async Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId)
         {
+            var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventEntity == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return null;
+            }
+
             var flowList = await _eventFlowRepository.GetAllFlowsAsync(eventId);
             if (flowList == null)
             {
@@ -40,6 +50,13 @@ namespace ems_back.Repo.Services
 
         public async Task<FlowOverviewDto> CreateFlowAsync(Guid orgId, Guid eventId, FlowCreateDto flowCreateDto)
         {
+            var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventEntity == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return null;
+            }
+
             if (flowCreateDto == null)
             {
                 throw new ArgumentNullException(nameof(flowCreateDto));
@@ -89,7 +106,14 @@ namespace ems_back.Repo.Services
         
         public async Task<FlowOverviewDto> GetFlowByIdAsync(Guid orgId, Guid eventId, Guid flowId)
         {
-            var flow = await _eventFlowRepository.GetFlowByIdAsync(orgId, eventId, flowId);
+            var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventEntity == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return null;
+            }
+
+            var flow = await _eventFlowRepository.GetFlowByIdAsync(eventId, flowId);
             if (flow == null) return null;
 
             return new FlowOverviewDto
@@ -114,9 +138,16 @@ namespace ems_back.Repo.Services
             };
         }
 
-        public async Task<FlowResponseDto> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, FlowUpdateDto flowDto)
+        public async Task<FlowOverviewDto> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, FlowUpdateDto flowDto)
         {
-            var flow = await _eventFlowRepository.GetFlowByIdAsync(orgId, eventId, flowId);
+            var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventEntity == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return null;
+            }
+
+            var flow = await _eventFlowRepository.GetFlowByIdAsync(eventId, flowId);
             if (flow == null) return null;
 
             flow.Name = flowDto.Name;
@@ -131,7 +162,14 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> DeleteFlow(Guid orgId, Guid eventId, Guid flowId)
         {
-            var flow = await _eventFlowRepository.GetFlowByIdAsync(orgId, eventId, flowId);
+            var eventEntity = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventEntity == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                return false;
+            }
+
+            var flow = await _eventFlowRepository.GetFlowByIdAsync(eventId, flowId);
             if (flow == null) return false;
 
             return await _eventFlowRepository.DeleteFlowAsync(eventId, flowId);

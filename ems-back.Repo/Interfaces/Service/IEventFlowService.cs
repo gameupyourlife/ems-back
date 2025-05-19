@@ -15,7 +15,7 @@ namespace ems_back.Repo.Interfaces.Service
         Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId);
         Task<FlowOverviewDto> CreateFlowAsync(Guid orgId, Guid eventId, FlowCreateDto flowCreateDto);
         Task<FlowOverviewDto> GetFlowByIdAsync(Guid orgId, Guid eventId, Guid flowId);
-        Task<FlowResponseDto> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, FlowUpdateDto flowDto);
+        Task<FlowOverviewDto> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, FlowUpdateDto flowDto);
         Task<bool> DeleteFlow(Guid orgId, Guid eventId, Guid flowId);
 
         // Actions

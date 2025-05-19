@@ -120,8 +120,8 @@ namespace ems_back
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+            });
+            /*.AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -134,7 +134,7 @@ namespace ems_back
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                 };
-            });
+            });*/
 
             // Authorization Policies
             builder.Services.AddAuthorization(options =>
@@ -172,8 +172,8 @@ namespace ems_back
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.MapControllers();
 

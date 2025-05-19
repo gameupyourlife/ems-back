@@ -8,6 +8,7 @@ using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ems_back.Repo.Repository
 {
@@ -69,7 +70,7 @@ namespace ems_back.Repo.Repository
             return flow;
         }
 
-        public async Task<FlowOverviewDto?> GetFlowByIdAsync(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<FlowOverviewDto?> GetFlowByIdAsync(Guid eventId, Guid flowId)
         {
             var flowDto = await _dbContext.Flows
                 .Where(f => f.EventId == eventId && f.FlowId == flowId)
@@ -101,7 +102,7 @@ namespace ems_back.Repo.Repository
             return flowDto;
         }
 
-        public async Task<FlowResponseDto> UpdateFlowAsync(FlowOverviewDto updatedFlow)
+        public async Task<FlowOverviewDto> UpdateFlowAsync(FlowOverviewDto updatedFlow)
         {
             var existing = await _dbContext.Flows.FindAsync(updatedFlow.Id);
             if (existing == null)
@@ -115,7 +116,8 @@ namespace ems_back.Repo.Repository
 
             await _dbContext.SaveChangesAsync();
 
-            return _mapper.Map<FlowResponseDto>(existing);
+            var updated = await GetFlowByIdAsync(existing.EventId, existing.FlowId);
+            return updated;
         }
 
 
