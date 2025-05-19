@@ -100,6 +100,10 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
                 return createdEvent;
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (AlreadyExistsException ex)
             {
                 return BadRequest(ex.Message);

@@ -146,6 +146,12 @@ namespace ems_back.Repo.Services
                 throw new MismatchException("User is not member of org");
             }
 
+            if (eventDto.Start < DateTime.UtcNow || eventDto.Start > eventDto.End)
+            {
+                _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
+                throw new InvalidOperationException("Event start date cannot be in the past");
+            }
+
             var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,
