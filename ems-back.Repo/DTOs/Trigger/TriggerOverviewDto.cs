@@ -10,8 +10,8 @@ namespace ems_back.Repo.DTOs.Trigger
     public class TriggerOverviewDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public String? Name { get; set; }
         public TriggerType Type { get; set; }
-        public string? Summary { get; set; }
+        public String? Summary { get; set; }
     }
 }

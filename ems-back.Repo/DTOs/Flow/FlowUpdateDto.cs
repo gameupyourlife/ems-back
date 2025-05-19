@@ -12,9 +12,6 @@ namespace ems_back.Repo.DTOs.Flow
     {
 
         [Required]
-        public Guid Id { get; set; }  // Add this line
-
-        [Required]
         [MaxLength(100)]
         public string Name { get; set; }
 
@@ -25,7 +22,5 @@ namespace ems_back.Repo.DTOs.Flow
 
         public bool stillPending { get; set; } = false;
         public bool multipleRuns { get; set; } = false;
-        public Guid OrganizationId { get; set; }
-        public Guid EventId { get; set; } // <-- Important!
 	}
 }
