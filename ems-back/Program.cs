@@ -162,14 +162,6 @@ namespace ems_back
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
             });
 
-            // MinIO Client Configuration
-            var minioConfig = builder.Configuration.GetSection("Minio");
-            builder.Services.AddMinio(configureClient => configureClient
-                .WithEndpoint(minioConfig["Endpoint"])
-                .WithCredentials(minioConfig["AccessKey"], minioConfig["SecretKey"])
-                .WithSSL()
-                .Build());
-
             var app = builder.Build();
 
             // Initialize roles on startup
