@@ -95,7 +95,7 @@ namespace ems_back
                         .AllowCredentials());
                 options.AddPolicy("AllowBackendHostPort",
                     builder => builder
-                        .WithOrigins("http://95.217.1.150:32325")
+                        .WithOrigins("95.217.1.150:32325")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());
@@ -197,9 +197,9 @@ namespace ems_back
             }
 
             app.UseHttpsRedirection();
-            //app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowSpecificOrigin");
             app.UseCors("AllowAllOrigins");
-            //app.UseCors("AllowBackendHostUrl");
+            app.UseCors("AllowBackendHostUrl");
             app.UseCors("AllowBackendHostPort");
 
 
