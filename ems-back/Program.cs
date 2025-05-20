@@ -82,14 +82,29 @@ namespace ems_back
                         .WithOrigins("http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
+                options.AddPolicy("AllowAllOrigins",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+                options.AddPolicy("AllowBackendHostUrl",
+                    builder => builder
+                        .WithOrigins("https://ems-back.gameup.dev")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
+                options.AddPolicy("AllowBackendHostPort",
+                    builder => builder
+                        .WithOrigins("http://95.217.1.150:32325")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
             });
 
-            var conString = builder.Configuration.GetConnectionString("DefaultConnection");
-            Console.WriteLine($"Connection String: {conString}");
-
+       
             // Database Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(conString));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // AutoMapper
             builder.Services.AddAutoMapper(typeof(DbMappingProfile));
@@ -182,7 +197,11 @@ namespace ems_back
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowSpecificOrigin");
+            //app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowAllOrigins");
+            //app.UseCors("AllowBackendHostUrl");
+            //app.UseCors("AllowBackendHostPort");
+
 
             app.UseAuthentication();
             app.UseAuthorization();
