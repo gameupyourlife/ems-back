@@ -89,10 +89,10 @@ namespace ems_back.Repo.Services
 
         private async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
         {
-            var user2 = await _userRepository.GetUserByIdAsync(userId);
-            if (user2 == null) return false;
-            if (user2.Role == UserRole.Admin) return true;
-            if (user2.Organization.Id != orgId) return false;
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+            if (user.Role == UserRole.Admin) return true;
+            if (user.Organization.Id != orgId) return false;
    
             return true;
         }
