@@ -20,25 +20,12 @@ namespace ems_back.Repo.Jobs
         {
             try
             {
-                //direkt auf Action und Trigger Models mappen wegen JSON und direkt in mehrere Listen abhängig nach Action aufteilen
-                var flows = await _dbContext.Flows 
-                    .Where(f => f.IsActive)
-                    .Include(f => f.Event)
-                    .Include(f => _dbContext.Triggers
-                        .Where(t => t.FlowId == f.FlowId)) // Falls keine Navigation Property vorhanden
-                    .ToListAsync();
-
-                foreach (var flow in flows)
-                {
-                    var trigger = await _dbContext.Triggers.FirstOrDefaultAsync(t => t.FlowId == flow.FlowId);
-                    var eventData = flow.Event;
-
-                    Console.WriteLine($"Flow: {flow.Name}, Trigger: {trigger.GetType().Name}, Event: {eventData.Title}");
-                }
+                var count = await _dbContext.Flows.CountAsync();
+                Console.WriteLine($"[Quartz] Es gibt aktuell {count} Flows in der Datenbank.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Quartz] Fehler beim Abrufen der Daten: {ex.Message}");
+                Console.WriteLine($"[Quartz] Fehler beim Zählen der Flows: {ex.Message}");
             }
         }
 
