@@ -86,7 +86,7 @@ namespace ems_back
 
             // Database Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql("Host=95.217.1.150;Port=3535;Database=postgres;Username=LiveDeploy;Password=dsadsfdbnjfbnxie"));
 
             // AutoMapper
             builder.Services.AddAutoMapper(typeof(DbMappingProfile));
