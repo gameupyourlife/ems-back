@@ -75,7 +75,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpGet("{flowId}")]
-        public async Task<ActionResult<object>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<ActionResult<FlowOverviewDto>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace ems_back.Controllers
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpPut("{flowId}")]
-        public async Task<ActionResult<object>> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] FlowUpdateDto updateDto)
+        public async Task<ActionResult<FlowOverviewDto>> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] FlowUpdateDto updateDto)
         {
             try
             {
