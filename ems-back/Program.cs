@@ -200,7 +200,7 @@ namespace ems_back
             //app.UseCors("AllowSpecificOrigin");
             app.UseCors("AllowAllOrigins");
             //app.UseCors("AllowBackendHostUrl");
-            //app.UseCors("AllowBackendHostPort");
+            app.UseCors("AllowBackendHostPort");
 
 
             app.UseAuthentication();
