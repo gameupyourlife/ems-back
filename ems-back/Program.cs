@@ -84,9 +84,12 @@ namespace ems_back
                         .AllowAnyMethod());
             });
 
+            var conString = builder.Configuration.GetConnectionString("DefaultConnection");
+            Console.WriteLine($"Connection String: {conString}");
+
             // Database Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql("Host=95.217.1.150;Port=3535;Database=postgres;Username=LiveDeploy;Password=dsadsfdbnjfbnxie"));
+                options.UseNpgsql(conString));
 
             // AutoMapper
             builder.Services.AddAutoMapper(typeof(DbMappingProfile));
