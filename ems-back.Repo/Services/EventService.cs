@@ -610,5 +610,26 @@ namespace ems_back.Repo.Services
             _logger.LogInformation("Agenda point with id {AgendaId} deleted for event with id {EventId}", agendaId, eventId);
             return true;
         }
+
+        public async Task<IEnumerable<EventOverviewDto>> GetAllEventsByCreatorAsync(Guid orgId, Guid creatorId, Guid userId)
+        {
+            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            {
+                _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
+                throw new MismatchException("User is not member of org");
+            }
+
+            var events = await _eventRepository.GetAllEventsByCreatorAsync(orgId, creatorId);
+
+            if (events == null || !events.Any())
+            {
+                _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
+                throw new NotFoundException("No events found");
+            }
+            else
+            {
+                return events;
+            }
+        }
     }
 }

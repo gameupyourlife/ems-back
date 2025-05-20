@@ -401,5 +401,29 @@ namespace ems_back.Repo.Repository
         {
             return await _context.AgendaEntries.FindAsync(agendaId);
         }
+
+        public async Task<IEnumerable<EventOverviewDto>> GetAllEventsByCreatorAsync(Guid orgId, Guid creatorId)
+        {
+            var events = await _context.Events
+                .Where(e => e.OrganizationId == orgId && e.CreatedBy == creatorId)
+                .Select(e => new EventOverviewDto
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Category = e.Category,
+                    Start = e.Start,
+                    Location = e.Location,
+                    Image = e.Image,
+                    AttendeeCount = e.Attendees.Count,
+                    Capacity = e.Capacity,
+                    Status = e.Status,
+                    Description = e.Description
+                })
+
+                .AsNoTracking()
+                .ToListAsync();
+
+            return events;
+        }
     }
 }

@@ -67,6 +67,48 @@ namespace ems_back.Controllers
 			}
 		}
 
+        // GET: api/orgs/{orgId}/events/{creatorID}
+        [HttpGet("{creatorId}")]
+        public async Task<ActionResult<IEnumerable<EventOverviewDto>>> GetAllEventsByCreator(
+            [FromRoute] Guid orgId, 
+            [FromRoute] Guid creatorId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+            if (!await _eventService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+            try
+            {
+                var events = await _eventService.GetAllEventsByCreatorAsync(orgId, creatorId, Guid.Parse(userId));
+                if (events == null || !events.Any())
+                {
+                    _logger.LogWarning("No events found for creator with id {CreatorId}", creatorId);
+                    return NotFound("No events found for this creator");
+                }
+                return Ok(events);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all events by creator");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         // POST: api/orgs/{orgId}/events
         [HttpPost]  
         [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
