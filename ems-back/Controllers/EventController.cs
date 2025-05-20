@@ -67,10 +67,10 @@ namespace ems_back.Controllers
 			}
 		}
 
-        // GET: api/orgs/{orgId}/events/{creatorID}
-        [HttpGet("{creatorId}")]
+        // GET: api/orgs/{orgId}/events/creator/{creatorId}
+        [HttpGet("creator/{creatorId}")]
         public async Task<ActionResult<IEnumerable<EventOverviewDto>>> GetAllEventsByCreator(
-            [FromRoute] Guid orgId, 
+            [FromRoute] Guid orgId,
             [FromRoute] Guid creatorId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
