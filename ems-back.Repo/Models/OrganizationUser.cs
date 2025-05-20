@@ -13,17 +13,17 @@ namespace ems_back.Repo.Models
 		[Key, Column(Order = 0)]
 		public Guid OrganizationId { get; set; }
 
-		[Key, Column(Order = 0)]
+		[Key, Column(Order = 1)]
 		public Guid UserId { get; set; }
 
 		[Required]
-		public UserRole UserRole { get; set; }
-
+		public UserRole UserRole { get; set; } = UserRole.User;
 		[Required]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
-		[ForeignKey("OrganizationId")]
+        // for navigation:
+
+        [ForeignKey("OrganizationId")]
 		public virtual Organization Organization { get; set; }
 
 		[ForeignKey("UserId")]

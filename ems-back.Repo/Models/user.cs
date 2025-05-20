@@ -11,11 +11,9 @@ namespace ems_back.Repo.Models
     {
 
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public override Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
@@ -27,7 +25,8 @@ namespace ems_back.Repo.Models
         public string LastName { get; set; }
 
         [Required]
-        public UserRole Role { get; set; }
+        public UserRole Role { get; set; } = UserRole.User;  // Default here
+
 
         public bool IsEmailConfirmed { get; set; } = false;
 
@@ -37,13 +36,13 @@ namespace ems_back.Repo.Models
         [MaxLength(255)]
         public string? ProfilePicture { get; set; }
 
-        public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
-
-        public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
-
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 
-        public virtual ICollection<Event> CreatedEvents { get; set; }
+        // for navigation:
+
+        public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
+        public virtual ICollection<EventAttendee> AttendedEvents { get; set; } = new List<EventAttendee>();
+        public virtual ICollection<EventOrganizer> AssignedEvents { get; set; } = new List<EventOrganizer>();
     }
 }

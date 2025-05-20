@@ -11,17 +11,13 @@ namespace ems_back.Repo.DTOs.Event
     public class EventCreateDto
     {
         public string Title { get; set; }
-        public Guid OrganizationId { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
         public string Location { get; set; }
-        public Guid CreatedBy { get; set; }
         public int Capacity { get; set; }
         public string Image { get; set; }
         public EventStatus Status { get; set; }
-        public DateTime? Start { get; set; }
+        public DateTime Start { get; set; }
         public DateTime? End { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Guid UpdatedBy { get; set; }
     }
 }

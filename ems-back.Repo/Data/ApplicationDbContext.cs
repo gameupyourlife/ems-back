@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
+using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Data
 {
@@ -22,7 +23,7 @@ namespace ems_back.Repo.Data
 		public DbSet<Event> Events { get; set; }
 		public DbSet<EventAttendee> EventAttendees { get; set; }
 		public DbSet<AgendaEntry> AgendaEntries { get; set; }
-		public DbSet<EventFile> Files { get; set; } // Will be excluded from auto-ID generation
+		public DbSet<EventFile> Files { get; set; }
 		public DbSet<Flow> Flows { get; set; }
 		public DbSet<Trigger> Triggers { get; set; }
 		public DbSet<Models.Action> Actions { get; set; }
@@ -33,8 +34,10 @@ namespace ems_back.Repo.Data
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<Mail> Mail { get; set; }
         public DbSet<MailRun> MailRun { get; set; }
+		public DbSet<EventOrganizer> EventOrganizers { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public DbSet<OrganizationDomain> OrganizationDomain { get; set; }
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
@@ -73,141 +76,274 @@ namespace ems_back.Repo.Data
 				}
 			}
 
+			// Event relationships:
 
-			// Special handling for EventFile (no auto UUID)
-			modelBuilder.Entity<EventFile>(b =>
+			modelBuilder.Entity<Event>()
+				.HasOne(e => e.Creator)
+				.WithMany()
+				.HasForeignKey(e => e.CreatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Event>()
+				.HasOne(e => e.Updater)
+				.WithMany()
+				.HasForeignKey(e => e.UpdatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Event>()
+				.HasOne(e => e.Organization)
+				.WithMany(o => o.Events)
+				.HasForeignKey(e => e.OrganizationId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Event>()
+                .HasMany(e => e.Organizers)
+                .WithOne(o => o.Event)
+                .HasForeignKey(o => o.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Flow Relationships:
+
+            modelBuilder.Entity<Flow>()
+				.HasOne(f => f.FlowTemplate)
+				.WithMany(f => f.Flows)
+				.HasForeignKey(f => f.FlowTemplateId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Flow>()
+				.HasOne(e => e.Creator)
+				.WithMany()
+				.HasForeignKey(e => e.CreatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Flow>()
+				.HasOne(e => e.Updater)
+				.WithMany()
+				.HasForeignKey(e => e.UpdatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<Flow>()
+				.HasOne(e => e.Event)
+				.WithMany(o => o.Flows)
+				.HasForeignKey(e => e.EventId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Flow>()
+				.HasMany(f => f.Actions)
+				.WithOne(f => f.Flow)
+				.OnDelete(DeleteBehavior.Restrict);
+
+            // FlowRun relationships:
+
+            modelBuilder.Entity<FlowsRun>()
+				.HasOne(e => e.Flow)
+				.WithMany(o => o.FlowsRuns)
+				.HasForeignKey(e => e.FlowId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// FlowTemplate relationships:
+
+			modelBuilder.Entity<FlowTemplate>()
+				.HasOne(e => e.Organization)
+				.WithMany(o => o.FlowTemplates)
+				.HasForeignKey(e => e.OrganizationId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<FlowTemplate>()
+				.HasOne(e => e.Creator)
+				.WithMany()
+				.HasForeignKey(e => e.CreatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<FlowTemplate>()
+				.HasOne(e => e.Updater)
+				.WithMany()
+				.HasForeignKey(e => e.UpdatedBy)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// MailTemplate relationships:
+
+			modelBuilder.Entity<MailTemplate>()
+				.HasOne(e => e.Organization)
+				.WithMany(o => o.MailTemplates)
+				.HasForeignKey(e => e.OrganizationId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// Mail relationships:
+
+			modelBuilder.Entity<Mail>()
+				.HasOne(e => e.Event)
+				.WithMany(o => o.Mails)
+				.HasForeignKey(e => e.EventId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// MailRun relationships:
+
+			modelBuilder.Entity<MailRun>()
+				.HasOne(e => e.Mail)
+				.WithMany(o => o.MailRuns)
+				.HasForeignKey(e => e.MailId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// User relationships:
+
+			modelBuilder.Entity<User>()
+				.HasMany(e => e.OrganizationUsers)
+				.WithOne(ou => ou.User)
+				.HasForeignKey(ou => ou.UserId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<User>()
+				.HasMany(e => e.AttendedEvents)
+				.WithOne(e => e.User)
+				.HasForeignKey(e => e.UserId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<User>()
+				.HasMany(e => e.AssignedEvents)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // Organization relationships:
+
+            modelBuilder.Entity<Organization>(b =>
 			{
-				b.Property(f => f.Id).HasDefaultValueSql(null);
-				// Add other file-specific configurations if needed
+				b.HasOne(o => o.Creator)
+					.WithMany()
+					.HasForeignKey(o => o.CreatedBy)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				b.HasOne(o => o.Updater)
+					.WithMany()
+					.HasForeignKey(o => o.UpdatedBy)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				b.HasMany(o => o.OrganizationUsers)
+					.WithOne(ou => ou.Organization)
+					.HasForeignKey(ou => ou.OrganizationId)
+					.OnDelete(DeleteBehavior.Cascade);
 			});
 
-            // Configure Organization relationships
-            modelBuilder.Entity<Organization>(b =>
-            {
-                // Beziehung zu Creator (User)
-                b.HasOne(o => o.Creator)
-                    .WithMany()
-                    .HasForeignKey(o => o.CreatedBy)
-                    .OnDelete(DeleteBehavior.Restrict);
+			// Configure EventAttendee relationships and constraints
 
-                // Beziehung zu Updater (User)
-                b.HasOne(o => o.Updater)
-                    .WithMany()
-                    .HasForeignKey(o => o.UpdatedBy)
-                    .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<EventAttendee>(b =>
+			{
+				b.HasIndex(ea => new { ea.EventId, ea.UserId }).IsUnique();
 
-                // Beziehung zu OrganizationUsers
-                b.HasMany(o => o.OrganizationUsers)
-                    .WithOne(ou => ou.Organization)
-                    .HasForeignKey(ou => ou.OrganizationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+				b.HasOne(ea => ea.Event)
+					.WithMany(e => e.Attendees)
+					.HasForeignKey(ea => ea.EventId)
+					.OnDelete(DeleteBehavior.Cascade);
 
-                // Beziehung zu FlowTemplates
-                b.HasMany<FlowTemplate>()
-                    .WithOne() 
-                    .HasForeignKey(ft => ft.OrganizationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+				b.HasOne(ea => ea.User)
+					.WithMany(u => u.AttendedEvents)
+					.HasForeignKey(ea => ea.UserId)
+					.OnDelete(DeleteBehavior.Cascade);
+			});
 
-                // Beziehung zu MailTemplates
-                b.HasMany<MailTemplate>()
-                    .WithOne()
-                    .HasForeignKey(mt => mt.OrganizationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+			//Configure OrganizationUser relationships and constraints
 
-                // Optional: Wenn Events ebenfalls direkt Organisation zugeordnet sind
+			modelBuilder.Entity<OrganizationUser>(b =>
+		   {
+			   // Composite unique constraint to prevent duplicate user-org relationships
+			   b.HasIndex(ou => new { ou.OrganizationId, ou.UserId }).IsUnique();
 
-                b.HasMany<Event>()
-                    .WithOne()
-                    .HasForeignKey(e => e.OrganizationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+			   // Indexes for performance
+			   b.HasIndex(ou => ou.UserRole);
 
-            // Configure OrganizationUser relationships and constraints
-   //         modelBuilder.Entity<OrganizationUser>(b =>
-			//{
-			//	// Composite unique constraint to prevent duplicate user-org relationships
-			//	b.HasIndex(ou => new { ou.OrganizationId, ou.UserId }).IsUnique();
+			   // Relationship with Organization
+			   b.HasOne(ou => ou.Organization)
+				   .WithMany(o => o.OrganizationUsers)
+				   .HasForeignKey(ou => ou.OrganizationId)
+				   .OnDelete(DeleteBehavior.Cascade);
 
-			//	// Indexes for performance
-			//	b.HasIndex(ou => ou.UserRole);
+			   // Relationship with User
+			   b.HasOne(ou => ou.User)
+				   .WithMany(u => u.OrganizationUsers)
+				   .HasForeignKey(ou => ou.UserId)
+				   .OnDelete(DeleteBehavior.Cascade);
+		   });
 
-			//	// Relationship with Organization
-			//	b.HasOne(ou => ou.Organization)
-			//		.WithMany(o => o.OrganizationUsers)
-			//		.HasForeignKey(ou => ou.OrganizationId)
-			//		.OnDelete(DeleteBehavior.Cascade);
+			// Configure composite key for EventAttendee
+			modelBuilder.Entity<EventAttendee>()
+				.HasKey(ea => new { ea.EventId, ea.UserId });
 
-			//	// Relationship with User
-			//	//b.HasOne(ou => ou.User)
-			//	//	.WithMany(u => u.OrganizationUsers)
-			//	//	.HasForeignKey(ou => ou.UserId)
-			//	//	.OnDelete(DeleteBehavior.Cascade);
-			//});
+			modelBuilder.Entity<OrganizationUser>()
+				.HasKey(ea => new { ea.UserId, ea.OrganizationId });
 
-			//// Configure composite key for EventAttendee
-			//modelBuilder.Entity<EventAttendee>()
-			//	.HasKey(ea => new { ea.EventId, ea.UserId });
+            modelBuilder.Entity<EventOrganizer>()
+				.HasKey(eo => new { eo.EventId, eo.UserId });
 
-			//// Configure enum conversions
-			//modelBuilder.Entity<User>()
-			//	.Property(u => u.Role)
-			//	.HasConversion<string>()
-			//	.HasMaxLength(20);
+            // Configure enum conversions
 
-			//modelBuilder.Entity<Event>()
-			//	.Property(e => e.Category)
-			//	.HasConversion<string>();
+            // Configure enum conversions
+            modelBuilder.Entity<User>()
+				.Property(u => u.Role)
+				.HasConversion<string>()
+				.HasMaxLength(20);
 
-			//modelBuilder.Entity<Event>()
-			//	.Property(e => e.Status)
-			//	.HasConversion<string>();
+			modelBuilder.Entity<OrganizationUser>()
+				.Property(u => u.UserRole)
+				.HasConversion<string>()
+				.HasMaxLength(20);
 
-			//// Configure JSON columns for PostgreSQL
-			//modelBuilder.Entity<Trigger>()
-			//	.Property(t => t.Details)
-			//	.HasColumnType("jsonb");
+			modelBuilder.Entity<Event>()
+				.Property(e => e.Category)
+				.HasConversion<string>();
 
-			//modelBuilder.Entity<Models.Action>()
-			//	.Property(a => a.Details)
-			//	.HasColumnType("jsonb");
+			modelBuilder.Entity<Event>()
+				.Property(e => e.Status)
+				.HasConversion<string>();
 
-			// Ab hier auf jeden Fall korrekt:
+			// Action and Trigger configuration:
 
-            modelBuilder.Entity<Models.Action>(entity =>
-            {
-                entity.HasOne(a => a.Flow)
-                      .WithMany()
-                      .HasForeignKey(a => a.FlowId)
-                      .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<Trigger>()
+				.Property(t => t.Details)
+				.HasColumnType("jsonb");
 
-                entity.HasOne(a => a.FlowTemplate)
-                      .WithMany()
-                      .HasForeignKey(a => a.FlowTemplateId)
-                      .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<Models.Action>()
+				.Property(a => a.Details)
+				.HasColumnType("jsonb");
 
-                entity.ToTable(tb => tb.HasCheckConstraint(
-                    "CK_Action_AtLeastOneFK",
-                    "FlowId IS NOT NULL OR FlowTemplateId IS NOT NULL"
-                ));
-            });
-
-			modelBuilder.Entity<Models.Trigger>(entity =>
+			modelBuilder.Entity<Models.Action>(entity =>
 			{
 				entity.HasOne(a => a.Flow)
-					  .WithMany()
+					  .WithMany(f => f.Actions)
 					  .HasForeignKey(a => a.FlowId)
-					  .OnDelete(DeleteBehavior.Restrict);
+					  .OnDelete(DeleteBehavior.Cascade);
 
 				entity.HasOne(a => a.FlowTemplate)
-					  .WithMany()
+					  .WithMany(f => f.Actions)
 					  .HasForeignKey(a => a.FlowTemplateId)
 					  .OnDelete(DeleteBehavior.Restrict);
-
-				entity.ToTable(tb => tb.HasCheckConstraint(
-					"CK_Action_AtLeastOneFK",
-					"FlowId IS NOT NULL OR FlowTemplateId IS NOT NULL"
-				));
 			});
+
+			modelBuilder.Entity<Trigger>(entity =>
+			{
+				entity.HasOne(a => a.Flow)
+					  .WithMany(f => f.Triggers)
+					  .HasForeignKey(a => a.FlowId)
+					  .OnDelete(DeleteBehavior.Cascade);
+
+				entity.HasOne(a => a.FlowTemplate)
+					  .WithMany(f => f.Triggers)
+					  .HasForeignKey(a => a.FlowTemplateId)
+					  .OnDelete(DeleteBehavior.Restrict);
+			});
+
+			// Configure the relationship, Testing
+			modelBuilder.Entity<OrganizationDomain>()
+				.HasOne(od => od.Organization)          // Each domain has one organization
+				.WithMany(o => o.AllowedDomains)        // Each org has many domains
+				.HasForeignKey(od => od.OrganizationId) // Foreign key property
+				.OnDelete(DeleteBehavior.Cascade);      // Delete domains when org is deleted
+
+			// Optional: Unique constraint on domain
+			modelBuilder.Entity<OrganizationDomain>()
+				.HasIndex(od => od.Domain)
+				.IsUnique();
 		}
 
 		public override int SaveChanges()
@@ -226,21 +362,36 @@ namespace ems_back.Repo.Data
 							(e.Property(nameof(User.FirstName)).IsModified ||
 							 e.Property(nameof(User.LastName)).IsModified ||
 							 e.Property(nameof(User.Email)).IsModified ||
-							 e.Property(nameof(User.ProfilePicture)).IsModified ||
-							 e.Property(nameof(User.Role)).IsModified))
+							 e.Property(nameof(User.ProfilePicture)).IsModified))
+							 // || e.Property(nameof(User.Role)).IsModified))
 				.Select(e => e.Entity)
 				.ToList();
 			var changedOrganizations = ChangeTracker.Entries<Organization>()
 				.Where(e => e.State == EntityState.Modified &&
-							(e.Property(nameof(Organization.Name)).IsModified ||
-							 e.Property(nameof(Organization.Address)).IsModified ||
-							 e.Property(nameof(Organization.Description)).IsModified ||
-							 e.Property(nameof(Organization.ProfilePicture)).IsModified ||
-							 e.Property(nameof(Organization.Domain)).IsModified))
+				            (e.Property(nameof(Organization.Name)).IsModified ||
+				             e.Property(nameof(Organization.Address)).IsModified ||
+				             e.Property(nameof(Organization.Description)).IsModified ||
+				             e.Property(nameof(Organization.ProfilePicture)).IsModified ||
+				             e.Property(nameof(Organization.UpdatedBy)).IsModified 
+				            ))
 				.Select(e => e.Entity)
 				.ToList();
 
-			var result = base.SaveChanges();
+			foreach (var entry in ChangeTracker.Entries<Trigger>())
+            {
+                var t = entry.Entity;
+                if (t.FlowTemplateId == null && t.FlowId == null)
+                    throw new InvalidOperationException("Trigger must be assigned to at least a Flow or a FlowTemplate.");
+            }
+
+            foreach (var entry in ChangeTracker.Entries<Models.Action>())
+            {
+                var a = entry.Entity;
+                if (a.FlowTemplateId == null && a.FlowId == null)
+                    throw new InvalidOperationException("Action must be assigned to at least a Flow or a FlowTemplate.");
+            }
+
+            var result = base.SaveChanges();
 
 
 
@@ -251,10 +402,6 @@ namespace ems_back.Repo.Data
 
 			return result;
 		}
-
-
-
-
 	}
 
 	// Optional interface for entities with timestamps

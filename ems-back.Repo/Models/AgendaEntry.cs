@@ -13,7 +13,6 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
@@ -31,6 +30,8 @@ namespace ems_back.Repo.Models
 
         [Required]
         public Guid EventId { get; set; }
+
+		// for navigation:
 
 		[ForeignKey("EventId")]
 		public virtual Event Event { get; set; }

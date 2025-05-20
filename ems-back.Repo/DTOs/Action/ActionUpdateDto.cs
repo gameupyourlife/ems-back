@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Action
@@ -12,9 +13,14 @@ namespace ems_back.Repo.DTOs.Action
     public class ActionUpdateDto
     {
         [Required]
-        public Guid Id { get; set; }
+        public ActionType Type { get; set; }
 
-        public ActionType? Type { get; set; }
-        public string Details { get; set; }
+        [Required]
+        public String Details { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        public string? Summary { get; set; }
     }
 }

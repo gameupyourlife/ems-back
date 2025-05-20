@@ -12,5 +12,6 @@ namespace ems_back.Repo.DTOs.Organization
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string? ProfilePicture { get; set; }
+
     }
 }

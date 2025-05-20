@@ -1,17 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using ems_back.Repo.Models;
 
 public class Mail
 {
 
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
     public Guid MailId { get; set; } = Guid.NewGuid();
 
     [Required]
     [MaxLength(200)]
-
     public string Name { get; set; }
 
     [Required]
@@ -22,15 +20,33 @@ public class Mail
     [Column(TypeName = "text")]
     public string Body { get; set; }
 
-    [MaxLength(1000)]
-    public string Description { get; set; }
+    [Required]
+    public IEnumerable<Guid> Recipients { get; set; }
+
+    public DateTime? ScheduledFor { get; set; }
 
     [Required]
-    public bool IsUserCreated { get; set; } = false;
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    [Required] 
+    public Guid CreatedBy { get; set; }
+
+    public Guid? UpdatedBy { get; set; }
 
     [Required]
     public Guid EventId { get; set; }
 
+    // for navigation:
+
     [ForeignKey("EventId")]
     public virtual Event Event { get; set; }
+
+    [ForeignKey("CreatedBy")]
+    public virtual User Creator { get; set; }
+
+    [ForeignKey("UpdatedBy")]
+    public virtual User Updater { get; set; }
+    public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
 }

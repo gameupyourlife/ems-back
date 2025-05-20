@@ -19,7 +19,6 @@ namespace ems_back.Repo.Models
         public FileType Type { get; set; }
 
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
@@ -33,6 +32,8 @@ namespace ems_back.Repo.Models
         public Guid EventId { get; set; }
 
         public long? SizeInBytes { get; set; }
+
+        // for navigation:
 
         [ForeignKey("UploadedBy")]
         public virtual User Uploader { get; set; }

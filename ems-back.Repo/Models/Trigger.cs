@@ -13,8 +13,12 @@ namespace ems_back.Repo.Models
     public class Trigger
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
+
+        [Required]
+        public string Name { get; set; }
+
+        public string? Summary { get; set; }
 
         [Required]
         public TriggerType Type { get; set; }
@@ -28,12 +32,14 @@ namespace ems_back.Repo.Models
 
         public Guid? FlowId { get; set; }
 
-        [ForeignKey("FlowId")]
-        public virtual Flow Flow { get; set; }
-
         public Guid? FlowTemplateId { get; set; }
+
+        // for navigation:
 
         [ForeignKey("FlowTemplateId")]
         public virtual FlowTemplate FlowTemplate { get; set; }
+
+        [ForeignKey("FlowId")]
+        public virtual Flow Flow { get; set; }
     }
 }

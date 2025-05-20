@@ -11,7 +11,6 @@ namespace ems_back.Repo.Models
 	public class FlowTemplate
 	{
 		[Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid FlowTemplateId { get; set; } = new Guid();
 
         [Required]
@@ -23,16 +22,26 @@ namespace ems_back.Repo.Models
 		[Required]
 		public Guid OrganizationId { get; set; }
 
-		[ForeignKey("OrganizationId")]
-		public Organization Organization { get; set; }
-
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; }
         public Guid CreatedBy { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
 		public Guid? UpdatedBy { get; set; }
+
+        // for navigation:
+
+        [ForeignKey("OrganizationId")]
+        public Organization Organization { get; set; }
+
+        [ForeignKey("CreatedBy")]
+        public virtual User Creator { get; set; }
+
+        [ForeignKey("UpdatedBy")]
+        public virtual User? Updater { get; set; }
+
+        public virtual ICollection<Flow> Flows { get; set; }
+        public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
+        public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
     }
 }

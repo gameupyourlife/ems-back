@@ -8,7 +8,6 @@ public class Event
 {
     [Key]
     [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
@@ -23,7 +22,6 @@ public class Event
     public string Location { get; set; }
 
     [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Required]
@@ -38,7 +36,6 @@ public class Event
     [Required]
     public EventStatus Status { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
     [Required]
@@ -49,12 +46,17 @@ public class Event
 
     public DateTime? End { get; set; }
 
-    public virtual ICollection<EventAttendee> Attendees { get; set; }
-
     [Required]
     public Guid OrganizationId { get; set; }
 
-    // Navigation properties
+    [Required]
+    public int AttendeeCount { get; set; }
+
+    [Required]
+    public int Capacity { get; set; }
+
+    // for navigation:
+
     [ForeignKey("CreatedBy")]
     public virtual User Creator { get; set; }
 
@@ -63,4 +65,11 @@ public class Event
 
     [ForeignKey("OrganizationId")]
     public virtual Organization Organization { get; set; }
+
+    public virtual ICollection<EventAttendee> Attendees { get; set; } = new List<EventAttendee>();
+    public virtual ICollection<EventFile> Files { get; set; } = new List<EventFile>();
+    public virtual ICollection<Mail> Mails { get; set; } = new List<Mail>();
+    public virtual ICollection<AgendaEntry> AgendaEntries { get; set; } = new List<AgendaEntry>();
+    public virtual ICollection<Flow> Flows { get; set; } = new List<Flow>();
+    public virtual ICollection<EventOrganizer> Organizers { get; set; } = new List<EventOrganizer>();
 }
