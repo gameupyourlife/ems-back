@@ -157,7 +157,7 @@ namespace ems_back.Repo.Services
                 throw new NotFoundException("User not found");
             }
 
-            var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) == null;
+            var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) != null;
 
             var eventInfo = new EventInfoDto
             {
@@ -209,6 +209,9 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event with id {EventId} not found", eventid);
                 throw new NotFoundException("Event not found");
             }
+
+            eventEntity.isAttending = await _eventRepository.GetEventAttendeeByIdAsync(eventEntity.Id, userId) != null;
+
             return eventEntity;
         }
 

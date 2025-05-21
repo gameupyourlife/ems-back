@@ -15,6 +15,7 @@ using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Repo.Repository
 {
@@ -116,7 +117,7 @@ namespace ems_back.Repo.Repository
                 .FirstOrDefaultAsync();
             if (existingEvent == null)
             {
-                return null;
+                throw new NotFoundException("Event not found");
             }
                 
             _mapper.Map(eventDto, existingEvent);

@@ -246,6 +246,10 @@ namespace ems_back.Controllers
                 }
                 return Ok(success);
             }
+            catch (NotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
