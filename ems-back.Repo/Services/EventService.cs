@@ -150,6 +150,15 @@ namespace ems_back.Repo.Services
                 throw new InvalidOperationException("Event start date cannot be in the past");
             }
 
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} does not exist", userId);
+                throw new NotFoundException("User not found");
+            }
+
+            var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) == null;
+
             var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,
@@ -166,7 +175,9 @@ namespace ems_back.Repo.Services
                 UpdatedAt = DateTime.UtcNow,
                 CreatedBy = userId,
                 UpdatedBy = userId,
-                AttendeeCount = 0
+                CreatorName = user.FullName,
+                AttendeeCount = 0,
+                isAttending = attends,
             };
 
             // Check if the event already exists
@@ -308,8 +319,7 @@ namespace ems_back.Repo.Services
                 UserId = attendeeDto.UserId,
                 EventId = eventId,
                 RegisteredAt = DateTime.UtcNow,
-                Status = AttendeeStatus.Pending,
-                Event = eventInfo,
+                Status = AttendeeStatus.Pending
             };
 
             try
@@ -336,7 +346,6 @@ namespace ems_back.Repo.Services
                 UserEmail = user.Email,
                 UserName = user.FullName,
                 Status = attendee.Status,
-                ProfilePicture = user.ProfilePicture,
                 RegisteredAt = attendee.RegisteredAt
             };
 
@@ -489,6 +498,7 @@ namespace ems_back.Repo.Services
 
             var agendaEntry = new AgendaEntryDto
             {
+                Id = Guid.NewGuid(),
                 Title = agendaEntryDto.Title,
                 Description = agendaEntryDto.Description,
                 Start = agendaEntryDto.Start,

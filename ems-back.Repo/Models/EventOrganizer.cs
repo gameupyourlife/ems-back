@@ -12,17 +12,17 @@ namespace ems_back.Repo.Models
     public class EventOrganizer
     {
         [Key, Column(Order = 0)]
-        public Guid EventId { get; set; }
+        public required Guid EventId { get; set; }
 
         [Key, Column(Order = 1)]
-        public Guid UserId { get; set; }
+        public required Guid UserId { get; set; }
 
         // for navigation:
 
         [ForeignKey("EventId")]
-        public virtual required Event Event { get; set; }
+        public virtual  Event? Event { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual required User User { get; set; }
+        public virtual  User? User { get; set; }
     }
 }

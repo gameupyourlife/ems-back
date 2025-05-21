@@ -9,7 +9,7 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventOverviewDto
     {
-        public required Guid Id { get; set; }
+        public Guid Id { get; set; }
         public required string Title { get; set; }
         public required string Category { get; set; }
         public required DateTime Start { get; set; }

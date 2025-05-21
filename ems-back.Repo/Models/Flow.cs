@@ -45,16 +45,16 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("CreatedBy")]
-		public virtual required User Creator { get; set; }
+		public virtual User? Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]
 		public virtual User? Updater { get; set; }
 
 		[ForeignKey("EventId")]
-		public virtual required Event Event { get; set; }
+		public virtual Event? Event { get; set; }
 
 		[ForeignKey("FlowTemplateId")]
-        public virtual required FlowTemplate FlowTemplate { get; set; }
+        public virtual  FlowTemplate? FlowTemplate { get; set; }
         public virtual ICollection<FlowsRun> FlowsRuns { get; set; } = new List<FlowsRun>();
         public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
         public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();

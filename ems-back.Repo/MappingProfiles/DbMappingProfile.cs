@@ -9,7 +9,6 @@ using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
-using ems_back.Repo.DTOs.File;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowsRun;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
@@ -103,10 +102,9 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
 				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId));
 
-            // Related mappings
-            CreateMap<EventAttendee, EventAttendeeDto>()
-				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
-				.ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePicture));
+			// Related mappings
+			CreateMap<EventAttendee, EventAttendeeDto>()
+				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName));
 
 
 			// Flow mappings
@@ -175,7 +173,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Flow, opt => opt.Ignore());
 
 			CreateMap<Action, ActionDto>();
-			CreateMap<Action, ActionDetailedDto>();
 
 
 

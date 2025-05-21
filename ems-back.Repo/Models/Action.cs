@@ -15,7 +15,7 @@ namespace ems_back.Repo.Models
 	{
 		[Key]
         [Required]
-        public required Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         public required string Name { get; set; }

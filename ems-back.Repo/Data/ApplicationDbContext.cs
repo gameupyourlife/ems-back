@@ -99,6 +99,18 @@ namespace ems_back.Repo.Data
                 .HasForeignKey(m => m.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<Event>()
+				.HasOne(e => e.Creator)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Event>()
+                .HasOne(e => e.Updater)
+                .WithMany()
+                .HasForeignKey(e => e.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Flow Relationships:
 
             modelBuilder.Entity<Flow>()
@@ -119,6 +131,18 @@ namespace ems_back.Repo.Data
 				.HasForeignKey(f => f.FlowId)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<Flow>()
+                .HasOne(f => f.Creator)
+                .WithMany()
+                .HasForeignKey(f => f.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Flow>()
+                .HasOne(f => f.Updater)
+                .WithMany()
+                .HasForeignKey(f => f.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // FlowTemplate relationships:
 
             modelBuilder.Entity<FlowTemplate>()
@@ -137,15 +161,39 @@ namespace ems_back.Repo.Data
                 .HasMany(e => e.Flows)
                 .WithOne(e => e.FlowTemplate)
                 .HasForeignKey(e => e.FlowTemplateId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
-			// Mail relationships:
+            modelBuilder.Entity<FlowTemplate>()
+                .HasOne(e => e.Creator)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
 
-			modelBuilder.Entity<Mail>()
+            modelBuilder.Entity<FlowTemplate>()
+                .HasOne(e => e.Updater)
+                .WithMany()
+                .HasForeignKey(e => e.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Mail relationships:
+
+            modelBuilder.Entity<Mail>()
 				.HasMany(e => e.MailRuns)
                 .WithOne(o => o.Mail)
                 .HasForeignKey(e => e.MailId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Mail>()
+                .HasOne(e => e.Creator)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Mail>()
+                .HasOne(e => e.Updater)
+                .WithMany()
+                .HasForeignKey(e => e.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // User relationships:
 
@@ -166,7 +214,6 @@ namespace ems_back.Repo.Data
                 .WithOne(e => e.User)
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung als Organizer gelöscht
-
 
 			// Organization relationships:
 
@@ -211,6 +258,18 @@ namespace ems_back.Repo.Data
                 .WithOne(ou => ou.Organization)
                 .HasForeignKey(ou => ou.OrganizationId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Organization>()
+				.HasOne(o => o.Creator)
+                .WithMany()
+                .HasForeignKey(o => o.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Organization>()
+                .HasOne(o => o.Updater)
+                .WithMany()
+                .HasForeignKey(o => o.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Configure EventAttendee relationships and constraints
 

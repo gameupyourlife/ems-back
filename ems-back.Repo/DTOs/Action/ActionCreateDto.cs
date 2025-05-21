@@ -15,8 +15,8 @@ namespace ems_back.Repo.DTOs.Action
     {
         public required ActionType Type { get; set; }
 
-        public String? Details { get; set; }
-        public String Name { get; set; }
+        public required String? Details { get; set; }
+        public required String Name { get; set; }
         public String? Description { get; set; }
 
     }

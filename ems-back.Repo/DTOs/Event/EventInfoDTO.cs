@@ -9,7 +9,7 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventInfoDto
     {
-        public required Guid Id { get; set; }
+        public Guid Id { get; set; }
         public required string Title { get; set; }
         public required Guid OrganizationId { get; set; }
         public required string Location { get; set; }
@@ -26,6 +26,6 @@ namespace ems_back.Repo.DTOs.Event
         public Guid? CreatedBy { get; set; }
         public required string CreatorName { get; set; }
         public Guid? UpdatedBy { get; set; }
-        public required bool isAttending { get; set; }
+        public bool? isAttending { get; set; }
     }
 }

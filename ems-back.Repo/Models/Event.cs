@@ -8,7 +8,7 @@ public class Event
 {
     [Key]
     [Required]
-    public required Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [MaxLength(255)]

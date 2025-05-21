@@ -49,7 +49,7 @@ namespace ems_back.Repo.Repository
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Description = a.Summary,
+                        Description = a.Description,
                         Type = a.Type
                     }).ToList()
                 })
@@ -101,7 +101,7 @@ namespace ems_back.Repo.Repository
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Description = a.Summary,
+                        Description = a.Description,
                         Type = a.Type
                     }).ToList()
                 })
@@ -160,7 +160,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = a.CreatedAt,
                 FlowTemplateId = a.FlowTemplateId,
                 Name = a.Name,
-                Description = a.Summary
+                Description = a.Description
             });
 
             return actionDtos;
@@ -181,7 +181,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = action.CreatedAt,
                 FlowTemplateId = action.FlowTemplateId,
                 Name = action.Name,
-                Description = action.Summary
+                Description = action.Description
             };
         }
 
@@ -206,7 +206,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = action.CreatedAt,
                 FlowTemplateId = action.FlowTemplateId,
                 Name = action.Name,
-                Description = action.Summary
+                Description = action.Description
             };
 
             return actionDto;
@@ -221,7 +221,7 @@ namespace ems_back.Repo.Repository
             existing.Type = dto.Type;
             existing.Details = dto.Details;  // JsonElement -> JSON-String
             existing.Name = dto.Name;
-            existing.Summary = dto. Description;
+            existing.Description = dto. Description;
 
             await _dbContext.SaveChangesAsync();
 
@@ -233,7 +233,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = existing.CreatedAt,
                 FlowTemplateId = existing.FlowTemplateId,
                 Name = existing.Name,
-                Description = existing.Summary
+                Description = existing.Description
             };
         }
 
