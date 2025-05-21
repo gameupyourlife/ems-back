@@ -41,7 +41,7 @@ namespace ems_back.Controllers
                 if (flowTemplates == null || !flowTemplates.Any())
                 {
                     _logger.LogWarning("No flow templates found for organization with id {OrgId}", orgId);
-                    return NotFound("No flow templates found");
+                    return Ok(flowTemplates);
                 }
                 _logger.LogInformation("Flow templates found for organization with id {OrgId}", orgId);
                 return Ok(flowTemplates);
@@ -86,7 +86,7 @@ namespace ems_back.Controllers
                 if (flowTemplate == null)
                 {
                     _logger.LogWarning("Flow template with ID {TemplateId} not found for organization {OrgId}", templateId, orgId);
-                    return NotFound($"Flow template with ID {templateId} not found.");
+                    return Ok(flowTemplate);
                 }
 
                 _logger.LogInformation("Flow template with ID {TemplateId} retrieved for organization {OrgId}", templateId, orgId);
@@ -161,7 +161,7 @@ namespace ems_back.Controllers
                 if (actions == null || !actions.Any())
                 {
                     _logger.LogWarning("No actions found for template {TemplateId} in organization {OrgId}", templateId, orgId);
-                    return NotFound("No actions found for this template");
+                    return Ok(actions);
                 }
 
                 _logger.LogInformation("Returned actions for template {TemplateId} in organization {OrgId}", templateId, orgId);
@@ -214,7 +214,7 @@ namespace ems_back.Controllers
                 if (action == null)
                 {
                     _logger.LogWarning("Action with ID {ActionId} not found for template {TemplateId} in organization {OrgId}", actionId, templateId, orgId);
-                    return NotFound("Action not found for this template");
+                    return Ok(action);
                 }
 
                 _logger.LogInformation("Returned action with ID {ActionId} for template {TemplateId} in organization {OrgId}", actionId, templateId, orgId);
@@ -284,7 +284,7 @@ namespace ems_back.Controllers
                 if (triggers == null || !triggers.Any())
                 {
                     _logger.LogWarning("No triggers found for template {TemplateId} in organization {OrgId}", templateId, orgId);
-                    return NotFound("No triggers found for this template.");
+                    return Ok(triggers);
                 }
 
                 _logger.LogInformation("Returned triggers for template {TemplateId} in organization {OrgId}", templateId, orgId);
@@ -330,7 +330,7 @@ namespace ems_back.Controllers
                 if (trigger == null)
                 {
                     _logger.LogWarning("Trigger {TriggerId} not found for template {TemplateId} in organization {OrgId}", triggerId, templateId, orgId);
-                    return NotFound("Trigger not found for this template.");
+                    return Ok(trigger);
                 }
 
                 _logger.LogInformation("Returned trigger {TriggerId} for template {TemplateId} in organization {OrgId}", triggerId, templateId, orgId);
