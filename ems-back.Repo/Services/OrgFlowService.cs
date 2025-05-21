@@ -100,7 +100,7 @@ namespace ems_back.Repo.Services
                     CreatedAt = createdTemplate.CreatedAt,
                     UpdatedAt = createdTemplate.UpdatedAt,
                     CreatedBy = createdTemplate.CreatedBy,
-                    UpdatedBy = (Guid)createdTemplate.UpdatedBy,
+                    UpdatedBy = createdTemplate.UpdatedBy,
                     Triggers = new List<TriggerOverviewDto>(),
                     Actions = new List<ActionOverviewDto>()
                 };

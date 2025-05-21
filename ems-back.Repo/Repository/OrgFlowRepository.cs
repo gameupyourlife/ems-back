@@ -89,7 +89,7 @@ namespace ems_back.Repo.Repository
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     CreatedBy = t.CreatedBy,
-                    UpdatedBy = (Guid)t.UpdatedBy,
+                    UpdatedBy = t.UpdatedBy,
                     Triggers = t.Triggers.Select(tr => new TriggerOverviewDto
                     {
                         Id = tr.Id,
