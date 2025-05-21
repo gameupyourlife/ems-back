@@ -125,14 +125,14 @@ namespace ems_back.Repo.Services
                 {
                     Id = t.Id,
                     Name = t.Name,
-                    Summary = t.Summary,
+                    Description = t.Description,
                     Type = t.Type
                 }).ToList(),
                 Actions = flow.Actions.Select(a => new ActionOverviewDto
                 {
                     Id = a.Id,
                     Name = a.Name,
-                    Summary = a.Summary,
+                    Description = a.Description,
                     Type = a.Type
                 }).ToList()
             };
@@ -191,7 +191,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowId = flowId,
                 Name = dto.Name,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _eventFlowRepository.CreateActionAsync(newAction);
@@ -249,7 +249,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowId = flowId,
                 Name = dto.Name ?? string.Empty,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdTrigger = await _eventFlowRepository.CreateTriggerAsync(newAction);

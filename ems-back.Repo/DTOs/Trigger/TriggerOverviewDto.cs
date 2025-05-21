@@ -12,6 +12,6 @@ namespace ems_back.Repo.DTOs.Trigger
         public Guid Id { get; set; }
         public String? Name { get; set; }
         public TriggerType Type { get; set; }
-        public String? Summary { get; set; }
+        public String? Description { get; set; }
     }
 }

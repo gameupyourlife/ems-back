@@ -177,7 +177,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowTemplateId = templateId,
                 Name = dto.Name,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _orgFlowRepository.CreateActionAsync(newAction);
@@ -235,7 +235,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowTemplateId = templateId,
                 Name = dto.Name ?? string.Empty,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdTrigger = await _orgFlowRepository.CreateTriggerAsync(newAction);
