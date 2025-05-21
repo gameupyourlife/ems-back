@@ -3,6 +3,7 @@ using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Placeholder;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows
         [HttpGet]
-        //[Authorize(Roles = "Admin, Organizer, EventOrganizer")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<IEnumerable<FlowOverviewDto>>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
         {
             try
@@ -37,11 +38,15 @@ namespace ems_back.Controllers
                 if (flows == null || !flows.Any())
                 {
                     _logger.LogWarning("No flows found for event {EventId} in organization {OrgId}", eventId, orgId);
-                    return NotFound("No flows found");
+                    return Ok(flows);
                 }
 
                 _logger.LogInformation("Flows retrieved for event {EventId} in organization {OrgId}", eventId, orgId);
                 return Ok(flows);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Event with id {eventId} not found in organization {orgId}");
             }
             catch (Exception ex)
             {
@@ -52,6 +57,7 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows
         [HttpPost]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<FlowOverviewDto>> CreateFlow(Guid orgId, Guid eventId, [FromBody] FlowCreateDto flowDto)
         {
             try
@@ -75,7 +81,8 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpGet("{flowId}")]
-        public async Task<ActionResult<object>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<FlowOverviewDto>> GetFlowDetails(Guid orgId, Guid eventId, Guid flowId)
         {
             try
             {
@@ -83,11 +90,15 @@ namespace ems_back.Controllers
                 if (flow == null)
                 {
                     _logger.LogWarning("Flow {FlowId} not found for event {EventId}", flowId, eventId);
-                    return NotFound($"Flow {flowId} not found.");
+                    return Ok(flow);
                 }
 
                 _logger.LogInformation("Flow {FlowId} retrieved for event {EventId}", flowId, eventId);
                 return Ok(flow);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Event with id {eventId} not found in organization {orgId}");
             }
             catch (Exception ex)
             {
@@ -98,7 +109,8 @@ namespace ems_back.Controllers
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpPut("{flowId}")]
-        public async Task<ActionResult<object>> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] FlowUpdateDto updateDto)
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<FlowOverviewDto>> UpdateFlow(Guid orgId, Guid eventId, Guid flowId, [FromBody] FlowUpdateDto updateDto)
         {
             try
             {
@@ -121,6 +133,7 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpDelete("{flowId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult> DeleteFlow(Guid orgId, Guid eventId, Guid flowId)
         {
             try
@@ -144,6 +157,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions
         [HttpGet("{flowId}/actions")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<IEnumerable<ActionDto>>> GetActions(Guid orgId, Guid eventId, Guid flowId)
         {
             try
@@ -152,7 +166,7 @@ namespace ems_back.Controllers
                 if (actions == null || !actions.Any())
                 {
                     _logger.LogWarning("No actions found for flow {FlowId} in event {EventId}", flowId, eventId);
-                    return NotFound("No actions found.");
+                    return Ok(actions);
                 }
 
                 _logger.LogInformation("Actions retrieved for flow {FlowId} in event {EventId}", flowId, eventId);
@@ -167,6 +181,7 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions
         [HttpPost("{flowId}/actions")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<ActionDto>> CreateAction(Guid orgId, Guid eventId, Guid flowId, [FromBody] ActionCreateDto actionDto)
         {
             try
@@ -190,6 +205,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpGet("{flowId}/actions/{actionId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<ActionDto>> GetActionDetails(Guid orgId, Guid eventId, Guid flowId, Guid actionId)
         {
             try
@@ -197,7 +213,7 @@ namespace ems_back.Controllers
                 var action = await _eventFlowService.GetActionByIdAsync(eventId, flowId, actionId);
                 if (action == null)
                 {
-                    return NotFound("Action not found.");
+                    return Ok(action);
                 }
 
                 return Ok(action);
@@ -211,6 +227,7 @@ namespace ems_back.Controllers
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpPut("{flowId}/actions/{actionId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<ActionDto>> UpdateAction(Guid orgId, Guid eventId, Guid flowId, Guid actionId, [FromBody] ActionUpdateDto dto)
         {
             try
@@ -231,6 +248,7 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/actions/{actionId}
         [HttpDelete("{flowId}/actions/{actionId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult> DeleteAction(Guid orgId, Guid eventId, Guid flowId, Guid actionId)
         {
             try
@@ -252,6 +270,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers
         [HttpGet("{flowId}/triggers")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<IEnumerable<TriggerDto>>> GetTriggers(Guid orgId, Guid eventId, Guid flowId)
         {
             try
@@ -259,7 +278,7 @@ namespace ems_back.Controllers
                 var triggers = await _eventFlowService.GetTriggersForFlowAsync(orgId, eventId, flowId);
                 if (triggers == null || !triggers.Any())
                 {
-                    return NotFound("No triggers found.");
+                    return Ok(triggers);
                 }
 
                 return Ok(triggers);
@@ -273,6 +292,7 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers
         [HttpPost("{flowId}/triggers")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<TriggerDto>> CreateTrigger(Guid orgId, Guid eventId, Guid flowId, [FromBody] TriggerCreateDto dto)
         {
             try
@@ -296,10 +316,15 @@ namespace ems_back.Controllers
                 var trigger = await _eventFlowService.GetTriggerByIdAsync(eventId, flowId, triggerId);
                 if (trigger == null)
                 {
-                    return NotFound("Trigger not found.");
+                    return Ok(trigger);
                 }
 
                 return Ok(trigger);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Trigger not found: {Message}", ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -310,6 +335,7 @@ namespace ems_back.Controllers
 
         // PUT: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers/{triggerId}
         [HttpPut("{flowId}/triggers/{triggerId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<TriggerDto>> UpdateTrigger(Guid orgId, Guid eventId, Guid flowId, Guid triggerId, [FromBody] TriggerUpdateDto dto)
         {
             try
@@ -330,6 +356,7 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/flows/{flowId}/triggers/{triggerId}
         [HttpDelete("{flowId}/triggers/{triggerId}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult> DeleteTrigger(Guid orgId, Guid eventId, Guid flowId, Guid triggerId)
         {
             try

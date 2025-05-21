@@ -116,8 +116,8 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
-				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.StillPending))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
 
 
@@ -129,8 +129,8 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
 
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
-				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.StillPending))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
 
 			// Response mappings
