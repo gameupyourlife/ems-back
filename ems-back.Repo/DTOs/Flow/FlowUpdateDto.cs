@@ -20,7 +20,7 @@ namespace ems_back.Repo.DTOs.Flow
         [Required]
         public Guid UpdatedBy { get; set; }
 
-        public bool stillPending { get; set; } = false;
-        public bool multipleRuns { get; set; } = false;
+        public bool StillPending { get; set; }
+        public bool MultipleRuns { get; set; }
 	}
 }

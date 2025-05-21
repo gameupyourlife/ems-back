@@ -12,6 +12,6 @@ namespace ems_back.Repo.DTOs.Action
         public Guid Id { get; set; }
         public string Name { get; set; }
         public ActionType Type { get; set; }
-        public string? Summary { get; set; }
+        public string? Description { get; set; }
     }
 }

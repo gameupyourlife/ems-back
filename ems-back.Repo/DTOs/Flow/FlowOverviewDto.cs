@@ -14,7 +14,7 @@ namespace ems_back.Repo.DTOs.Flow
         public string Name { get; set; }
         public string? Description { get; set; }
         public Guid? UpdatedBy { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public List<TriggerOverviewDto> Triggers { get; set; }
         public List<ActionOverviewDto> Actions { get; set; }
     }
