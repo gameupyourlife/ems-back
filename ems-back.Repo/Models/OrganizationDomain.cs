@@ -13,10 +13,10 @@ namespace ems_back.Repo.Models
 
 		[Required]
 		[MaxLength(255)] 
-		public string Domain { get; set; }  
+		public required string Domain { get; set; }  
 		public Guid OrganizationId { get; set; }
 
 		// Navigation property
-		public Organization Organization { get; set; }
+		public Organization? Organization { get; set; }
 	}
 }

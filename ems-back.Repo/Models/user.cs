@@ -18,11 +18,11 @@ namespace ems_back.Repo.Models
 
         [Required]
         [MaxLength(100)]
-        public string FirstName { get; set; }
+        public required string FirstName { get; set; }
 
         [Required]
         [MaxLength(100)]
-        public string LastName { get; set; }
+        public required string LastName { get; set; }
 
         [Required]
         public UserRole Role { get; set; } = UserRole.User;  // Default here

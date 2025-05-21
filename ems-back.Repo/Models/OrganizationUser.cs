@@ -24,9 +24,9 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("OrganizationId")]
-		public virtual Organization Organization { get; set; }
+		public virtual Organization? Organization { get; set; }
 
 		[ForeignKey("UserId")]
-		public virtual User User { get; set; }
+		public virtual User? User { get; set; }
 	}
 }

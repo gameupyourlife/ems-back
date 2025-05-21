@@ -58,7 +58,6 @@ namespace ems_back.Repo.Repository
         {
             var eventObject = new Event
             {
-                Id = Guid.NewGuid(),
                 Title = eventDto.Title,
                 Location = eventDto.Location,
                 Description = eventDto.Description,
