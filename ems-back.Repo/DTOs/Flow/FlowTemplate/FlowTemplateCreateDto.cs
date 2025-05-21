@@ -12,7 +12,7 @@ namespace ems_back.Repo.DTOs.Flow.FlowTemplate
 		[Required]
 		public string Name { get; set; }
 		[Required]
-		public string Description { get; set; }
+		public string? Description { get; set; }
 		public Guid OrganizationId { get; set; }
 		[Required]
         public Guid CreatedBy { get; set; }
