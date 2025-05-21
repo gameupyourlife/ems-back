@@ -36,7 +36,7 @@ namespace ems_back.Repo.Services
             if (eventEntity == null)
             {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
-                return null;
+                throw new KeyNotFoundException("Event not found");
             }
 
             var flowList = await _eventFlowRepository.GetAllFlowsAsync(eventId);
@@ -110,11 +110,14 @@ namespace ems_back.Repo.Services
             if (eventEntity == null)
             {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
-                return null;
+                throw new KeyNotFoundException("Event not found");
             }
 
             var flow = await _eventFlowRepository.GetFlowByIdAsync(eventId, flowId);
-            if (flow == null) return null;
+            if (flow == null) {
+                _logger.LogWarning("Flow with id {FlowId} not found", flowId);
+                throw new KeyNotFoundException("Flow not found");
+            }
 
             return new FlowOverviewDto
             {
@@ -201,6 +204,10 @@ namespace ems_back.Repo.Services
         public async Task<ActionDto?> GetActionByIdAsync(Guid eventId, Guid flowId, Guid actionId)
         {
             var action = await _eventFlowRepository.GetActionByIdAsync(eventId, flowId, actionId);
+            if (action == null)
+            {
+                throw new KeyNotFoundException($"Action with ID {actionId} not found for flow {flowId} in event {eventId}");
+            }
             return action;
         }
 
@@ -259,6 +266,10 @@ namespace ems_back.Repo.Services
         public async Task<TriggerDto?> GetTriggerByIdAsync(Guid eventId, Guid flowId, Guid triggerId)
         {
             var trigger = await _eventFlowRepository.GetTriggerByIdAsync(eventId, flowId, triggerId);
+            if (trigger == null)
+            {
+                throw new KeyNotFoundException($"Trigger with ID {triggerId} not found for template {flowId} in event {eventId}");
+            }
             return trigger;
         }
 

@@ -116,6 +116,11 @@ namespace ems_back.Repo.Services
         public async Task<FlowTemplateResponseDto?> GetFlowTemplateByIdAsync(Guid orgId, Guid templateId)
         {
             var template = await _orgFlowRepository.GetFlowTemplateByIdAsync(orgId, templateId);
+            if (template == null)
+            {
+                throw new KeyNotFoundException($"Flow template with ID {templateId} not found for organization {orgId}");
+            }
+
             return template != null ? _mapper.Map<FlowTemplateResponseDto>(template) : null;
         }
 
@@ -187,6 +192,10 @@ namespace ems_back.Repo.Services
         public async Task<ActionDto?> GetActionByIdAsync(Guid orgId, Guid templateId, Guid actionId)
         {
             var action = await _orgFlowRepository.GetActionByIdAsync(orgId, templateId, actionId);
+            if (action == null)
+            {
+                throw new KeyNotFoundException($"Action with ID {actionId} not found for template {templateId} in organization {orgId}");
+            }
             return action;
         }
 
@@ -245,6 +254,10 @@ namespace ems_back.Repo.Services
         public async Task<TriggerDto?> GetTriggerByIdAsync(Guid orgId, Guid templateId, Guid triggerId)
         {
             var trigger = await _orgFlowRepository.GetTriggerByIdAsync(orgId, templateId, triggerId);
+            if (trigger == null)
+            {
+                throw new KeyNotFoundException($"Trigger with ID {triggerId} not found for template {templateId} in organization {orgId}");
+            }
             return trigger;
         }
 
