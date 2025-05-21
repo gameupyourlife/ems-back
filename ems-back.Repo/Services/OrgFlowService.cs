@@ -182,7 +182,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowTemplateId = templateId,
                 Name = dto.Name,
-                Summary = dto.Description ?? string.Empty // ensure non-null value
+                Description = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _orgFlowRepository.CreateActionAsync(newAction);

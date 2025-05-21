@@ -12,14 +12,11 @@ namespace ems_back.Repo.DTOs.Action
     // For updating an existing action
     public class ActionUpdateDto
     {
-        [Required]
-        public ActionType Type { get; set; }
+        public required ActionType Type { get; set; }
 
-        [Required]
-        public String Details { get; set; }
+        public required String Details { get; set; }
 
-        [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         public string? Description { get; set; }
     }

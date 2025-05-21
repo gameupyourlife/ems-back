@@ -9,12 +9,10 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventAttendeeDto
     {
-        public Guid UserId { get; set; }
-        public string UserEmail { get; set; }
-        public string UserName { get; set; }
-        public AttendeeStatus Status { get; set; }
-        public string ProfilePicture { get; set; }
-        //public UserRole Role { get; set; }
-        public DateTime RegisteredAt { get; set; }
+        public required Guid UserId { get; set; }
+        public required string UserEmail { get; set; }
+        public required string UserName { get; set; }
+        public required AttendeeStatus Status { get; set; }
+        public required DateTime RegisteredAt { get; set; }
     }
 }
