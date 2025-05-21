@@ -3,6 +3,7 @@ using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Placeholder;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ namespace ems_back.Controllers
                 if (flows == null || !flows.Any())
                 {
                     _logger.LogWarning("No flows found for event {EventId} in organization {OrgId}", eventId, orgId);
-                    return NotFound("No flows found");
+                    return Ok(flows);
                 }
 
                 _logger.LogInformation("Flows retrieved for event {EventId} in organization {OrgId}", eventId, orgId);
@@ -83,7 +84,7 @@ namespace ems_back.Controllers
                 if (flow == null)
                 {
                     _logger.LogWarning("Flow {FlowId} not found for event {EventId}", flowId, eventId);
-                    return NotFound($"Flow {flowId} not found.");
+                    return Ok(flow);
                 }
 
                 _logger.LogInformation("Flow {FlowId} retrieved for event {EventId}", flowId, eventId);
@@ -152,7 +153,7 @@ namespace ems_back.Controllers
                 if (actions == null || !actions.Any())
                 {
                     _logger.LogWarning("No actions found for flow {FlowId} in event {EventId}", flowId, eventId);
-                    return NotFound("No actions found.");
+                    return Ok(actions);
                 }
 
                 _logger.LogInformation("Actions retrieved for flow {FlowId} in event {EventId}", flowId, eventId);
@@ -197,7 +198,7 @@ namespace ems_back.Controllers
                 var action = await _eventFlowService.GetActionByIdAsync(eventId, flowId, actionId);
                 if (action == null)
                 {
-                    return NotFound("Action not found.");
+                    return Ok(action);
                 }
 
                 return Ok(action);
@@ -259,7 +260,7 @@ namespace ems_back.Controllers
                 var triggers = await _eventFlowService.GetTriggersForFlowAsync(orgId, eventId, flowId);
                 if (triggers == null || !triggers.Any())
                 {
-                    return NotFound("No triggers found.");
+                    return Ok(triggers);
                 }
 
                 return Ok(triggers);
@@ -296,7 +297,7 @@ namespace ems_back.Controllers
                 var trigger = await _eventFlowService.GetTriggerByIdAsync(eventId, flowId, triggerId);
                 if (trigger == null)
                 {
-                    return NotFound("Trigger not found.");
+                    return Ok(trigger);
                 }
 
                 return Ok(trigger);
