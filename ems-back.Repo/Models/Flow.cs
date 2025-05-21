@@ -14,47 +14,46 @@ namespace ems_back.Repo.Models
 
 		[Required]
 		[MaxLength(100)]
-		public string Name { get; set; }
+		public required string Name { get; set; }
 
 		public string? Description { get; set; }
 
 		[Required]
-		public bool IsActive { get; set; } = true;
+		public required bool IsActive { get; set; } = true;
 
 		[Required]
-		public bool stillPending { get; set; } = false;
+		public required bool stillPending { get; set; } = false;
 
 		[Required]
-		public bool multipleRuns { get; set; } = false;
+		public required bool multipleRuns { get; set; }
 
 		[Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-		[Required]
-		public Guid CreatedBy { get; set; }
+		public Guid? CreatedBy { get; set; }
 
-        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+        public required DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		public Guid? UpdatedBy { get; set; }
 
 		[Required]
-		public Guid EventId { get; set; }
+		public required Guid EventId { get; set; }
 
 		public Guid? FlowTemplateId { get; set; }
 
         // for navigation:
 
         [ForeignKey("CreatedBy")]
-		public virtual User Creator { get; set; }
+		public virtual User? Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]
 		public virtual User? Updater { get; set; }
 
 		[ForeignKey("EventId")]
-		public virtual Event Event { get; set; }
+		public virtual Event? Event { get; set; }
 
 		[ForeignKey("FlowTemplateId")]
-        public virtual FlowTemplate FlowTemplate { get; set; }
+        public virtual FlowTemplate? FlowTemplate { get; set; }
         public virtual ICollection<FlowsRun> FlowsRuns { get; set; } = new List<FlowsRun>();
         public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
         public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();

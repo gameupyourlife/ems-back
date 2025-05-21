@@ -13,14 +13,12 @@ namespace ems_back.Repo.DTOs.Flow
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         public string? Description { get; set; }
 
         [Required]
         public Guid UpdatedBy { get; set; }
-
-        public bool StillPending { get; set; }
         public bool MultipleRuns { get; set; }
 	}
 }

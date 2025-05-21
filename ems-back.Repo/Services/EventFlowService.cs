@@ -77,6 +77,9 @@ namespace ems_back.Repo.Services
                     CreatedBy = flowCreateDto.CreatedBy,
                     UpdatedAt = DateTime.UtcNow,
                     UpdatedBy = flowCreateDto.CreatedBy,
+                    IsActive = true,
+                    stillPending = false,
+                    multipleRuns = flowCreateDto.MultipleRuns,
                     Triggers = new List<Trigger>(),
                     Actions = new List<Models.Action>()
                 };

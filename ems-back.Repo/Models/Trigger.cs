@@ -15,8 +15,7 @@ namespace ems_back.Repo.Models
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public string? Summary { get; set; }
 
@@ -25,10 +24,10 @@ namespace ems_back.Repo.Models
 
         [Required]
         [Column(TypeName = "jsonb")]
-        public string Details { get; set; }
+        public required string Details { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Guid? FlowId { get; set; }
 
@@ -37,9 +36,9 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("FlowTemplateId")]
-        public virtual FlowTemplate FlowTemplate { get; set; }
+        public virtual FlowTemplate? FlowTemplate { get; set; }
 
         [ForeignKey("FlowId")]
-        public virtual Flow Flow { get; set; }
+        public virtual Flow? Flow { get; set; }
     }
 }

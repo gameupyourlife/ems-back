@@ -116,7 +116,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.StillPending))
 				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
 
@@ -128,20 +127,8 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
-
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.StillPending))
 				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
-
-			// Response mappings
-			CreateMap<Flow, FlowDto>();
-
-			CreateMap<Flow, FlowResponseDto>()
-				.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
-				.ForMember(dest => dest.Updater, opt => opt.MapFrom(src => src.Updater));
-
-			CreateMap<Flow, FlowDetailedDto>()
-				.IncludeBase<Flow, FlowResponseDto>();
 
 			// Trigger mappings
 			CreateMap<TriggerCreateDto, Trigger>()
