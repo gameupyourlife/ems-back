@@ -8,7 +8,7 @@ namespace ems_back.Repo.DTOs.Flow.FlowTemplate
 {
     public class FlowTemplateUpdateDto
     {
-		public Guid FlowTemplateId { get; set; }
+		public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public Guid OrganizationId { get; set; }

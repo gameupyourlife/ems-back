@@ -13,8 +13,8 @@ namespace ems_back.Repo.DTOs.Flow
     {
         public UserDto Creator { get; set; }
         public UserDto Updater { get; set; }
-        public bool stillPending { get; set; } = false;
-        public bool multipleRuns { get; set; } = false;
+        public bool StillPending { get; set; } = false;
+        public bool MultipleRuns { get; set; } = false;
         public Guid OrganizationId { get; set; }
         public Guid EventId { get; set; } // <-- Important!
 	}

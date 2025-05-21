@@ -15,8 +15,8 @@ namespace ems_back.Repo.DTOs.Flow
         public string Name { get; set; }
 
         public string? Description { get; set; }
-        public bool stillPending { get; set; } = false;
-        public bool multipleRuns { get; set; } = false;
+        public bool StillPending { get; set; } = false;
+        public bool MultipleRuns { get; set; } = false;
 
 		[Required]
         public Guid CreatedBy { get; set; }

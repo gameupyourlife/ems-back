@@ -93,14 +93,14 @@ namespace ems_back.Repo.Services
                 // 3. Mapping Entity -> ResponseDto (initial leere Listen)
                 return new FlowTemplateResponseDto
                 {
-                    FlowTemplateId = createdTemplate.FlowTemplateId,
+                    Id = createdTemplate.FlowTemplateId,
                     Name = createdTemplate.Name,
                     Description = createdTemplate.Description,
                     OrganizationId = createdTemplate.OrganizationId,
                     CreatedAt = createdTemplate.CreatedAt,
                     UpdatedAt = createdTemplate.UpdatedAt,
                     CreatedBy = createdTemplate.CreatedBy,
-                    UpdatedBy = createdTemplate.UpdatedBy,
+                    UpdatedBy = (Guid)createdTemplate.UpdatedBy,
                     Triggers = new List<TriggerOverviewDto>(),
                     Actions = new List<ActionOverviewDto>()
                 };

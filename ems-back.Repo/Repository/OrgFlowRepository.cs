@@ -33,7 +33,7 @@ namespace ems_back.Repo.Repository
                 .Include(e => e.Actions)
                 .Select(e => new FlowTemplateResponseDto
                 {
-                    FlowTemplateId = e.FlowTemplateId,
+                    Id = e.FlowTemplateId,
                     Name = e.Name,
                     Description = e.Description,
                     OrganizationId = e.OrganizationId,
@@ -82,14 +82,14 @@ namespace ems_back.Repo.Repository
                 .Include(t => t.Actions)
                 .Select(t => new FlowTemplateResponseDto
                 {
-                    FlowTemplateId = t.FlowTemplateId,
+                    Id = t.FlowTemplateId,
                     Name = t.Name,
                     Description = t.Description,
                     OrganizationId = t.OrganizationId,
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     CreatedBy = t.CreatedBy,
-                    UpdatedBy = t.UpdatedBy,
+                    UpdatedBy = (Guid)t.UpdatedBy,
                     Triggers = t.Triggers.Select(tr => new TriggerOverviewDto
                     {
                         Id = tr.Id,
@@ -114,7 +114,7 @@ namespace ems_back.Repo.Repository
 
         public async Task<FlowTemplateResponseDto> UpdateFlowTemplateAsync(FlowTemplateResponseDto updatedTemplate)
         {
-            var existing = await _dbContext.FlowTemplates.FindAsync(updatedTemplate.FlowTemplateId);
+            var existing = await _dbContext.FlowTemplates.FindAsync(updatedTemplate.Id);
             if (existing == null)
                 return null;
 

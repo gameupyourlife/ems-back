@@ -65,7 +65,7 @@ namespace ems_back.Controllers
                     _logger.LogWarning("Failed to create flow template");
                     return BadRequest("Failed to create flow template");
                 }
-                _logger.LogInformation("Flow template created successfully with id {FlowId}", createdFlowTemplate.FlowTemplateId);
+                _logger.LogInformation("Flow template created successfully with id {FlowId}", createdFlowTemplate.Id);
                 return createdFlowTemplate;
             }
             catch (Exception ex)
