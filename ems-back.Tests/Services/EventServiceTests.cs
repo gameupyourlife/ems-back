@@ -117,7 +117,8 @@ namespace ems_back.Tests.Services
                     Capacity = 100,
                     Image = "test-image.png",
                     Status = EventStatus.ONGOING, // oder ein anderer gültiger Wert aus EventStatus
-                    Start = DateTime.UtcNow.AddDays(1)
+                    Start = DateTime.UtcNow.AddDays(1),
+                    End = DateTime.UtcNow.AddDays(2) 
                 };
 
                 var expectedEvent = new EventInfoDto

@@ -7,6 +7,7 @@ using ems_back.Repo.Interfaces.Service;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using ems_back.Repo.DTOs.Password;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Controllers
 {
@@ -112,6 +113,10 @@ namespace ems_back.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (MissingRoleException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

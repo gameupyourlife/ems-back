@@ -48,7 +48,7 @@ namespace ems_back.Repo.Services
 			}
 		}
 
-		public async Task<List<string>> GetAllRoles()
+        public async Task<List<string>> GetAllRoles()
 		{
 			return await _roleManager.Roles
 				.Select(r => r.Name)

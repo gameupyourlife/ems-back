@@ -19,7 +19,6 @@ public class MailRun
     [Required]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    [Column(TypeName = "jsonb")]
     public string? Logs { get; set; }
 
     // for navigation:
