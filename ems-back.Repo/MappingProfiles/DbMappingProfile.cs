@@ -156,21 +156,6 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<Trigger, TriggerDto>();
 			CreateMap<Trigger, TriggerDetailedDto>();
 
-			// File mappings
-			CreateMap<FileCreateDto, EventFile>()
-				.ForMember(dest => dest.UploadedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
-
-			CreateMap<FileUpdateDto, EventFile>()
-				.ForMember(dest => dest.Url, opt => opt.Ignore())
-				.ForMember(dest => dest.Type, opt => opt.Ignore())
-				.ForMember(dest => dest.UploadedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.UploadedBy, opt => opt.Ignore())
-				.ForMember(dest => dest.SizeInBytes, opt => opt.Ignore())
-				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
-
-			CreateMap<EventFile, FileDto>();
-
 			// Add these to your existing DbMappingProfile
 			CreateMap<AgendaEntryCreateDto, AgendaEntry>();
 			CreateMap<AgendaEntryUpdateDto, AgendaEntry>()

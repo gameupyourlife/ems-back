@@ -34,10 +34,6 @@ namespace ems_back.Repo.Models
 		[MaxLength(255)]
 		public string? ProfilePicture { get; set; }
 
-		public ICollection<OrganizationDomain> AllowedDomains { get; set; }
-
-
-
 		// for navigation:
 
 		[ForeignKey("CreatedBy")]
@@ -46,6 +42,7 @@ namespace ems_back.Repo.Models
 		[ForeignKey("UpdatedBy")]
 		public virtual User Updater { get; set; }
 
+		public ICollection<OrganizationDomain> AllowedDomains { get; set; }
 		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
 		public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 		public virtual ICollection<FlowTemplate> FlowTemplates { get; set; } = new List<FlowTemplate>();

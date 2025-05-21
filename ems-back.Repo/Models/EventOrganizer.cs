@@ -20,9 +20,9 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("EventId")]
-        public virtual Event Event { get; set; }
+        public virtual required Event Event { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual User User { get; set; }
+        public virtual required User User { get; set; }
     }
 }

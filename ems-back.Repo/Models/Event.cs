@@ -8,68 +8,65 @@ public class Event
 {
     [Key]
     [Required]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public required Guid Id { get; set; }
 
     [Required]
     [MaxLength(255)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Column(TypeName = "text")]
     public string? Description { get; set; }
 
     [Required]
     [MaxLength(255)]
-    public string Location { get; set; }
+    public required string Location { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public required DateTime CreatedAt { get; set; }
 
-    [Required]
-    public Guid CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     [MaxLength(255)]
     public string? Image { get; set; }
 
     [Required]
-    public string Category { get; set; }
+    public required string Category { get; set; }
 
     [Required]
-    public EventStatus Status { get; set; }
-
-    public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+    public required EventStatus Status { get; set; }
 
     [Required]
-    public Guid UpdatedBy { get; set; }
+    public required DateTime UpdatedAt { get; set; }
+
+    public Guid? UpdatedBy { get; set; }
 
     [Required]
-    public DateTime Start { get; set; }
+    public required DateTime Start { get; set; }
 
     public DateTime? End { get; set; }
 
     [Required]
-    public Guid OrganizationId { get; set; }
+    public required Guid OrganizationId { get; set; }
 
     [Required]
-    public int AttendeeCount { get; set; }
+    public required int AttendeeCount { get; set; }
 
     [Required]
-    public int Capacity { get; set; }
+    public required int Capacity { get; set; }
 
     // for navigation:
 
     [ForeignKey("CreatedBy")]
-    public virtual User Creator { get; set; }
+    public virtual User? Creator { get; set; }
 
     [ForeignKey("UpdatedBy")]
     public virtual User? Updater { get; set; }
 
     [ForeignKey("OrganizationId")]
-    public virtual Organization Organization { get; set; }
-
-    public virtual ICollection<EventAttendee> Attendees { get; set; } = new List<EventAttendee>();
-    public virtual ICollection<EventFile> Files { get; set; } = new List<EventFile>();
-    public virtual ICollection<Mail> Mails { get; set; } = new List<Mail>();
-    public virtual ICollection<AgendaEntry> AgendaEntries { get; set; } = new List<AgendaEntry>();
-    public virtual ICollection<Flow> Flows { get; set; } = new List<Flow>();
-    public virtual ICollection<EventOrganizer> Organizers { get; set; } = new List<EventOrganizer>();
+    public virtual Organization? Organization { get; set; }
+    public virtual ICollection<EventAttendee>? Attendees { get; set; }
+    public virtual ICollection<Mail>? Mails { get; set; }
+    public virtual ICollection<AgendaEntry>? AgendaEntries { get; set; }
+    public virtual ICollection<Flow>? Flows { get; set; }
+    public virtual ICollection<EventOrganizer>? Organizers { get; set; }
 }

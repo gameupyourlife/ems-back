@@ -9,22 +9,23 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventInfoDto
     {
-        public Guid Id { get; set; }
-        public string Title { get; set; }
-        public Guid OrganizationId { get; set; }
-        public string Location { get; set; }
+        public required Guid Id { get; set; }
+        public required string Title { get; set; }
+        public required Guid OrganizationId { get; set; }
+        public required string Location { get; set; }
         public string? Description { get; set; }
-        public string Category { get; set; }
-        public int AttendeeCount { get; set; }
-        public int Capacity { get; set; }
-        public string Image { get; set; }
-        public EventStatus Status { get; set; }
-        public DateTime Start { get; set; }
+        public required string Category { get; set; }
+        public required int AttendeeCount { get; set; }
+        public required int Capacity { get; set; }
+        public string? Image { get; set; }
+        public required EventStatus Status { get; set; }
+        public required DateTime Start { get; set; }
         public DateTime? End { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public Guid CreatedBy { get; set; }
-        public string CreatorName { get; set; }
-        public Guid UpdatedBy { get; set; }
+        public required DateTime CreatedAt { get; set; }
+        public required DateTime UpdatedAt { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public required string CreatorName { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        public required bool isAttending { get; set; }
     }
 }

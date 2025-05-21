@@ -309,6 +309,7 @@ namespace ems_back.Repo.Services
                 EventId = eventId,
                 RegisteredAt = DateTime.UtcNow,
                 Status = AttendeeStatus.Pending,
+                Event = eventInfo,
             };
 
             try

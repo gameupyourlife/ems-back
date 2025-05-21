@@ -9,7 +9,6 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventAttendeeCreateDto
     {
-        public Guid UserId { get; set; }
-        public string ProfilePicture { get; set; }
+        public required Guid UserId { get; set; }
     }
 }
