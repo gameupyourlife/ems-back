@@ -8,6 +8,7 @@ using AutoMapper;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.DTOs.Email;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.File;
 using ems_back.Repo.DTOs.Flow;
@@ -89,22 +90,22 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.OrganizationId, opt => opt.MapFrom(src => src.OrganizationId))
 				.ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
 
-            CreateMap<EventUpdateDto, Event>();
+			CreateMap<EventUpdateDto, Event>();
 
-            CreateMap<Event, EventOverviewDto>()
+			CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count));
 
-            // Agenda mappings
+			// Agenda mappings
 
-            CreateMap<AgendaEntryDto, AgendaEntry>()
+			CreateMap<AgendaEntryDto, AgendaEntry>()
 				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
 				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
 				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId));
 
-            // Related mappings
-            CreateMap<EventAttendee, EventAttendeeDto>()
+			// Related mappings
+			CreateMap<EventAttendee, EventAttendeeDto>()
 				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
 				.ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePicture));
 
@@ -206,6 +207,12 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<FlowTemplate, FlowTemplateResponseDto>();
 
+			//Mail-template Mappings
+			CreateMap<CreateMailTemplateDto, MailTemplate>();
+			CreateMap<UpdateMailTemplateDto, MailTemplate>()
+				.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+			CreateMap<MailTemplate, MailTemplateResponseDto>()
+				.ForMember(dest => dest.IsUserCreated, opt => opt.MapFrom(src => src.isUserCreated));
 
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()

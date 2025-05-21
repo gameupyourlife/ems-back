@@ -30,6 +30,9 @@ namespace ems_back.Repo.Models
         [Required]
         public Guid OrganizationId { get; set; }
 
+
+        
+
         // for navigation:
 
         [ForeignKey("OrganizationId")]
