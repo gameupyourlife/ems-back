@@ -7,7 +7,7 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class StatusChangeModel
+    public class StatusChangeModel : IActionModel
     {
         public ActionType ActionType => ActionType.ChangeStatus;
         public EventStatus NewEventStatus { get; set; }

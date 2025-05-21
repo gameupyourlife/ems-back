@@ -7,9 +7,9 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class TitleChangeModel
+    public class TitleChangeModel : IActionModel
     {
         public ActionType ActionType => ActionType.ChangeTitle;
-        public String NewTitle { get; set; }
+        public required String NewTitle { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace ems_back.Repo.Jobs.Trigger
         public TriggerType TriggerType => TriggerType.NumOfAttendees;
         public NumOfAttendeesOperator Operator { get; set; }
         public NumOfAttendeesValueType ValueType { get; set; }
-        public int Value { get; set; }
+        public required int Value { get; set; }
     }
 
 }

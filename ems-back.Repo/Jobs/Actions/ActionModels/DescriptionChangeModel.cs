@@ -7,10 +7,10 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class DescriptionChangeModel
+    public class DescriptionChangeModel : IActionModel
     {
         public ActionType ActionType => ActionType.ChangeDescription;
-        public string NewDescription { get; set; }
+        public required string NewDescription { get; set; }
 
     }
 }

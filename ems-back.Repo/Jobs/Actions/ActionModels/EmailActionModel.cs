@@ -7,9 +7,9 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class EmailActionModel
+    public class EmailActionModel : IActionModel
     {
         public ActionType ActionType => ActionType.SendEmail;
-        public string MailId { get; set; }
+        public required string MailId { get; set; }
     }
 }

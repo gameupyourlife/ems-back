@@ -7,9 +7,9 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class ImageChangeModel
+    public class ImageChangeModel : IActionModel
     {
         public ActionType ActionType => ActionType.ChangeImage;
-        public string NewImage { get; set; }
+        public required string NewImage { get; set; }
     }
 }
