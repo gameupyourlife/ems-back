@@ -36,5 +36,10 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<User> GetUserEntityByIdAsync(Guid id);
 		Task<User> GetUserEntityByEmailAsync(string email);
 		Task<UserResponseDto> UpdateUserRoleAsync(UserUpdateRoleDto userDto);
+
+        // additional methods
+
+		Task<int> GetNumberOfOwnersAsync(Guid organizationId);
+        Task<int> GetNumberOfOrganizersAsync(Guid organizationId);
     }
 }

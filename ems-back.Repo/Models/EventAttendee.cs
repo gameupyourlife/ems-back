@@ -13,20 +13,20 @@ namespace ems_back.Repo.Models
 	public class EventAttendee
 	{
 		[Key, Column(Order = 0)]
-		public Guid EventId { get; set; }
+		public required Guid EventId { get; set; }
 
 		[Key, Column(Order = 1)]
-		public Guid UserId { get; set; }
+		public required Guid UserId { get; set; }
 
-        public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-		public AttendeeStatus Status { get; set; }
+        public required DateTime RegisteredAt { get; set; }
+		public required AttendeeStatus Status { get; set; }
 
         // for navigation:
 
         [ForeignKey("EventId")]
-		public virtual Event Event { get; set; }
+		public virtual Event? Event { get; set; }
 
 		[ForeignKey("UserId")]
-		public virtual User User { get; set; }
+		public virtual User? User { get; set; }
     }
 }

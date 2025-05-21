@@ -9,9 +9,9 @@ namespace ems_back.Repo.DTOs.Action
 {
     public class ActionOverviewDto
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public ActionType Type { get; set; }
+        public required Guid Id { get; set; }
+        public required String Name { get; set; }
+        public required ActionType Type { get; set; }
         public string? Description { get; set; }
     }
 }

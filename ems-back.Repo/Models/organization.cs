@@ -13,7 +13,7 @@ namespace ems_back.Repo.Models
 
 		[Required]
 		[MaxLength(255)]
-		public string Name { get; set; }
+		public required string Name { get; set; }
 
 		[Required]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -34,18 +34,15 @@ namespace ems_back.Repo.Models
 		[MaxLength(255)]
 		public string? ProfilePicture { get; set; }
 
-		public ICollection<OrganizationDomain> AllowedDomains { get; set; }
-
-
-
 		// for navigation:
 
 		[ForeignKey("CreatedBy")]
-		public virtual User Creator { get; set; }
+		public virtual User? Creator { get; set; }
 
 		[ForeignKey("UpdatedBy")]
-		public virtual User Updater { get; set; }
+		public virtual User? Updater { get; set; }
 
+		public ICollection<OrganizationDomain>? AllowedDomains { get; set; }
 		public virtual ICollection<OrganizationUser> OrganizationUsers { get; set; } = new List<OrganizationUser>();
 		public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 		public virtual ICollection<FlowTemplate> FlowTemplates { get; set; } = new List<FlowTemplate>();

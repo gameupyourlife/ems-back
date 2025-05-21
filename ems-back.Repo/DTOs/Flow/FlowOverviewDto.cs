@@ -11,11 +11,13 @@ namespace ems_back.Repo.DTOs.Flow
     public class FlowOverviewDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public string? Description { get; set; }
         public Guid? UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public List<TriggerOverviewDto> Triggers { get; set; }
-        public List<ActionOverviewDto> Actions { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public required List<TriggerOverviewDto> Triggers { get; set; }
+        public required List<ActionOverviewDto> Actions { get; set; }
     }
 }

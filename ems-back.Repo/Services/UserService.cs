@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Services
 {
@@ -214,6 +215,12 @@ namespace ems_back.Services
         {
             try
             {
+                if (await _userRepository.GetNumberOfOrganizersAsync(id) <= 1)
+                {
+                    _logger.LogWarning("User {UserId} cannot be deleted because they are an organizer", id);
+                    throw new MissingRoleException("User cannot be deleted because they are an organizer");
+                }
+
                 // First delete from repository
                 var result = await _userRepository.DeleteUserAsync(id);
 

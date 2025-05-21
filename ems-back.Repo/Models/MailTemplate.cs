@@ -14,13 +14,13 @@ namespace ems_back.Repo.Models
         public Guid Id { get; set; } = new Guid();
 
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Required]
-        public string Subject { get; set; }
+        public required string Subject { get; set; }
 
         [Required]
-        public string Body { get; set; }
+        public required string Body { get; set; }
 
         public string? Description { get; set; }
 
@@ -33,6 +33,6 @@ namespace ems_back.Repo.Models
         // for navigation:
 
         [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
+        public virtual Organization? Organization { get; set; }
     }
 }

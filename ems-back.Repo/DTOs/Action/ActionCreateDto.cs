@@ -13,12 +13,10 @@ namespace ems_back.Repo.DTOs.Action
     // For creating a new action
     public class ActionCreateDto
     {
-        [Required]
-        public ActionType Type { get; set; }
+        public required ActionType Type { get; set; }
 
-        [Required]
-        public String? Details { get; set; }
-        public String Name { get; set; }
+        public required String Details { get; set; }
+        public required String Name { get; set; }
         public String? Description { get; set; }
 
     }

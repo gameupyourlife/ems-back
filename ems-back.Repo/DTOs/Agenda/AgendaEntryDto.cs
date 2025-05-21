@@ -9,11 +9,11 @@ namespace ems_back.Repo.DTOs.Agenda
 {
     public class AgendaEntryDto
     {
-        public Guid Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public Guid EventId { get; set; }
+        public required Guid Id { get; set; }
+        public required string Title { get; set; }
+        public string? Description { get; set; }
+        public required DateTime Start { get; set; }
+        public required DateTime End { get; set; }
+        public required Guid EventId { get; set; }
     }
 }

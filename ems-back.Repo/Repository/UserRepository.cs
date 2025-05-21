@@ -279,5 +279,19 @@ namespace ems_back.Repo.Repository
         {
             return await _userManager.FindByEmailAsync(email);
         }
+
+        public async Task<int> GetNumberOfOwnersAsync(Guid orgId)
+        {
+           var count = await _context.OrganizationUsers
+                .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Owner);
+            return count;
+        }
+
+        public async Task<int> GetNumberOfOrganizersAsync(Guid orgId)
+        {
+           var count = await _context.OrganizationUsers
+                .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Organizer);
+            return count;
+        }
     }
 }

@@ -77,6 +77,9 @@ namespace ems_back.Repo.Services
                     CreatedBy = flowCreateDto.CreatedBy,
                     UpdatedAt = DateTime.UtcNow,
                     UpdatedBy = flowCreateDto.CreatedBy,
+                    IsActive = false,
+                    stillPending = true,
+                    multipleRuns = flowCreateDto.MultipleRuns,
                     Triggers = new List<Trigger>(),
                     Actions = new List<Models.Action>()
                 };
@@ -194,7 +197,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowId = flowId,
                 Name = dto.Name,
-                Summary = dto.Description ?? string.Empty // ensure non-null value
+                Description = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _eventFlowRepository.CreateActionAsync(newAction);
