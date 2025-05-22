@@ -26,15 +26,17 @@ namespace ems_back.Tests.Services
 		private readonly Mock<IOrganizationService> _organizationServiceMock = new();
 		private readonly Mock<ILogger<AuthService>> _loggerMock = new();
 		private readonly AuthService _authService;
+        private readonly Mock<UserManager<User>> _userManagerMock = new();
 
-		public AuthServiceTests(ITestOutputHelper output)
+        public AuthServiceTests(ITestOutputHelper output)
 		{
 			_report = new TestReportGenerator(output);
 			_authService = new AuthService(
 				_userServiceMock.Object,
 				_tokenServiceMock.Object,
 				_organizationServiceMock.Object,
-				_loggerMock.Object);
+				_loggerMock.Object,
+				_userManagerMock.Object);
 		}
 
 		[Fact]

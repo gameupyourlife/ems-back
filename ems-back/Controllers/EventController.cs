@@ -569,7 +569,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
-		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(
+		public async Task<ActionResult<List<AgendaEntryDto>>> GetAgendaByEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
 		{

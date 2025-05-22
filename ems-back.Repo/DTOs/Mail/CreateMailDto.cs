@@ -9,22 +9,14 @@ namespace ems_back.Repo.DTOs.Email
 {
 	public class CreateMailDto
 	{
-		[Required]
 		[MaxLength(200)]
-		public string Name { get; set; }
-
-		[Required]
+		public required string Name { get; set; }
 		public required string Subject { get; set; }
-
-		[Required]
+		public string? Description { get; set; }
 		public required string Body { get; set; }
-
-		[Required]
-		public required IEnumerable<Guid> Recipients { get; set; }
-
+		public IEnumerable<Guid>? Recipients { get; set; }
 		public DateTime? ScheduledFor { get; set; }
-
-		[Required]
-		public required Guid EventId { get; set; }
-	}
+		public required bool IsUserCreated { get; set; }
+        public required bool sendToAllParticipants { get; set; }
+    }
 }

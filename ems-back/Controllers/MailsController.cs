@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ems_back.Repo.Models.Types;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ems_back.Controllers
 {
@@ -25,18 +27,32 @@ namespace ems_back.Controllers
 			_mailService = mailService;
 			_mailRunService = mailRunService;
 			_logger = logger;
-
 			_logger.LogInformation("MailsController initialized");
 		}
-		// === MAILS ===
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<MailDto>>> GetMailsForEvent(Guid orgId, Guid eventId)
-		{
-			var mails = await _mailService.GetMailsForEventAsync(orgId, eventId);
-			return Ok(mails);
-		}
 
-		[HttpGet("{mailId}")]
+        // GET: api/org/{orgId}/events/{eventId}/mails
+        [HttpGet]
+        [Authorize(Roles = 
+			$"{nameof(UserRole.Admin)}, " +
+			$"{nameof(UserRole.Owner)}, " +
+			$"{nameof(UserRole.Organizer)}, " +
+			$"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<IEnumerable<MailDto>>> GetMailsForEvent(Guid orgId, Guid eventId)
+		{
+			try
+			{
+				var mails = await _mailService.GetMailsForEventAsync(orgId, eventId);
+				return Ok(mails);
+			}
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving mails for event {EventId}", eventId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        // GET: api/org/{orgId}/events/{eventId}/mails/{mailId}
+        [HttpGet("{mailId}")]
 		public async Task<ActionResult<MailDto>> GetMail(Guid orgId, Guid eventId, Guid mailId)
 		{
 			var mail = await _mailService.GetMailByIdAsync(orgId, eventId, mailId);
@@ -46,28 +62,25 @@ namespace ems_back.Controllers
 			return Ok(mail);
 		}
 
-		[HttpPost]
-		public async Task<ActionResult<MailDto>> CreateMail(Guid orgId, Guid eventId, CreateMailDto createMailDto)
+        // POST: api/org/{orgId}/events/{eventId}/mails
+        [HttpPost]
+		public async Task<ActionResult<CreateMailDto>> CreateMail(Guid orgId, Guid eventId, CreateMailDto createMailDto)
 		{
-			var createdMail = await _mailService.CreateMailAsync(orgId, eventId, createMailDto);
-			return CreatedAtAction(
-				nameof(GetMail),
-				new { orgId, eventId, mailId = createdMail.MailId },
-				createdMail
-			);
-		}
+			throw new NotImplementedException("CreateMail is not implemented yet.");
+        }
 
 		[HttpPut("{mailId}")]
-		public async Task<IActionResult> UpdateMail(Guid orgId, Guid eventId, Guid mailId, UpdateMailDto updateMailDto)
+		public async Task<IActionResult> UpdateMail(
+			[FromRoute] Guid orgId,
+            [FromRoute] Guid eventId, 
+			[FromRoute] Guid mailId,
+			[FromBody] CreateMailDto updateMailDto)
 		{
-			var result = await _mailService.UpdateMailAsync(orgId, eventId, mailId, updateMailDto);
-			if (!result)
-				return NotFound();
-
-			return NoContent();
+			throw new NotImplementedException("UpdateMail is not implemented yet.");
 		}
 
-		[HttpDelete("{mailId}")]
+        // DELETE: api/org/{orgId}/events/{eventId}/mails/{mailId}
+        [HttpDelete("{mailId}")]
 		public async Task<IActionResult> DeleteMail(Guid orgId, Guid eventId, Guid mailId)
 		{
 			var result = await _mailService.DeleteMailAsync(orgId, eventId, mailId);

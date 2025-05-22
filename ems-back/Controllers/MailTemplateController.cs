@@ -35,7 +35,7 @@ namespace ems_back.Controllers
 
 		[HttpGet]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public async Task<ActionResult<IEnumerable<MailTemplateResponseDto>>> GetTemplates([FromRoute] Guid orgId)
+		public async Task<ActionResult<IEnumerable<MailDto>>> GetTemplates([FromRoute] Guid orgId)
 		{
 			try
 			{
@@ -53,7 +53,7 @@ namespace ems_back.Controllers
 		[HttpGet("{id}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<MailTemplateResponseDto>> GetTemplate([FromRoute] Guid orgId, [FromRoute] Guid id)
+		public async Task<ActionResult<MailDto>> GetTemplate([FromRoute] Guid orgId, [FromRoute] Guid id)
 		{
 			try
 			{
@@ -77,7 +77,7 @@ namespace ems_back.Controllers
 		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)},{nameof(UserRole.Organizer)},{nameof(UserRole.EventOrganizer)}")]
 		[ProducesResponseType(StatusCodes.Status201Created)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<MailTemplateResponseDto>> CreateTemplate([FromRoute] Guid orgId, [FromBody] CreateMailTemplateDto dto)
+		public async Task<ActionResult<MailDto>> CreateTemplate([FromRoute] Guid orgId, [FromBody] CreateMailDto dto)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -102,7 +102,7 @@ namespace ems_back.Controllers
 		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)},{nameof(UserRole.Organizer)},{nameof(UserRole.EventOrganizer)}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<MailTemplateResponseDto>> UpdateTemplate([FromRoute] Guid orgId, [FromRoute] Guid id, [FromBody] UpdateMailTemplateDto dto)
+		public async Task<ActionResult<MailDto>> UpdateTemplate([FromRoute] Guid orgId, [FromRoute] Guid id, [FromBody] CreateMailDto dto)
 		{
 			if (!ModelState.IsValid)
 			{

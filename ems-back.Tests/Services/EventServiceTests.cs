@@ -27,14 +27,15 @@ namespace ems_back.Tests.Services
             _report = new TestReportGenerator(output);
             _eventRepoMock = new Mock<IEventRepository>();
             _orgRepoMock = new Mock<IOrganizationUserRepository>();
+            _org2RepoMock = new Mock<IOrganizationRepository>();
             _userRepoMock = new Mock<IUserRepository>();
             _eventService = new EventService(
-            _eventRepoMock.Object,
-            _userRepoMock.Object,
-            _orgRepoMock.Object,
-            _org2RepoMock.Object,
-            Mock.Of<ILogger<EventService>>(),
-            null);
+                _eventRepoMock.Object,
+                _userRepoMock.Object,
+                _orgRepoMock.Object,
+                _org2RepoMock.Object,
+                Mock.Of<ILogger<EventService>>()
+            );
         }
 
 		[Fact]

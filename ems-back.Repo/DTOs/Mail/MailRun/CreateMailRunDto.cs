@@ -10,10 +10,12 @@ namespace ems_back.Repo.DTOs.Email.MailRun
 {
 	public class CreateMailRunDto
 	{
-		[Required] public required Guid MailId { get; set; }
+		[Required] 
+		public required Guid MailId { get; set; }
 
-		[Required] public required MailRunStatus Status { get; set; }
+		[Required] 
+		public required MailRunStatus Status { get; set; }
 
-		public string Logs { get; set; } = "{}"; // default to empty JSON
+		public string? Logs { get; set; }
 	}
 }

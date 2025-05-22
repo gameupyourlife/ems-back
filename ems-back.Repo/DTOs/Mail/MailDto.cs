@@ -11,25 +11,18 @@ namespace ems_back.Repo.DTOs.Email
 {
     public class MailDto
     {
-        public Guid MailId { get; set; }
-        public string Name { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
-
-
-		//[Column(TypeName = "jsonb")]
-		public IEnumerable<Guid> Recipients { get; set; }
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public required string Subject { get; set; }
+        public required string Body { get; set; }
+        public string? Description { get; set; }
+        public IEnumerable<Guid>? Recipients { get; set; }
         public DateTime? ScheduledFor { get; set; }
-
-
-        [Required]
+        public required bool IsUserCreated { get; set; }
+        public required bool sendToAllParticipants { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public Guid CreatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public Guid? CreatedBy { get; set; }
         public Guid? UpdatedBy { get; set; }
-
-        [Required]
-		public Guid EventId { get; set; }
-
 	}
 }
