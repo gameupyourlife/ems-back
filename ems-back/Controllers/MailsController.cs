@@ -1,83 +1,122 @@
 ﻿using ems_back.Repo.DTOs.Email.MailRun;
 using ems_back.Repo.DTOs.Email;
-using ems_back.Repo.Services;
+using ems_back.Repo.Interfaces.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-[ApiController]
-[Route("api/events/{eventId}/[controller]")]
-public class MailsController : ControllerBase
+namespace ems_back.Controllers
 {
-	private readonly IMailService _mailService;
-
-	public MailsController(IMailService mailService)
+	[ApiController]
+	[Route("api/org/{orgId}/events/{eventId}/mails")]
+	public class MailsController : ControllerBase
 	{
-		_mailService = mailService;
-	}
+		private readonly IMailService _mailService;
+		private readonly IMailRunService _mailRunService;
+		private readonly ILogger<MailsController> _logger;
 
-	// GET: api/events/{eventId}/mails
-	[HttpGet]
-	public async Task<ActionResult<IEnumerable<EmailDto>>> GetMailsForEvent(Guid eventId)
-	{
-		var mails = await _mailService.GetMailsForEventAsync(eventId);
-		return Ok(mails);
-	}
-
-	// GET: api/events/{eventId}/mails/{id}
-	[HttpGet("{id}")]
-	public async Task<ActionResult<EmailDto>> GetMail(Guid eventId, Guid id)
-	{
-		var mail = await _mailService.GetMailForEventAsync(eventId, id);
-		if (mail == null)
+		public MailsController(
+			IMailService mailService,
+			IMailRunService mailRunService,
+			ILogger<MailsController> logger)
 		{
-			return NotFound();
+			_mailService = mailService;
+			_mailRunService = mailRunService;
+			_logger = logger;
+
+			_logger.LogInformation("MailsController initialized");
 		}
-		return Ok(mail);
-	}
 
-	// POST: api/events/{eventId}/mails
-	[HttpPost]
-	public async Task<ActionResult<EmailDto>> CreateMail(Guid eventId, CreateMailDto createMailDto)
-	{
-		// Ensure the mail is created for the correct event
-		createMailDto.EventId = eventId;
+		// === MAILS ===
 
-		var createdMail = await _mailService.CreateMailAsync(createMailDto);
-		return CreatedAtAction(
-			nameof(GetMail),
-			new { eventId, id = createdMail.MailId },
-			createdMail
-		);
-	}
-
-	// PUT: api/events/{eventId}/mails/{id}
-	[HttpPut("{id}")]
-	public async Task<IActionResult> UpdateMail(Guid eventId, Guid id, UpdateMailDto updateMailDto)
-	{
-		var result = await _mailService.UpdateMailForEventAsync(eventId, id, updateMailDto);
-		if (!result)
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<MailDto>>> GetMailsForEvent(Guid orgId, Guid eventId)
 		{
-			return NotFound();
+			var mails = await _mailService.GetMailsForEventAsync(orgId, eventId);
+			return Ok(mails);
 		}
-		return NoContent();
-	}
 
-	// DELETE: api/events/{eventId}/mails/{id}
-	[HttpDelete("{id}")]
-	public async Task<IActionResult> DeleteMail(Guid eventId, Guid id)
-	{
-		var result = await _mailService.DeleteMailForEventAsync(eventId, id);
-		if (!result)
+		[HttpGet("{mailId}")]
+		public async Task<ActionResult<MailDto>> GetMail(Guid orgId, Guid eventId, Guid mailId)
 		{
-			return NotFound();
-		}
-		return NoContent();
-	}
+			var mail = await _mailService.GetMailByIdAsync(orgId, eventId, mailId);
+			if (mail == null)
+				return NotFound();
 
-	// GET: api/events/{eventId}/mails/{id}/runs
-	[HttpGet("{id}/runs")]
-	public async Task<ActionResult<IEnumerable<MailRunDto>>> GetMailRunsForMail(Guid eventId, Guid id)
-	{
-		var runs = await _mailService.GetMailRunsForMailAsync(eventId, id);
-		return Ok(runs);
+			return Ok(mail);
+		}
+
+		[HttpPost]
+		public async Task<ActionResult<MailDto>> CreateMail(Guid orgId, Guid eventId, CreateMailDto createMailDto)
+		{
+			var createdMail = await _mailService.CreateMailAsync(orgId, eventId, createMailDto);
+			return CreatedAtAction(
+				nameof(GetMail),
+				new { orgId, eventId, mailId = createdMail.MailId },
+				createdMail
+			);
+		}
+
+		[HttpPut("{mailId}")]
+		public async Task<IActionResult> UpdateMail(Guid orgId, Guid eventId, Guid mailId, UpdateMailDto updateMailDto)
+		{
+			var result = await _mailService.UpdateMailAsync(orgId, eventId, mailId, updateMailDto);
+			if (!result)
+				return NotFound();
+
+			return NoContent();
+		}
+
+		[HttpDelete("{mailId}")]
+		public async Task<IActionResult> DeleteMail(Guid orgId, Guid eventId, Guid mailId)
+		{
+			var result = await _mailService.DeleteMailAsync(orgId, eventId, mailId);
+			if (!result)
+				return NotFound();
+
+			return NoContent();
+		}
+
+		// === MAIL RUNS ===
+
+		[HttpGet("{mailId}/runs")]
+		public async Task<ActionResult<IEnumerable<MailRunDto>>> GetMailRunsForMail(Guid orgId, Guid eventId, Guid mailId)
+		{
+			var runs = await _mailRunService.GetMailRunsForMailAsync(orgId, eventId, mailId);
+			return Ok(runs);
+		}
+
+		[HttpGet("{mailId}/runs/{runId}")]
+		public async Task<ActionResult<MailRunDto>> GetMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
+		{
+			var run = await _mailRunService.GetMailRunByIdAsync(orgId, eventId, mailId, runId);
+			if (run == null)
+				return NotFound();
+
+			return Ok(run);
+		}
+
+		[HttpPost("{mailId}/runs")]
+		public async Task<ActionResult<MailRunDto>> CreateMailRun(Guid orgId, Guid eventId, Guid mailId, CreateMailRunDto createDto)
+		{
+			var result = await _mailRunService.CreateMailRunAsync(orgId, eventId, mailId, createDto);
+			return CreatedAtAction(
+				nameof(GetMailRun),
+				new { orgId, eventId, mailId, runId = result.MailRunId },
+				result
+			);
+		}
+
+		[HttpDelete("{mailId}/runs/{runId}")]
+		public async Task<IActionResult> DeleteMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
+		{
+			var success = await _mailRunService.DeleteMailRunAsync(orgId, eventId, mailId, runId);
+			if (!success)
+				return NotFound();
+
+			return NoContent();
+		}
 	}
 }

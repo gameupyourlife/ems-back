@@ -21,23 +21,23 @@ namespace ems_back.Repo.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<EmailDto>> GetMailTemplates(Guid orgId)
+        public async Task<IEnumerable<MailDto>> GetMailTemplates(Guid orgId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<EmailDto> CreateMailTemplate(Guid orgId, EmailDto emailDto)
+        public async Task<MailDto> CreateMailTemplate(Guid orgId, MailDto mailDto)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<EmailDto>> GetEventMails(Guid orgId, Guid eventId)
+        public async Task<IEnumerable<MailDto>> GetEventMails(Guid orgId, Guid eventId)
         {
             var mails = await _emailRepository.GetEventMails(orgId, eventId);
             return mails;
         }
 
-        public async Task<EmailDto> CreateEventMail(Guid orgId, Guid eventId, EmailDto emailDto)
+        public async Task<MailDto> CreateEventMail(Guid orgId, Guid eventId, MailDto mailDto)
         {
             throw new NotImplementedException();
         }        

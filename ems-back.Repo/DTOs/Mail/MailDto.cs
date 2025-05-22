@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Email
 {
-    public class EmailDto
+    public class MailDto
     {
         public Guid MailId { get; set; }
         public string Name { get; set; }

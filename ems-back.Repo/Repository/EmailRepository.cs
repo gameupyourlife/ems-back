@@ -18,21 +18,21 @@ namespace ems_back.Repo.Repository
         }
 
 
-        public Task<EmailDto> CreateEventMail(Guid orgId, Guid eventId, EmailDto emailDto)
+        public Task<MailDto> CreateEventMail(Guid orgId, Guid eventId, MailDto mailDto)
         {
             throw new NotImplementedException();
         }
 
-        public Task<EmailDto> CreateMailTemplate(Guid orgId, EmailDto emailDto)
+        public Task<MailDto> CreateMailTemplate(Guid orgId, MailDto mailDto)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<EmailDto>> GetEventMails(Guid orgId, Guid eventId)
+        public async Task<IEnumerable<MailDto>> GetEventMails(Guid orgId, Guid eventId)
         {
 			//var mails = await _context.Mail
 			//    .Where(m => m.EventId == eventId)
-			//    .Select(m => new EmailDto
+			//    .Select(m => new MailDto
 			//    {
 			//        MailId = m.MailId,
 			//        Subject = m.Subject,
@@ -51,7 +51,7 @@ namespace ems_back.Repo.Repository
 			throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<EmailDto>> GetMailTemplates(Guid orgId)
+        public Task<IEnumerable<MailDto>> GetMailTemplates(Guid orgId)
         {
 	        throw new NotImplementedException();
         }
