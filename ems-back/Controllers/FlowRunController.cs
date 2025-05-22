@@ -59,7 +59,7 @@ namespace ems_back.Controllers
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpGet("{eventId}")]
         [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
-        public async Task<ActionResult<FlowOverviewDto>> GetFlowRunsForEvent(Guid orgId, Guid eventId)
+        public async Task<ActionResult<FlowsRunResponseDto>> GetFlowRunsForEvent(Guid orgId, Guid eventId)
         {
             try
             {
