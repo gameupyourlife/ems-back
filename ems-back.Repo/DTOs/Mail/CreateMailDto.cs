@@ -17,6 +17,6 @@ namespace ems_back.Repo.DTOs.Email
 		public IEnumerable<Guid>? Recipients { get; set; }
 		public DateTime? ScheduledFor { get; set; }
 		public required bool IsUserCreated { get; set; }
-        public required bool sendToAllParticipants { get; set; }
+        public required bool SendToAllParticipants { get; set; }
     }
 }

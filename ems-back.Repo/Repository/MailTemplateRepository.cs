@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ems_back.Repo.Repository.MailTemplate
 {
-	public class MailTemplateRepository : IMailTemplateRepository
+	public class MailTemplateRepository : IMailRepository
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;

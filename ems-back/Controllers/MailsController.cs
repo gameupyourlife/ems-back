@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Controllers
 {
@@ -44,6 +45,10 @@ namespace ems_back.Controllers
 				var mails = await _mailService.GetMailsForEventAsync(orgId, eventId);
 				return Ok(mails);
 			}
+            catch (NotFoundException ex)
+			{
+				return NotFound(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving mails for event {EventId}", eventId);

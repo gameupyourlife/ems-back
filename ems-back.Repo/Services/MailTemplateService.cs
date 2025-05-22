@@ -19,7 +19,7 @@ namespace ems_back.Repo.Services
 	{
 		public class MailTemplateService : IMailTemplateService
 		{
-			private readonly IMailTemplateRepository _repository;
+			private readonly IMailRepository _repository;
 			private readonly IMapper _mapper;
 			private readonly IOrganizationService _organizationService;
 			private readonly IOrganizationRepository _organizationRepository;
@@ -28,7 +28,7 @@ namespace ems_back.Repo.Services
 			private readonly ILogger<MailTemplateService> _logger;
 
 			public MailTemplateService(
-				IMailTemplateRepository repository,
+				IMailRepository repository,
 				IMapper mapper,
 				UserManager<User> userManager,
 				IOrganizationService organizationService,
