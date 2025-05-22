@@ -9,7 +9,6 @@ using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
-using ems_back.Repo.DTOs.File;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowsRun;
 using ems_back.Repo.DTOs.Flow.FlowTemplate;
@@ -103,10 +102,9 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
 				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId));
 
-            // Related mappings
-            CreateMap<EventAttendee, EventAttendeeDto>()
-				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
-				.ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePicture));
+			// Related mappings
+			CreateMap<EventAttendee, EventAttendeeDto>()
+				.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName));
 
 
 			// Flow mappings
@@ -116,8 +114,7 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
-				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
 
 
@@ -128,20 +125,8 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
 				.ForMember(dest => dest.Creator, opt => opt.Ignore())
 				.ForMember(dest => dest.Updater, opt => opt.Ignore())
-
-				.ForMember(dest => dest.stillPending, opt => opt.MapFrom(src => src.stillPending))
-				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.multipleRuns))
+				.ForMember(dest => dest.multipleRuns, opt => opt.MapFrom(src => src.MultipleRuns))
 				;
-
-			// Response mappings
-			CreateMap<Flow, FlowDto>();
-
-			CreateMap<Flow, FlowResponseDto>()
-				.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
-				.ForMember(dest => dest.Updater, opt => opt.MapFrom(src => src.Updater));
-
-			CreateMap<Flow, FlowDetailedDto>()
-				.IncludeBase<Flow, FlowResponseDto>();
 
 			// Trigger mappings
 			CreateMap<TriggerCreateDto, Trigger>()
@@ -155,21 +140,6 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<Trigger, TriggerDto>();
 			CreateMap<Trigger, TriggerDetailedDto>();
-
-			// File mappings
-			CreateMap<FileCreateDto, EventFile>()
-				.ForMember(dest => dest.UploadedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
-
-			CreateMap<FileUpdateDto, EventFile>()
-				.ForMember(dest => dest.Url, opt => opt.Ignore())
-				.ForMember(dest => dest.Type, opt => opt.Ignore())
-				.ForMember(dest => dest.UploadedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.UploadedBy, opt => opt.Ignore())
-				.ForMember(dest => dest.SizeInBytes, opt => opt.Ignore())
-				.ForMember(dest => dest.Uploader, opt => opt.Ignore());
-
-			CreateMap<EventFile, FileDto>();
 
 			// Add these to your existing DbMappingProfile
 			CreateMap<AgendaEntryCreateDto, AgendaEntry>();
@@ -190,7 +160,6 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.Flow, opt => opt.Ignore());
 
 			CreateMap<Action, ActionDto>();
-			CreateMap<Action, ActionDetailedDto>();
 
 
 

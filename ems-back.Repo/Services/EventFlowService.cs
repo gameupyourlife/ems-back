@@ -36,7 +36,7 @@ namespace ems_back.Repo.Services
             if (eventEntity == null)
             {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
-                return null;
+                throw new KeyNotFoundException("Event not found");
             }
 
             var flowList = await _eventFlowRepository.GetAllFlowsAsync(eventId);
@@ -77,6 +77,9 @@ namespace ems_back.Repo.Services
                     CreatedBy = flowCreateDto.CreatedBy,
                     UpdatedAt = DateTime.UtcNow,
                     UpdatedBy = flowCreateDto.CreatedBy,
+                    IsActive = false,
+                    stillPending = true,
+                    multipleRuns = flowCreateDto.MultipleRuns,
                     Triggers = new List<Trigger>(),
                     Actions = new List<Models.Action>()
                 };
@@ -110,11 +113,14 @@ namespace ems_back.Repo.Services
             if (eventEntity == null)
             {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
-                return null;
+                throw new KeyNotFoundException("Event not found");
             }
 
             var flow = await _eventFlowRepository.GetFlowByIdAsync(eventId, flowId);
-            if (flow == null) return null;
+            if (flow == null) {
+                _logger.LogWarning("Flow with id {FlowId} not found", flowId);
+                throw new KeyNotFoundException("Flow not found");
+            }
 
             return new FlowOverviewDto
             {
@@ -125,14 +131,14 @@ namespace ems_back.Repo.Services
                 {
                     Id = t.Id,
                     Name = t.Name,
-                    Summary = t.Summary,
+                    Description = t.Description,
                     Type = t.Type
                 }).ToList(),
                 Actions = flow.Actions.Select(a => new ActionOverviewDto
                 {
                     Id = a.Id,
                     Name = a.Name,
-                    Summary = a.Summary,
+                    Description = a.Description,
                     Type = a.Type
                 }).ToList()
             };
@@ -191,7 +197,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowId = flowId,
                 Name = dto.Name,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Description = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdAction = await _eventFlowRepository.CreateActionAsync(newAction);
@@ -201,6 +207,10 @@ namespace ems_back.Repo.Services
         public async Task<ActionDto?> GetActionByIdAsync(Guid eventId, Guid flowId, Guid actionId)
         {
             var action = await _eventFlowRepository.GetActionByIdAsync(eventId, flowId, actionId);
+            if (action == null)
+            {
+                throw new KeyNotFoundException($"Action with ID {actionId} not found for flow {flowId} in event {eventId}");
+            }
             return action;
         }
 
@@ -249,7 +259,7 @@ namespace ems_back.Repo.Services
                 CreatedAt = DateTime.UtcNow,
                 FlowId = flowId,
                 Name = dto.Name ?? string.Empty,
-                Summary = dto.Summary ?? string.Empty // ensure non-null value
+                Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
             var createdTrigger = await _eventFlowRepository.CreateTriggerAsync(newAction);
@@ -259,6 +269,10 @@ namespace ems_back.Repo.Services
         public async Task<TriggerDto?> GetTriggerByIdAsync(Guid eventId, Guid flowId, Guid triggerId)
         {
             var trigger = await _eventFlowRepository.GetTriggerByIdAsync(eventId, flowId, triggerId);
+            if (trigger == null)
+            {
+                throw new KeyNotFoundException($"Trigger with ID {triggerId} not found for template {flowId} in event {eventId}");
+            }
             return trigger;
         }
 

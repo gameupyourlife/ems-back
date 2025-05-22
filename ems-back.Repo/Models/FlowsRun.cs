@@ -15,18 +15,18 @@ namespace ems_back.Repo.Models
         public Guid Id { get; set; } = new Guid();
 
         [Required]
-		public Guid FlowId { get; set; }
+		public required Guid FlowId { get; set; }
 
 		[Required]
 		[MaxLength(50)]
-		public FlowRunStatus Status { get; set; }
+		public required FlowRunStatus Status { get; set; }
 
 		public DateTime? Timestamp { get; set; }
 
-		public string Logs { get; set; }
+		public string? Logs { get; set; }
 
         // for navigation:
         [ForeignKey("FlowId")]
-        public Flow Flow { get; set; }
+        public Flow? Flow { get; set; }
     }
 }

@@ -84,6 +84,11 @@ namespace ems_back
                         .WithOrigins("http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
+                options.AddPolicy("AllowAllOrigins",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
             });
 
             // Database Context
@@ -101,7 +106,6 @@ namespace ems_back
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IEventRepository, EventRepository>();
-            builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
@@ -138,8 +142,8 @@ namespace ems_back
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            });
-            /*.AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -152,7 +156,7 @@ namespace ems_back
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                 };
-            });*/
+            });
 
             // Authorization Policies
             builder.Services.AddAuthorization(options =>
@@ -217,10 +221,10 @@ namespace ems_back
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowAllOrigins");
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 

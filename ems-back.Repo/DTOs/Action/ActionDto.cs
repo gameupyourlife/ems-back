@@ -12,14 +12,14 @@ namespace ems_back.Repo.DTOs.Action
     // Basic response DTO
     public class ActionDto
     {
-        public Guid Id { get; set; }
-        public ActionType Type { get; set; }
-        public JsonElement Details { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public required Guid Id { get; set; }
+        public required ActionType Type { get; set; }
+        public required JsonElement Details { get; set; }
+        public required DateTime CreatedAt { get; set; }
         public Guid? FlowId { get; set; }
         public Guid? FlowTemplateId { get; set; }
-        public String Name { get; set; }
-        public String? Summary { get; set; }
+        public required String Name { get; set; }
+        public String? Description { get; set; }
 
     }
 }

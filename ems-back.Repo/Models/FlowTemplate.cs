@@ -15,32 +15,32 @@ namespace ems_back.Repo.Models
 
         [Required]
 		[MaxLength(255)]
-		public string Name { get; set; }
+		public required string Name { get; set; }
 
-		public string Description { get; set; }
+		public string? Description { get; set; }
 
 		[Required]
-		public Guid OrganizationId { get; set; }
+		public required Guid OrganizationId { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
-        public Guid CreatedBy { get; set; }
+        public required DateTime CreatedAt { get; set; }
+        public Guid? CreatedBy { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        public required DateTime UpdatedAt { get; set; }
 		public Guid? UpdatedBy { get; set; }
 
         // for navigation:
 
         [ForeignKey("OrganizationId")]
-        public Organization Organization { get; set; }
+        public Organization? Organization { get; set; }
 
         [ForeignKey("CreatedBy")]
-        public virtual User Creator { get; set; }
+        public virtual User? Creator { get; set; }
 
         [ForeignKey("UpdatedBy")]
         public virtual User? Updater { get; set; }
 
-        public virtual ICollection<Flow> Flows { get; set; }
+        public virtual ICollection<Flow>? Flows { get; set; }
         public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
         public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
     }

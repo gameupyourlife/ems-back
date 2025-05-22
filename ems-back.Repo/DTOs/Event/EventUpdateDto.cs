@@ -9,15 +9,15 @@ namespace ems_back.Repo.DTOs.Event
 {
     public class EventUpdateDto
     {
-        public string Title { get; set; }
-        public string Location { get; set; }
+        public required string Title { get; set; }
+        public required string Location { get; set; }
         public string? Description { get; set; }
-        public string Category { get; set; }
-        public int Capacity { get; set; }
-        public EventStatus Status { get; set; } 
-        public string Image { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime? End { get; set; }
+        public required string Category { get; set; }
+        public required int Capacity { get; set; }
+        public required EventStatus Status { get; set; } 
+        public required string Image { get; set; }
+        public required DateTime Start { get; set; }
+        public required DateTime End { get; set; }
     }
 
 }

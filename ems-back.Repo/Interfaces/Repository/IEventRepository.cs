@@ -8,6 +8,7 @@ namespace ems_back.Repo.Interfaces.Repository;
 public interface IEventRepository
 {
 	Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId);
+	Task<IEnumerable<EventOverviewDto>> GetAllEventsByCreatorAsync(Guid orgId, Guid creatorId);
 	Task<Guid> CreateEventAsync(EventInfoDto eventDto);
 	Task<EventInfoDto> GetEventByIdAsync(Guid orgId, Guid eventId);
 	Task<EventInfoDto> UpdateEventAsync(Guid orgId, Guid eventId, EventUpdateDto infoDto, Guid userId);

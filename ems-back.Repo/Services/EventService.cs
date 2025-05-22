@@ -89,13 +89,11 @@ namespace ems_back.Repo.Services
 
         private async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
         {
-            var user = await _organizationUserRepository.GetAsync(userId, orgId);
-            if (user == null)
-            {
-                if (user.User.Role == UserRole.Admin) return true;
-                return false;
-            }
-            
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+            if (user.Role == UserRole.Admin) return true;
+            if (user.Organization.Id != orgId) return false;
+   
             return true;
         }
 
@@ -152,6 +150,15 @@ namespace ems_back.Repo.Services
                 throw new InvalidOperationException("Event start date cannot be in the past");
             }
 
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} does not exist", userId);
+                throw new NotFoundException("User not found");
+            }
+
+            var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) != null;
+
             var eventInfo = new EventInfoDto
             {
                 Title = eventDto.Title,
@@ -168,7 +175,9 @@ namespace ems_back.Repo.Services
                 UpdatedAt = DateTime.UtcNow,
                 CreatedBy = userId,
                 UpdatedBy = userId,
-                AttendeeCount = 0
+                CreatorName = user.FullName,
+                AttendeeCount = 0,
+                isAttending = attends,
             };
 
             // Check if the event already exists
@@ -200,6 +209,9 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event with id {EventId} not found", eventid);
                 throw new NotFoundException("Event not found");
             }
+
+            eventEntity.isAttending = await _eventRepository.GetEventAttendeeByIdAsync(eventEntity.Id, userId) != null;
+
             return eventEntity;
         }
 
@@ -310,7 +322,7 @@ namespace ems_back.Repo.Services
                 UserId = attendeeDto.UserId,
                 EventId = eventId,
                 RegisteredAt = DateTime.UtcNow,
-                Status = AttendeeStatus.Pending,
+                Status = AttendeeStatus.Pending
             };
 
             try
@@ -337,7 +349,6 @@ namespace ems_back.Repo.Services
                 UserEmail = user.Email,
                 UserName = user.FullName,
                 Status = attendee.Status,
-                ProfilePicture = user.ProfilePicture,
                 RegisteredAt = attendee.RegisteredAt
             };
 
@@ -490,6 +501,7 @@ namespace ems_back.Repo.Services
 
             var agendaEntry = new AgendaEntryDto
             {
+                Id = Guid.NewGuid(),
                 Title = agendaEntryDto.Title,
                 Description = agendaEntryDto.Description,
                 Start = agendaEntryDto.Start,
@@ -609,6 +621,27 @@ namespace ems_back.Repo.Services
 
             _logger.LogInformation("Agenda point with id {AgendaId} deleted for event with id {EventId}", agendaId, eventId);
             return true;
+        }
+
+        public async Task<IEnumerable<EventOverviewDto>> GetAllEventsByCreatorAsync(Guid orgId, Guid creatorId, Guid userId)
+        {
+            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            {
+                _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
+                throw new MismatchException("User is not member of org");
+            }
+
+            var events = await _eventRepository.GetAllEventsByCreatorAsync(orgId, creatorId);
+
+            if (events == null || !events.Any())
+            {
+                _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
+                throw new NotFoundException("No events found");
+            }
+            else
+            {
+                return events;
+            }
         }
     }
 }

@@ -17,6 +17,6 @@ namespace ems_back.Repo.DTOs.Trigger
         public Guid? FlowId { get; set; }
         public Guid? FlowTemplateId { get; set; }
         public String? Name { get; set; }
-        public String? Summary { get; set; }
+        public String? Description { get; set; }
     }
 }
