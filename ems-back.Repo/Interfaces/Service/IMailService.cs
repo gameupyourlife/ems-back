@@ -14,7 +14,7 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<IEnumerable<MailDto>> GetMailsForEventAsync(Guid orgId, Guid eventId);
 		Task<MailDto> GetMailByIdAsync(Guid orgId, Guid eventId, Guid mailId);
 		Task<MailDto> CreateMailAsync(Guid orgId, Guid eventId, CreateMailDto createMailDto);
-		Task<bool> UpdateMailAsync(Guid orgId, Guid eventId, Guid mailId, UpdateMailDto updateMailDto);
+		Task<bool> UpdateMailAsync(Guid orgId, Guid eventId, Guid mailId, CreateMailDto updateMailDto);
 		Task<bool> DeleteMailAsync(Guid orgId, Guid eventId, Guid mailId);
 	}
 }

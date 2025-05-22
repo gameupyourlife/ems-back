@@ -46,7 +46,7 @@ namespace ems_back.Repo.Services
 			}
 
 
-			public async Task<MailTemplateResponseDto> GetTemplateAsync(Guid id)
+			public async Task<MailDto> GetTemplateAsync(Guid id)
 			{
 				_logger.LogDebug("Service layer - Getting template with ID: {TemplateId}", id);
 
@@ -58,10 +58,10 @@ namespace ems_back.Repo.Services
 				}
 
 				_logger.LogDebug("Successfully mapped template {TemplateId} to DTO", id);
-				return _mapper.Map<MailTemplateResponseDto>(template);
+				return _mapper.Map<MailDto>(template);
 			}
 
-			public async Task<IEnumerable<MailTemplateResponseDto>> GetTemplatesForOrganizationAsync(Guid organizationId)
+			public async Task<IEnumerable<MailDto>> GetTemplatesForOrganizationAsync(Guid organizationId)
 			{
 				_logger.LogDebug("Getting templates for organization: {OrganizationId}", organizationId);
 
@@ -76,13 +76,13 @@ namespace ems_back.Repo.Services
 				_logger.LogInformation("Retrieved {Count} templates for organization {OrganizationId}",
 					templates.Count(), organizationId);
 
-				return _mapper.Map<IEnumerable<MailTemplateResponseDto>>(templates);
+				return _mapper.Map<IEnumerable<MailDto>>(templates);
 			}
 
-			public async Task<MailTemplateResponseDto> CreateTemplateAsync(
+			public async Task<MailDto> CreateTemplateAsync(
 				Guid organizationId,
 				Guid userId,
-				CreateMailTemplateDto dto)
+				CreateMailDto dto)
 			{
 				_logger.LogDebug("Creating new template for organization {OrganizationId}", organizationId);
 
@@ -128,12 +128,12 @@ namespace ems_back.Repo.Services
 				var created = await _repository.CreateAsync(template);
 				_logger.LogDebug("Template created with ID: {TemplateId}", created.Id);
 
-				return _mapper.Map<MailTemplateResponseDto>(created);
+				return _mapper.Map<MailDto>(created);
 			}
-			public async Task<MailTemplateResponseDto> UpdateTemplateAsync(
+			public async Task<MailDto> UpdateTemplateAsync(
 				Guid id,
 				Guid userId,
-				UpdateMailTemplateDto dto)
+				CreateMailDto dto)
 			{
 				//
 
@@ -177,7 +177,7 @@ namespace ems_back.Repo.Services
 				_logger.LogInformation("Saving updates to template {TemplateId}", id);
 				var updated = await _repository.UpdateAsync(existing);
 
-				return _mapper.Map<MailTemplateResponseDto>(updated);
+				return _mapper.Map<MailDto>(updated);
 			}
 
 			public async Task<bool> DeleteTemplateAsync(Guid id, Guid userId

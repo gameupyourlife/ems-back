@@ -19,15 +19,18 @@ namespace ems_back.Repo.Services
         private readonly IEventFlowRepository _eventFlowRepository;
         private readonly IEventRepository _eventRepository;
         private readonly ILogger<EventFlowService> _logger;
+        private readonly IAuthService _authService;
 
         public EventFlowService(
             IEventFlowRepository eventFlowRepository,
             IEventRepository eventRepository,
-            ILogger<EventFlowService> logger)
+            ILogger<EventFlowService> logger,
+            IAuthService authService)
         {
             _eventFlowRepository = eventFlowRepository;
             _logger = logger;
             _eventRepository = eventRepository;
+            _authService = authService;
         }
 
         public async Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId)

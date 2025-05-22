@@ -9,10 +9,10 @@ namespace ems_back.Repo.Interfaces.Service
 {
 	public interface IMailTemplateService
 	{
-		Task<MailTemplateResponseDto> GetTemplateAsync(Guid id);
-		Task<IEnumerable<MailTemplateResponseDto>> GetTemplatesForOrganizationAsync(Guid organizationId);
-		Task<MailTemplateResponseDto> CreateTemplateAsync(Guid organizationId, Guid userId, CreateMailTemplateDto dto);
-		Task<MailTemplateResponseDto> UpdateTemplateAsync(Guid id, Guid userId, UpdateMailTemplateDto dto);
+		Task<MailDto> GetTemplateAsync(Guid id);
+		Task<IEnumerable<MailDto>> GetTemplatesForOrganizationAsync(Guid organizationId);
+		Task<MailDto> CreateTemplateAsync(Guid organizationId, Guid userId, CreateMailDto dto);
+		Task<MailDto> UpdateTemplateAsync(Guid id, Guid userId, CreateMailDto dto);
 		Task<bool> DeleteTemplateAsync(Guid id, Guid userId);
 	}
 }
