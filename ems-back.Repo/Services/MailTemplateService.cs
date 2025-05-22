@@ -58,7 +58,6 @@ namespace ems_back.Repo.Services
 				throw;
 			}
 		}
-
 		public async Task<IEnumerable<MailDto>> GetTemplatesForOrganizationAsync(Guid organizationId)
 		{
 			try
@@ -83,7 +82,6 @@ namespace ems_back.Repo.Services
 				throw;
 			}
 		}
-
 		public async Task<MailDto> CreateTemplateAsync(Guid organizationId, Guid userId, CreateMailDto dto)
 		{
 			try
