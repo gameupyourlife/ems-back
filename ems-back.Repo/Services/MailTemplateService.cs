@@ -9,84 +9,88 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ems_back.Repo.Services
 {
-	// Service/MailTemplate/MailTemplateService.cs
-	namespace ems_back.Repo.Service.MailTemplate
+	public class MailTemplateService : IMailTemplateService
 	{
-		public class MailTemplateService : IMailTemplateService
-		{
-			private readonly IMailTemplateRepository _repository;
-			private readonly IMapper _mapper;
-			private readonly IOrganizationService _organizationService;
-			private readonly IOrganizationRepository _organizationRepository;
-			private readonly UserManager<User> _userManager;
+		private readonly IMailTemplateRepository _repository;
+		private readonly IMapper _mapper;
+		private readonly IOrganizationRepository _organizationRepository;
+		private readonly UserManager<User> _userManager;
+		private readonly ILogger<MailTemplateService> _logger;
 
-			private readonly ILogger<MailTemplateService> _logger;
-
-			public MailTemplateService(
-				IMailTemplateRepository repository,
-				IMapper mapper,
-				UserManager<User> userManager,
-				IOrganizationService organizationService,
-				IOrganizationRepository organizationRepository,
+		public MailTemplateService(
+			IMailTemplateRepository repository,
+			IMapper mapper,
+			UserManager<User> userManager,
+			IOrganizationRepository organizationRepository,
 			ILogger<MailTemplateService> logger)
+		{
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+			_userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+			_organizationRepository = organizationRepository ?? throw new ArgumentNullException(nameof(organizationRepository));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+			_logger.LogInformation("MailTemplateService initialized");
+		}
+
+		public async Task<MailDto> GetTemplateAsync(Guid id)
+		{
+			try
 			{
-				_repository = repository;
-				_mapper = mapper;
-				_organizationService = organizationService;
-				_logger = logger;
-				_userManager = userManager;
-
-				_organizationRepository = organizationRepository;
-				_logger.LogInformation("MailTemplateService initialized");
-			}
-
-
-			public async Task<MailDto> GetTemplateAsync(Guid id)
-			{
-				_logger.LogDebug("Service layer - Getting template with ID: {TemplateId}", id);
-
+				_logger.LogDebug("Fetching mail template {TemplateId}", id);
 				var template = await _repository.GetByIdAsync(id);
+
 				if (template == null)
 				{
-					_logger.LogWarning("Template not found in service layer: {TemplateId}", id);
+					_logger.LogWarning("Mail template {TemplateId} not found", id);
 					throw new KeyNotFoundException($"Template with ID {id} not found");
 				}
 
-				_logger.LogDebug("Successfully mapped template {TemplateId} to DTO", id);
 				return _mapper.Map<MailDto>(template);
 			}
-
-			public async Task<IEnumerable<MailDto>> GetTemplatesForOrganizationAsync(Guid organizationId)
+			catch (Exception ex)
 			{
-				_logger.LogDebug("Getting templates for organization: {OrganizationId}", organizationId);
+				_logger.LogError(ex, "Error fetching mail template {TemplateId}", id);
+				throw;
+			}
+		}
 
-				//check if Org exists
+		public async Task<IEnumerable<MailDto>> GetTemplatesForOrganizationAsync(Guid organizationId)
+		{
+			try
+			{
+				_logger.LogDebug("Fetching mail templates for organization {OrganizationId}", organizationId);
+
 				if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
 				{
 					_logger.LogWarning("Organization not found: {OrganizationId}", organizationId);
 					throw new KeyNotFoundException("Organization not found");
 				}
-				
+
 				var templates = await _repository.GetByOrganizationAsync(organizationId);
 				_logger.LogInformation("Retrieved {Count} templates for organization {OrganizationId}",
 					templates.Count(), organizationId);
 
 				return _mapper.Map<IEnumerable<MailDto>>(templates);
 			}
-
-			public async Task<MailDto> CreateTemplateAsync(
-				Guid organizationId,
-				Guid userId,
-				CreateMailDto dto)
+			catch (Exception ex)
 			{
-				_logger.LogDebug("Creating new template for organization {OrganizationId}", organizationId);
+				_logger.LogError(ex, "Error fetching mail templates for organization {OrganizationId}", organizationId);
+				throw;
+			}
+		}
 
-				// Get user first to avoid multiple DB calls
+		public async Task<MailDto> CreateTemplateAsync(Guid organizationId, Guid userId, CreateMailDto dto)
+		{
+			try
+			{
+				_logger.LogDebug("Creating new template for organization {OrganizationId} by user {UserId}",
+					organizationId, userId);
+
 				var user = await _userManager.FindByIdAsync(userId.ToString());
 				if (user == null)
 				{
@@ -100,11 +104,7 @@ namespace ems_back.Repo.Services
 					throw new KeyNotFoundException("Organization not found");
 				}
 
-				// Check rights - more efficient single call
 				var userRoles = await _userManager.GetRolesAsync(user);
-
-				// Permission logic:
-				// Allow if user is Admin, Owner, Organizer, or EventOrganizer
 				var hasPermission = userRoles.Contains(nameof(UserRole.Admin)) ||
 								   userRoles.Contains(nameof(UserRole.Owner)) ||
 								   userRoles.Contains(nameof(UserRole.Organizer)) ||
@@ -117,26 +117,33 @@ namespace ems_back.Repo.Services
 					throw new UnauthorizedAccessException("Insufficient permissions");
 				}
 
-				var template = _mapper.Map<Models.MailTemplate>(dto);
+				var template = _mapper.Map<MailTemplate>(dto);
+				template.Id = Guid.NewGuid();
 				template.OrganizationId = organizationId;
+				template.CreatedBy = userId;
+				template.CreatedAt = DateTime.UtcNow;
 				template.isUserCreated = true;
-
 
 				_logger.LogInformation("Creating template: {TemplateName} by user {UserId}",
 					template.Name, userId);
 
-				var created = await _repository.CreateAsync(template);
-				_logger.LogDebug("Template created with ID: {TemplateId}", created.Id);
+				var createdTemplate = await _repository.CreateAsync(template);
+				_logger.LogDebug("Template created with ID: {TemplateId}", createdTemplate.Id);
 
-				return _mapper.Map<MailDto>(created);
+				return _mapper.Map<MailDto>(createdTemplate);
 			}
-			public async Task<MailDto> UpdateTemplateAsync(
-				Guid id,
-				Guid userId,
-				CreateMailDto dto)
+			catch (Exception ex)
 			{
-				//
+				_logger.LogError(ex, "Error creating mail template for organization {OrganizationId} by user {UserId}",
+					organizationId, userId);
+				throw;
+			}
+		}
 
+		public async Task<MailDto> UpdateTemplateAsync(Guid id, Guid userId, CreateMailDto dto)
+		{
+			try
+			{
 				_logger.LogDebug("Updating template {TemplateId} by user {UserId}", id, userId);
 
 				var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -146,15 +153,11 @@ namespace ems_back.Repo.Services
 					throw new UnauthorizedAccessException("User not found");
 				}
 
-				// Check rights - more efficient single call
 				var userRoles = await _userManager.GetRolesAsync(user);
-
-				// Permission logic:
-				// Allow if user is Admin, Owner, Organizer, or EventOrganizer
 				var hasPermission = userRoles.Contains(nameof(UserRole.Admin)) ||
-				                    userRoles.Contains(nameof(UserRole.Owner)) ||
-				                    userRoles.Contains(nameof(UserRole.Organizer)) ||
-				                    userRoles.Contains(nameof(UserRole.EventOrganizer));
+								   userRoles.Contains(nameof(UserRole.Owner)) ||
+								   userRoles.Contains(nameof(UserRole.Organizer)) ||
+								   userRoles.Contains(nameof(UserRole.EventOrganizer));
 
 				if (!hasPermission)
 				{
@@ -163,30 +166,34 @@ namespace ems_back.Repo.Services
 					throw new UnauthorizedAccessException("Insufficient permissions");
 				}
 
-				var existing = await _repository.GetByIdAsync(id);
-				if (existing == null)
+				var existingTemplate = await _repository.GetByIdAsync(id);
+				if (existingTemplate == null)
 				{
 					_logger.LogError("Update failed - template not found: {TemplateId}", id);
 					throw new KeyNotFoundException("Template not found");
 				}
 
-				_logger.LogDebug("Mapping update DTO to existing template {TemplateId}", id);
-				_mapper.Map(dto, existing);
-
+				_mapper.Map(dto, existingTemplate);
+				existingTemplate.UpdatedBy = userId;
+				existingTemplate.UpdatedAt = DateTime.UtcNow;
 
 				_logger.LogInformation("Saving updates to template {TemplateId}", id);
-				var updated = await _repository.UpdateAsync(existing);
+				var updatedTemplate = await _repository.UpdateAsync(existingTemplate);
 
-				return _mapper.Map<MailDto>(updated);
+				return _mapper.Map<MailDto>(updatedTemplate);
 			}
-
-			public async Task<bool> DeleteTemplateAsync(Guid id, Guid userId
-			)
+			catch (Exception ex)
 			{
-				_logger.LogDebug("Attempting to delete template {TemplateId}", id);
+				_logger.LogError(ex, "Error updating mail template {TemplateId} by user {UserId}", id, userId);
+				throw;
+			}
+		}
 
-
-				_logger.LogDebug("Updating template {TemplateId} by user {UserId}", id, userId);
+		public async Task<bool> DeleteTemplateAsync(Guid id, Guid userId)
+		{
+			try
+			{
+				_logger.LogDebug("Attempting to delete template {TemplateId} by user {UserId}", id, userId);
 
 				var user = await _userManager.FindByIdAsync(userId.ToString());
 				if (user == null)
@@ -195,19 +202,15 @@ namespace ems_back.Repo.Services
 					throw new UnauthorizedAccessException("User not found");
 				}
 
-				// Check rights - more efficient single call
 				var userRoles = await _userManager.GetRolesAsync(user);
-
-				// Permission logic:
-				// Allow if user is Admin, Owner, Organizer, or EventOrganizer
 				var hasPermission = userRoles.Contains(nameof(UserRole.Admin)) ||
-				                    userRoles.Contains(nameof(UserRole.Owner)) ||
-				                    userRoles.Contains(nameof(UserRole.Organizer)) ||
-				                    userRoles.Contains(nameof(UserRole.EventOrganizer));
+								   userRoles.Contains(nameof(UserRole.Owner)) ||
+								   userRoles.Contains(nameof(UserRole.Organizer)) ||
+								   userRoles.Contains(nameof(UserRole.EventOrganizer));
 
 				if (!hasPermission)
 				{
-					_logger.LogWarning("User {UserId} with roles {UserRoles} lacks permission to update templates",
+					_logger.LogWarning("User {UserId} with roles {UserRoles} lacks permission to delete templates",
 						userId, string.Join(",", userRoles));
 					throw new UnauthorizedAccessException("Insufficient permissions");
 				}
@@ -223,6 +226,11 @@ namespace ems_back.Repo.Services
 					id, result);
 
 				return result;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting template {TemplateId} by user {UserId}", id, userId);
+				throw;
 			}
 		}
 	}
