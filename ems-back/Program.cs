@@ -107,6 +107,7 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
+            builder.Services.AddScoped<IFlowRunRepository, FlowRunRepository>();
 
             // Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -118,6 +119,7 @@ namespace ems_back
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IFlowRunService, FlowRunService>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>

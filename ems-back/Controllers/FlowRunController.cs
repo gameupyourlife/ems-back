@@ -29,7 +29,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/flows
         [HttpGet]
-        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<IEnumerable<FlowsRunResponseDto>>> GetFlowRuns([FromRoute] Guid orgId)
         {
             try
@@ -59,7 +59,7 @@ namespace ems_back.Controllers
         // GET: api/orgs/{orgId}/events/{eventId}/flows/{flowId}
         [HttpGet("{eventId}")]
         [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
-        public async Task<ActionResult<FlowOverviewDto>> GetFlowRunsForEvent(Guid orgId, Guid eventId, Guid flowId)
+        public async Task<ActionResult<FlowOverviewDto>> GetFlowRunsForEvent(Guid orgId, Guid eventId)
         {
             try
             {
