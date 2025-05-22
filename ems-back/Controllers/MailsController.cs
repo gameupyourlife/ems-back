@@ -28,9 +28,7 @@ namespace ems_back.Controllers
 
 			_logger.LogInformation("MailsController initialized");
 		}
-
 		// === MAILS ===
-
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<MailDto>>> GetMailsForEvent(Guid orgId, Guid eventId)
 		{
