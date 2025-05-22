@@ -9,9 +9,9 @@ namespace ems_back.Repo.Interfaces.Repository
 {
     public interface IEmailRepository
     {
-        Task<IEnumerable<EmailDto>> GetMailTemplates(Guid orgId);
-        Task<EmailDto> CreateMailTemplate(Guid orgId, EmailDto emailDto);
-        Task<IEnumerable<EmailDto>> GetEventMails(Guid orgId, Guid eventId);
-        Task<EmailDto> CreateEventMail(Guid orgId, Guid eventId, EmailDto emailDto);
+        Task<IEnumerable<MailDto>> GetMailTemplates(Guid orgId);
+        Task<MailDto> CreateMailTemplate(Guid orgId, MailDto mailDto);
+        Task<IEnumerable<MailDto>> GetEventMails(Guid orgId, Guid eventId);
+        Task<MailDto> CreateEventMail(Guid orgId, Guid eventId, MailDto mailDto);
     }
 }
