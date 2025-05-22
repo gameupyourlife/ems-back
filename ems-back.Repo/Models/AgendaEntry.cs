@@ -17,23 +17,23 @@ namespace ems_back.Repo.Models
 
         [Required]
 		[MaxLength(255)]
-		public string Title { get; set; }
+		public required string Title { get; set; }
 
 		[Column(TypeName = "text")]
 		public string? Description { get; set; }
 
 		[Required]
-		public DateTime Start { get; set; }
+		public required DateTime Start { get; set; }
 
 		[Required]
-		public DateTime End { get; set; }
+		public required DateTime End { get; set; }
 
         [Required]
-        public Guid EventId { get; set; }
+        public required Guid EventId { get; set; }
 
 		// for navigation:
 
 		[ForeignKey("EventId")]
-		public virtual Event Event { get; set; }
+		public virtual Event? Event { get; set; }
     }
 }

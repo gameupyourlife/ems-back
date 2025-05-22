@@ -10,16 +10,14 @@ namespace ems_back.Repo.DTOs.Agenda
     // For updating an existing agenda entry
     public class AgendaEntryUpdateDto
     {
-        [Required]
         public Guid Id { get; set; }
 
-        [MaxLength(255)]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public DateTime? Start { get; set; }
+        public required DateTime Start { get; set; }
 
-        public DateTime? End { get; set; }
+        public required DateTime End { get; set; }
     }
 }

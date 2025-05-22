@@ -49,7 +49,13 @@ namespace ems_back.Tests.Services
 			{
 				// Arrange
 				var request = new LoginRequest { Email = "test@example.com", Password = "ValidP@ss1" };
-				var user = new User { Id = Guid.NewGuid(), Email = request.Email };
+				var user = new User 
+				{ 
+					Id = Guid.NewGuid(), 
+					Email = request.Email,
+                    FirstName = "Test",
+                    LastName = "User"
+                };
 				var token = "generated.jwt.token";
 
 				_userServiceMock.Setup(x => x.FindByEmailAsync(request.Email)).ReturnsAsync(user);
@@ -93,7 +99,13 @@ namespace ems_back.Tests.Services
 		[Fact]
 		public async Task LoginAsync_WrongPassword_ReturnsFailure()
 		{
-			var user = new User { Id = Guid.NewGuid(), Email = "test@example.com" };
+			var user = new User 
+			{ 
+				Id = Guid.NewGuid(), 
+				Email = "test@example.com",
+                FirstName = "Test",
+                LastName = "User"
+            };
 			var request = new LoginRequest { Email = user.Email, Password = "wrongpass" };
 
 			_userServiceMock.Setup(x => x.FindByEmailAsync(request.Email)).ReturnsAsync(user);
@@ -117,7 +129,13 @@ namespace ems_back.Tests.Services
 				Role = UserRole.User
 			};
 
-			var user = new User { Id = Guid.NewGuid(), Email = request.Email };
+			var user = new User 
+			{ 
+				Id = Guid.NewGuid(), 
+				Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName
+            };
 
 			_userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), request.Password)).ReturnsAsync(IdentityResult.Success);
 			_userServiceMock.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), request.Role.ToString())).ReturnsAsync(IdentityResult.Success);

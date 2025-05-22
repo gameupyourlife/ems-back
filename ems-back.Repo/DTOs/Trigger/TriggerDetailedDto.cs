@@ -10,6 +10,6 @@ namespace ems_back.Repo.DTOs.Trigger
     // Detailed response DTO (with Flow information)
     public class TriggerDetailedDto : TriggerDto
     {
-        public FlowDto Flow { get; set; }
+        public required FlowDto Flow { get; set; }
     }
 }

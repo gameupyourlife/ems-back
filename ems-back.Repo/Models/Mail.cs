@@ -10,18 +10,18 @@ public class Mail
 
     [Required]
     [MaxLength(200)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [MaxLength(200)]
-    public string Subject { get; set; }
+    public required string Subject { get; set; }
 
     [Required]
     [Column(TypeName = "text")]
-    public string Body { get; set; }
+    public required string Body { get; set; }
 
     [Required]
-    public IEnumerable<Guid> Recipients { get; set; }
+    public required IEnumerable<Guid> Recipients { get; set; }
 
     public DateTime? ScheduledFor { get; set; }
 
@@ -41,12 +41,12 @@ public class Mail
     // for navigation:
 
     [ForeignKey("EventId")]
-    public virtual Event Event { get; set; }
+    public virtual Event? Event { get; set; }
 
     [ForeignKey("CreatedBy")]
-    public virtual User Creator { get; set; }
+    public virtual User? Creator { get; set; }
 
     [ForeignKey("UpdatedBy")]
-    public virtual User Updater { get; set; }
+    public virtual User? Updater { get; set; }
     public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
 }

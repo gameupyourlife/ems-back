@@ -8,13 +8,13 @@ namespace ems_back.Repo.DTOs.Flow
 {
     public class FlowDto
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+        public required Guid Id { get; set; }
+        public required string Name { get; set; }
         public string? Description { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public Guid CreatedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
         public Guid? UpdatedBy { get; set; }
         public bool StillPending { get; set; }
         public bool MultipleRuns { get; set; }
