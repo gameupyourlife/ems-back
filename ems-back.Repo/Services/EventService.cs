@@ -112,7 +112,7 @@ namespace ems_back.Repo.Services
         }
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId, Guid userId)
-		{
+        {
             if (!await IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
@@ -121,16 +121,23 @@ namespace ems_back.Repo.Services
 
             var events = await _eventRepository.GetAllEventsAsync(orgId);
 
-			if (events == null || !events.Any())
-			{
+            if (events == null || !events.Any())
+            {
                 _logger.LogWarning("No events found for organization with id {OrgId}", orgId);
                 throw new NotFoundException("No events found");
             }
-			else
-			{
-				return events;
-            }	
-		}
+            else
+            {
+                var updatedEvents = new List<EventOverviewDto>();
+                foreach (var ev in events)
+                {
+                    var isAttending = await _eventRepository.GetEventAttendeeByIdAsync(ev.Id, userId) != null;
+                    ev.isAttending = isAttending;
+                    updatedEvents.Add(ev);
+                }
+                return updatedEvents;
+            }
+        }
 
         public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId)
         {
