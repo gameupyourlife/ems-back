@@ -142,6 +142,10 @@ namespace ems_back.Controllers
                 _logger.LogInformation("Event created successfully with id {EventId}", createdEvent.Id);
                 return createdEvent;
             }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
@@ -241,6 +245,10 @@ namespace ems_back.Controllers
                     return BadRequest("Failed to update event");
                 }
                 return Ok(success);
+            }
+            catch (NotFoundException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {

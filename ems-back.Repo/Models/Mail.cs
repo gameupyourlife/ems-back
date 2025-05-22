@@ -40,12 +40,12 @@ public class Mail
     // for navigation:
 
     [ForeignKey("EventId")]
-    public virtual Event Event { get; set; }
+    public virtual Event? Event { get; set; }
 
     [ForeignKey("CreatedBy")]
-    public virtual User Creator { get; set; }
+    public virtual User? Creator { get; set; }
 
     [ForeignKey("UpdatedBy")]
-    public virtual User Updater { get; set; }
+    public virtual User? Updater { get; set; }
     public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
 }

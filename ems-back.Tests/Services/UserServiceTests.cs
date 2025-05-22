@@ -100,8 +100,18 @@ namespace ems_back.Tests.Services
 			var userId = Guid.NewGuid();
 			var organizationId = Guid.NewGuid();
 
-			var user = new User { Id = userId, Email = email };
-			var orgDomain = new OrganizationDomain { OrganizationId = organizationId };
+			var user = new User 
+			{ 
+				Id = userId, 
+				Email = email,
+                FirstName = "Test",
+                LastName = "User"
+            };
+			var orgDomain = new OrganizationDomain 
+			{ 
+				OrganizationId = organizationId,
+				Domain = "test.com"
+            };
 
 			_userManagerMock.Setup(m => m.FindByEmailAsync(email)).ReturnsAsync(user);
 			_orgDomainRepoMock.Setup(r => r.GetByDomainAsync(domain)).ReturnsAsync(orgDomain);
@@ -125,8 +135,18 @@ namespace ems_back.Tests.Services
 			var userId = Guid.NewGuid();
 			var organizationId = Guid.NewGuid();
 
-			var user = new User { Id = userId, Email = email };
-			var orgDomain = new OrganizationDomain { OrganizationId = organizationId };
+			var user = new User 
+			{ 
+				Id = userId, 
+				Email = email,
+                FirstName = "Test",
+                LastName = "User"
+            };
+			var orgDomain = new OrganizationDomain 
+			{ 
+				OrganizationId = organizationId,
+                Domain = "test.com"
+            };
 
 			_userManagerMock.Setup(m => m.FindByEmailAsync(email)).ReturnsAsync(user);
 			_orgDomainRepoMock.Setup(r => r.GetByDomainAsync(domain)).ReturnsAsync(orgDomain);
@@ -152,7 +172,12 @@ namespace ems_back.Tests.Services
 			};
 
 			_userManagerMock.Setup(m => m.FindByEmailAsync(userDto.Email))
-				.ReturnsAsync(new User { Email = userDto.Email });
+				.ReturnsAsync(new User 
+				{ 
+					Email = userDto.Email,
+                    FirstName = userDto.FirstName,
+                    LastName = userDto.LastName
+                });
 
 			// Act
 			var act = async () => await _userService.CreateUserAsync(userDto);

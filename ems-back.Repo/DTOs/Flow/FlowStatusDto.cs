@@ -10,6 +10,6 @@ namespace ems_back.Repo.DTOs.Flow
     public class FlowStatusDto
     {
         public bool IsActive { get; set; }
-        public Guid UpdatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }

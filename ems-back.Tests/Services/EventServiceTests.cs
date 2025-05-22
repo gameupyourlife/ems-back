@@ -56,7 +56,15 @@ namespace ems_back.Tests.Services
                     Title = "New Event",
                     OrganizationId = orgId,
                     Description = "Test Description",
-                    Category = "Test Category"
+                    Category = "Test Category",
+                    Location = "Test Location",
+                    AttendeeCount = 0,
+                    Capacity = 100,
+                    Status = EventStatus.ONGOING,
+                    Start = DateTime.UtcNow.AddDays(1),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    CreatorName = "Test Creator"
                 };
 
                 _eventRepoMock.Setup(x => x.GetEventByIdAsync(orgId, eventId)).ReturnsAsync(expectedEvent);
@@ -96,11 +104,21 @@ namespace ems_back.Tests.Services
             {
                 // Arrange
                 Guid orgId = Guid.NewGuid();
+                // Pseudocode-Plan:
+                // 1. Ermittle alle erforderlichen Properties von EventCreateDto (Location, Capacity, Image, Status, Start).
+                // 2. Ergänze den Objektinitialisierer um sinnvolle Testwerte für diese Properties.
+
                 var eventDto = new EventCreateDto
                 {
                     Title = "New Event",
                     Description = "Test Description",
                     Category = "Test Category",
+                    Location = "Test Location",
+                    Capacity = 100,
+                    Image = "test-image.png",
+                    Status = EventStatus.ONGOING, // oder ein anderer gültiger Wert aus EventStatus
+                    Start = DateTime.UtcNow.AddDays(1),
+                    End = DateTime.UtcNow.AddDays(2) 
                 };
 
                 var expectedEvent = new EventInfoDto
@@ -109,6 +127,14 @@ namespace ems_back.Tests.Services
                     OrganizationId = orgId,
                     Description = "Test Description",
                     Category = "Test Category",
+                    Location = "Test Location",
+                    AttendeeCount = 0,
+                    Capacity = 100,
+                    Status = EventStatus.ONGOING,
+                    Start = DateTime.UtcNow.AddDays(1),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    CreatorName = "Test Creator"
                 };
 
                 // Fix: Pass the required parameter to CreateEventAsync and fix the syntax error

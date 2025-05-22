@@ -17,10 +17,9 @@ public class MailRun
     [Required]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    [Column(TypeName = "jsonb")]
-    public string Logs { get; set; }
+    public string? Logs { get; set; }
 
     // for navigation:
     [ForeignKey("MailId")]
-    public virtual Mail Mail { get; set; }
+    public virtual Mail? Mail { get; set; }
 }

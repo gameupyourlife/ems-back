@@ -15,6 +15,7 @@ using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.Exceptions;
 
 namespace ems_back.Repo.Repository
 {
@@ -55,8 +56,22 @@ namespace ems_back.Repo.Repository
 
         public async Task<Guid> CreateEventAsync(EventInfoDto eventDto)
         {
-            var eventObject = new Event();
-            _mapper.Map(eventDto, eventObject);
+            var eventObject = new Event
+            {
+                Title = eventDto.Title,
+                Location = eventDto.Location,
+                Description = eventDto.Description,
+                Start = eventDto.Start,
+                End = eventDto.End,
+                Capacity = eventDto.Capacity,
+                Category = eventDto.Category,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                CreatedBy = eventDto.CreatedBy,
+                OrganizationId = eventDto.OrganizationId,
+                AttendeeCount = 0,
+                Status = EventStatus.SCHEDULED,
+            };
             _context.Events.Add(eventObject);
             await _context.SaveChangesAsync();
             return eventObject.Id;
@@ -64,11 +79,11 @@ namespace ems_back.Repo.Repository
 
         public async Task<EventInfoDto> GetEventByIdAsync(Guid orgId, Guid eventId)
 		{
-			var eventEntity = await _context.Events
-				.Where(e => e.OrganizationId == orgId && e.Id == eventId)
-				.Select( e => new EventInfoDto
+            var eventEntity = await _context.Events
+                .Where(e => e.OrganizationId == orgId && e.Id == eventId)
+                .Select(e => new EventInfoDto
                 {
-					
+
                     Id = e.Id,
                     Title = e.Title,
                     OrganizationId = e.OrganizationId,
@@ -86,7 +101,6 @@ namespace ems_back.Repo.Repository
                     AttendeeCount = e.AttendeeCount,
                     Capacity = e.Capacity,
                     Image = e.Image,
-
                 })
 				.AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -102,7 +116,7 @@ namespace ems_back.Repo.Repository
                 .FirstOrDefaultAsync();
             if (existingEvent == null)
             {
-                return null;
+                throw new NotFoundException("Event not found");
             }
                 
             _mapper.Map(eventDto, existingEvent);
@@ -148,7 +162,6 @@ namespace ems_back.Repo.Repository
                     UserEmail = a.User.Email,
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
-                    ProfilePicture = a.User.ProfilePicture,
                     RegisteredAt = a.RegisteredAt,
                 })
                 .ToListAsync();
@@ -377,7 +390,6 @@ namespace ems_back.Repo.Repository
                     UserEmail = ea.User.Email,
                     UserName = ea.User.FirstName + " " + ea.User.LastName,
                     Status = ea.Status,
-                    ProfilePicture = ea.User.ProfilePicture,
                     RegisteredAt = ea.RegisteredAt,
                 })
                 .AsNoTracking()

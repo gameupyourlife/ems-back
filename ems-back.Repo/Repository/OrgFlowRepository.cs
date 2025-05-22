@@ -33,7 +33,7 @@ namespace ems_back.Repo.Repository
                 .Include(e => e.Actions)
                 .Select(e => new FlowTemplateResponseDto
                 {
-                    FlowTemplateId = e.FlowTemplateId,
+                    Id = e.FlowTemplateId,
                     Name = e.Name,
                     Description = e.Description,
                     OrganizationId = e.OrganizationId,
@@ -42,14 +42,14 @@ namespace ems_back.Repo.Repository
                     {
                         Id = t.Id,
                         Name = t.Name,
-                        Summary = t.Summary,
+                        Description = t.Summary,
                         Type = t.Type
                     }).ToList(),
                     Actions = e.Actions.Select(a => new ActionOverviewDto
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Summary = a.Summary,
+                        Description = a.Description,
                         Type = a.Type
                     }).ToList()
                 })
@@ -82,7 +82,7 @@ namespace ems_back.Repo.Repository
                 .Include(t => t.Actions)
                 .Select(t => new FlowTemplateResponseDto
                 {
-                    FlowTemplateId = t.FlowTemplateId,
+                    Id = t.FlowTemplateId,
                     Name = t.Name,
                     Description = t.Description,
                     OrganizationId = t.OrganizationId,
@@ -94,14 +94,14 @@ namespace ems_back.Repo.Repository
                     {
                         Id = tr.Id,
                         Name = tr.Name,
-                        Summary = tr.Summary,
+                        Description = tr.Summary,
                         Type = tr.Type
                     }).ToList(),
                     Actions = t.Actions.Select(a => new ActionOverviewDto
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Summary = a.Summary,
+                        Description = a.Description,
                         Type = a.Type
                     }).ToList()
                 })
@@ -114,7 +114,7 @@ namespace ems_back.Repo.Repository
 
         public async Task<FlowTemplateResponseDto> UpdateFlowTemplateAsync(FlowTemplateResponseDto updatedTemplate)
         {
-            var existing = await _dbContext.FlowTemplates.FindAsync(updatedTemplate.FlowTemplateId);
+            var existing = await _dbContext.FlowTemplates.FindAsync(updatedTemplate.Id);
             if (existing == null)
                 return null;
 
@@ -160,7 +160,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = a.CreatedAt,
                 FlowTemplateId = a.FlowTemplateId,
                 Name = a.Name,
-                Summary = a.Summary
+                Description = a.Description
             });
 
             return actionDtos;
@@ -181,7 +181,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = action.CreatedAt,
                 FlowTemplateId = action.FlowTemplateId,
                 Name = action.Name,
-                Summary = action.Summary
+                Description = action.Description
             };
         }
 
@@ -206,7 +206,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = action.CreatedAt,
                 FlowTemplateId = action.FlowTemplateId,
                 Name = action.Name,
-                Summary = action.Summary
+                Description = action.Description
             };
 
             return actionDto;
@@ -221,7 +221,7 @@ namespace ems_back.Repo.Repository
             existing.Type = dto.Type;
             existing.Details = dto.Details;  // JsonElement -> JSON-String
             existing.Name = dto.Name;
-            existing.Summary = dto.Summary;
+            existing.Description = dto. Description;
 
             await _dbContext.SaveChangesAsync();
 
@@ -233,7 +233,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = existing.CreatedAt,
                 FlowTemplateId = existing.FlowTemplateId,
                 Name = existing.Name,
-                Summary = existing.Summary
+                Description = existing.Description
             };
         }
 
@@ -271,7 +271,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = a.CreatedAt,
                 FlowTemplateId = a.FlowTemplateId,
                 Name = a.Name,
-                Summary = a.Summary
+                Description = a.Summary
             });
 
             return triggersDto;
@@ -292,7 +292,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = trigger.CreatedAt,
                 FlowTemplateId = trigger.FlowTemplateId,
                 Name = trigger.Name,
-                Summary = trigger.Summary
+                Description = trigger.Summary
             };
         }
 
@@ -317,7 +317,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = trigger.CreatedAt,
                 FlowTemplateId = trigger.FlowTemplateId,
                 Name = trigger.Name,
-                Summary = trigger.Summary
+                Description = trigger.Summary
             };
 
             return triggerDto;
@@ -332,7 +332,7 @@ namespace ems_back.Repo.Repository
             existing.Type = dto.Type;
             existing.Details = dto.Details ?? "{}"; // Ensure Details is not null
             existing.Name = dto.Name ?? existing.Name; // Fix for CS8601: Use existing.Name if dto.Name is null
-            existing.Summary = dto.Summary ?? existing.Summary; // Fix for CS8601: Use existing.Summary if dto.Summary is null
+            existing.Summary = dto.Description ?? existing.Summary; // Fix for CS8601: Use existing.Summary if dto.Summary is null
 
             await _dbContext.SaveChangesAsync();
 
@@ -344,7 +344,7 @@ namespace ems_back.Repo.Repository
                 CreatedAt = existing.CreatedAt,
                 FlowTemplateId = existing.FlowTemplateId,
                 Name = existing.Name,
-                Summary = existing.Summary
+                Description = existing.Summary
             };
         }
 

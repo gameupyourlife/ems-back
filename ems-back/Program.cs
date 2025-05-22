@@ -106,7 +106,6 @@ namespace ems_back
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IEventRepository, EventRepository>();
-            builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
@@ -190,8 +189,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 
