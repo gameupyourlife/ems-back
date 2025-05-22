@@ -1,6 +1,7 @@
 ﻿// Repository/MailTemplate/MailTemplateRepository.cs
 using AutoMapper;
 using ems_back.Repo.Data;
+using ems_back.Repo.DTOs.Email;
 using ems_back.Repo.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -140,5 +141,10 @@ namespace ems_back.Repo.Repository.MailTemplate
 			_logger.LogDebug("Template {TemplateId} exists: {Exists}", id, exists);
 			return exists;
 		}
-	}
+
+        public Task<IEnumerable<MailDto>> GetMailsForEventAsync(Guid orgId, Guid eventId)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

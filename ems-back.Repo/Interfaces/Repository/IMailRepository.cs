@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces.Repository
 {
-	public interface IMailRepository
-	{
-		Task<IEnumerable<MailDto>> GetMailsForEventAsync(Guid orgId, Guid eventId);
+    public interface IMailRepository
+    {
+        Task<IEnumerable<MailDto>> GetMailsForEventAsync(Guid orgId, Guid eventId);
         Task<bool> DeleteAsync(Guid id);
-		Task<bool> ExistsAsync(Guid id);
-	}
+        Task<bool> ExistsAsync(Guid id);
+    }
 }
