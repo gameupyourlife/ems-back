@@ -12,6 +12,7 @@ using ems_back.Repo.DTOs.Agenda;
 using System.Security.Claims;
 using System.Diagnostics.Eventing.Reader;
 using ems_back.Repo.Exceptions;
+using System.Data;
 
 namespace ems_back.Controllers
 {

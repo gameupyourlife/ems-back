@@ -10,10 +10,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Expressions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -305,12 +307,6 @@ namespace ems_back.Repo.Services
                 throw new NotFoundException("Event not found"); 
             }
 
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event with id {EventId} does not belong to organization with id {OrgId}", eventId, orgId);
-                throw new MismatchException("Given event is not in given organization");
-            }
-
             if (eventInfo.AttendeeCount >= eventInfo.Capacity)
             {
                 _logger.LogWarning("Event with id {EventId} is full", eventId);
@@ -332,14 +328,14 @@ namespace ems_back.Repo.Services
                 if (!isCreated)
                 {
                     _logger.LogWarning("Failed to add attendee to event with id {EventId}", eventId);
-                    return null;
+                    throw new DbUpdateException("Failed to add attendee to event");
                 }
             }
 
             catch (DbUpdateException ex)
             {
                 _logger.LogError(ex, "Error adding attendee to event with id {EventId}", eventId);
-                return null;
+                throw new DbUpdateException("Error adding attendee to event");
             }
 
             var user = await _userRepository.GetUserByIdAsync(attendeeDto.UserId);
