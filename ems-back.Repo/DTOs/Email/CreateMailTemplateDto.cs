@@ -21,5 +21,11 @@ namespace ems_back.Repo.DTOs.Email
 		public string Body { get; set; }
 
 		public string? Description { get; set; }
+
+		[Required] 
+		public required IEnumerable<Guid> Recipients { get; set; }
+
+
+
 	}
 }

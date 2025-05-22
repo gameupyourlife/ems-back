@@ -15,6 +15,7 @@ namespace ems_back.Repo.DTOs.Email
 		[StringLength(200)]
 		public string? Subject { get; set; }
 
+		public IEnumerable<Guid> Recipients { get; set; }
 
 		public string? Body { get; set; }
 		public string? Description { get; set; }

@@ -14,9 +14,6 @@ namespace ems_back.Repo.DTOs.Email
 		public string? Description { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public bool IsUserCreated { get; set; }
-		public Guid OrganizationId { get; set; }
-
-		// Optional: Include organization name
 		public string? OrganizationName { get; set; }
 	}
 }
