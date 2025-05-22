@@ -26,12 +26,11 @@ public class Mail
     public DateTime? ScheduledFor { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
 
-    [Required] 
-    public Guid CreatedBy { get; set; }
+    public Guid ? CreatedBy { get; set; }
 
     public Guid? UpdatedBy { get; set; }
 

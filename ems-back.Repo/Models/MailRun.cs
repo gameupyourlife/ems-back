@@ -6,15 +6,13 @@ public class MailRun
 
 {
     [Key]
-
     public Guid MainRunId { get; set; } = Guid.NewGuid();
 
     [Required]
-    [MaxLength(50)]
-    public Guid MailId { get; set; }
+    public required Guid MailId { get; set; }
 
     [Required]
-    public MailRunStatus Status { get; set; }
+    public required MailRunStatus Status { get; set; }
 
     [Required]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
