@@ -109,10 +109,12 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
-            builder.Services.AddScoped<IMailRepository, MailTemplateRepository>();
+            builder.Services.AddScoped<IMailTemplateRepository, MailTemplateRepository>();
+            builder.Services.AddScoped<IMailRunService, MailRunService>();
 
-			// Services
-			builder.Services.AddScoped<IAuthService, AuthService>();
+
+            // Services
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IMailService, Repo.Services.MailService>();
             builder.Services.AddScoped<IEventFlowService, EventFlowService>();
             builder.Services.AddScoped<IEventService, EventService>();

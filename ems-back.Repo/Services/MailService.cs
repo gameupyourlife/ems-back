@@ -14,11 +14,13 @@ namespace ems_back.Repo.Services
     public class MailService : IMailService
     {
         private readonly IMailRepository _mailRepository;
+        private readonly IEventService _eventService;
         private readonly ILogger<MailService> _logger;
 
-        public MailService(IMailRepository emailRepository, ILogger<MailService> logger)
+        public MailService(IMailRepository emailRepository, IEventService eventService, ILogger<MailService> logger)
         {
             _mailRepository = emailRepository;
+            _eventService = eventService;
             _logger = logger;
         }
 

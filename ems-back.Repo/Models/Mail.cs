@@ -28,7 +28,7 @@ namespace ems_back.Repo.Models
         public IEnumerable<Guid>? Recipients { get; set; }
 
         [Required]
-        public required bool SendToAllParticipants { get; set; }
+        public required bool sendToAllParticipants { get; set; }
 
         public DateTime? ScheduledFor { get; set; }
 

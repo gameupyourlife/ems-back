@@ -39,7 +39,7 @@ namespace ems_back.Repo.Repository
                     Body = m.Body,
                     CreatedAt = m.CreatedAt,
                     UpdatedAt = m.UpdatedAt,
-                    SendToAllParticipants = m.SendToAllParticipants,
+                    sendToAllParticipants = m.sendToAllParticipants,
                     IsUserCreated = m.IsUserCreated,
                 })
                 .AsNoTracking()
