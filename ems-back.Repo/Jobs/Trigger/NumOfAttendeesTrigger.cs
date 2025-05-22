@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
 
@@ -21,11 +22,13 @@ namespace ems_back.Repo.Jobs.Trigger
         Percentage
     }
 
-    public class NumOfAttendeesTrigger : ITrigger
+    public class NumOfAttendeesTrigger : BaseTrigger
     {
-        public TriggerType TriggerType => TriggerType.NumOfAttendees;
-        public NumOfAttendeesOperator Operator { get; set; }
-        public NumOfAttendeesValueType ValueType { get; set; }
+        [JsonPropertyName("operator")]
+        public required String Operator { get; set; }
+        [JsonPropertyName("valueType")]
+        public required String ValueType { get; set; }
+        [JsonPropertyName("value")]
         public required int Value { get; set; }
     }
 

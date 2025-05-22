@@ -7,8 +7,8 @@ using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Trigger
 {
-    public class RegistrationTrigger : ITrigger
+    public class RegistrationTrigger : BaseTrigger
     {
-        public TriggerType TriggerType => TriggerType.Registration;
+       public new static TriggerType TriggerType => TriggerType.Registration;
     }
 }

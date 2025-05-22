@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
+using ems_back.Repo.Models;
+using System.Text.Json.Serialization;
 
 namespace ems_back.Repo.Jobs.Trigger
 {
@@ -15,13 +17,11 @@ namespace ems_back.Repo.Jobs.Trigger
         On
     }
 
-    public class DateTrigger : ITrigger
+    public class DateTrigger : BaseTrigger
     {
-
-        public TriggerType TriggerType => TriggerType.Date;
-        public DateTime Value { get; set; }
-
+        [JsonPropertyName("operator")]
         public DateTriggerOperator Operator { get; set; }
-
+        [JsonPropertyName("value")]
+        public DateTime Value { get; set; }
     }
 }

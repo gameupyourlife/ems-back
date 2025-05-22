@@ -168,6 +168,9 @@ namespace ems_back
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
             });
 
+            //FlowRuns related Stuff
+            builder.Services.AddScoped<MapTriggers>();
+
             builder.Services.AddQuartz(opt =>
             {
                 opt.SchedulerId = "Scheduler-1";
@@ -195,7 +198,7 @@ namespace ems_back
                 {
                     t.ForJob(jobKey)
                      .WithIdentity("CheckFlow", "Default")
-                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(10).RepeatForever());
+                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(30).RepeatForever());
                 });
             });
 

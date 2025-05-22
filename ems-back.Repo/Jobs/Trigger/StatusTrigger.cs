@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
 
@@ -20,10 +21,11 @@ namespace ems_back.Repo.Jobs.Trigger
         Is,
         IsNot
     }
-    public class StatusTrigger : ITrigger
+    public class StatusTrigger : BaseTrigger
     {
-        public TriggerType TriggerType => TriggerType.Status;
+        [JsonPropertyName("operator")]
         public StausTriggerOperator Operator { get; set; }
+        [JsonPropertyName("value")]
         public StatusTriggerValue Value { get; set; }
     }
 
