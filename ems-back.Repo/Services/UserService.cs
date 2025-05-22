@@ -215,10 +215,10 @@ namespace ems_back.Services
         {
             try
             {
-                if (await _userRepository.GetNumberOfOrganizersAsync(id) <= 1)
+                if (await _userRepository.GetNumberOfOwnersAsync(id) <= 1)
                 {
-                    _logger.LogWarning("User {UserId} cannot be deleted because they are an organizer", id);
-                    throw new MissingRoleException("User cannot be deleted because they are an organizer");
+                    _logger.LogWarning("User {UserId} cannot be deleted because they are an owner", id);
+                    throw new MissingRoleException("User cannot be deleted because they are an owner");
                 }
 
                 // First delete from repository
@@ -342,12 +342,30 @@ namespace ems_back.Services
         {
             try
             {
-                User? user = null;
+                UserResponseDto userEntity; 
+
+                if (userId != null)
+                {
+                    userEntity = await _userRepository.GetUserByIdAsync(userId.Value);
+                    
+                }
+                else
+                {
+                    userEntity = await _userRepository.GetUserByEmailAsync(email); 
+                }
+
+                var orgId = userEntity.Organization.Id;
+                if (await _userRepository.GetNumberOfOwnersAsync(orgId) <= 1)
+                {
+                    _logger.LogWarning("User {UserId} cannot be deleted because he is the last owner", userId);
+                    throw new MissingRoleException("User cannot be deleted because he is the last owner");
+                }
+
+                User? user = null; // This 'user' variable remains unchanged
                 if (userId.HasValue)
                 {
                     user = await _userManager.FindByIdAsync(userId.Value.ToString());
                 }
-
                 else if (!string.IsNullOrEmpty(email))
                 {
                     user = await _userManager.FindByEmailAsync(email);
@@ -364,12 +382,10 @@ namespace ems_back.Services
                 {
                     _logger.LogError("Failed to delete user from Identity: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
                     return false;
-
                 }
                 _logger.LogInformation("Successfully deleted user with ID: {UserId} and Email: {Email}", user.Id, user.Email);
                 return true;
             }
-
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting user by Id or Email (UserId: {UserId}, Email: {Email})", userId, email);

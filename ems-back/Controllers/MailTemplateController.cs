@@ -83,7 +83,7 @@ namespace ems_back.Controllers
 			{
 				var template = await _mailTemplateService.GetTemplateAsync(id);
 
-				if (template == null || template.OrganizationId != organizationId)
+				if (template == null)
 				{
 					_logger.LogWarning("Template {TemplateId} not found in organization {OrganizationId}",
 						id, organizationId);
@@ -181,13 +181,6 @@ namespace ems_back.Controllers
 
 				var updatedTemplate = await _mailTemplateService.UpdateTemplateAsync(id, userId, dto);
 
-				if (updatedTemplate.OrganizationId != organizationId)
-				{
-					_logger.LogWarning("Template {TemplateId} does not belong to organization {OrganizationId}",
-						id, organizationId);
-					return NotFound();
-				}
-
 				_logger.LogInformation("Updated template {TemplateId}", id);
 				return Ok(updatedTemplate);
 			}
@@ -227,7 +220,7 @@ namespace ems_back.Controllers
 				}
 
 				var template = await _mailTemplateService.GetTemplateAsync(id);
-				if (template == null || template.OrganizationId != organizationId)
+				if (template == null)
 				{
 					_logger.LogWarning("Template {TemplateId} not found in organization {OrganizationId}",
 						id, organizationId);
