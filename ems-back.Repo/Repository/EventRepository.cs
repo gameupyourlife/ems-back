@@ -188,6 +188,8 @@ namespace ems_back.Repo.Repository
                 return false;
             }
 
+            await DecreaseAttendeeCount(eventId);
+
             _context.EventAttendees.Remove(attendee);
             await _context.SaveChangesAsync();
             return true;
@@ -368,6 +370,19 @@ namespace ems_back.Repo.Repository
         }
 
         private async Task<bool> IncreaseAttendeeCount(Guid eventId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+            eventEntity.AttendeeCount++;
+            _context.Events.Update(eventEntity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private async Task<bool> DecreaseAttendeeCount(Guid eventId)
         {
             var eventEntity = await _context.Events.FindAsync(eventId);
             if (eventEntity == null)
