@@ -214,6 +214,15 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<MailTemplate, MailTemplateResponseDto>()
 				.ForMember(dest => dest.IsUserCreated, opt => opt.MapFrom(src => src.isUserCreated));
 
+
+			//Mail Mappings
+
+			CreateMap<Mail, SimpleMailDto>();
+			CreateMap<CreateMailDto, Mail>();
+			CreateMap<UpdateMailDto, Mail>()
+				.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()
 			//	.ForMember(dest => dest.UserFullName,

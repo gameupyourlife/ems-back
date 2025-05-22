@@ -10,28 +10,27 @@ public class Mail
 
     [Required]
     [MaxLength(200)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [MaxLength(200)]
-    public string Subject { get; set; }
+    public required string Subject { get; set; }
 
     [Required]
     [Column(TypeName = "text")]
-    public string Body { get; set; }
+    public required string Body { get; set; }
 
     [Required]
-    public IEnumerable<Guid> Recipients { get; set; }
+    public required IEnumerable<Guid> Recipients { get; set; }
 
     public DateTime? ScheduledFor { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
 
-    [Required] 
-    public Guid CreatedBy { get; set; }
+    public Guid ? CreatedBy { get; set; }
 
     public Guid? UpdatedBy { get; set; }
 

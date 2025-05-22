@@ -14,5 +14,7 @@ namespace ems_back.Repo.DTOs.Email
 		public DateTime? ScheduledFor { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public Guid EventId { get; set; }
+
+		//Excluded Body because class just represent an Overview about a Mail not what was sent.
 	}
 }

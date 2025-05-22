@@ -14,18 +14,17 @@ namespace ems_back.Repo.DTOs.Email
 		public string Name { get; set; }
 
 		[Required]
-		[MaxLength(200)]
-		public string Subject { get; set; }
+		public required string Subject { get; set; }
 
 		[Required]
-		public string Body { get; set; }
+		public required string Body { get; set; }
 
 		[Required]
-		public IEnumerable<Guid> Recipients { get; set; }
+		public required IEnumerable<Guid> Recipients { get; set; }
 
 		public DateTime? ScheduledFor { get; set; }
 
 		[Required]
-		public Guid EventId { get; set; }
+		public required Guid EventId { get; set; }
 	}
 }

@@ -30,29 +30,30 @@ namespace ems_back.Repo.Repository
 
         public async Task<IEnumerable<EmailDto>> GetEventMails(Guid orgId, Guid eventId)
         {
-            var mails = await _context.Mail
-                .Where(m => m.EventId == eventId)
-                .Select(m => new EmailDto
-                {
-                    MailId = m.MailId,
-                    Subject = m.Subject,
-                    Body = m.Body,
-                    Recipients = m.Recipients,
-                    ScheduledFor = m.ScheduledFor,
-                    CreatedAt = m.CreatedAt,
-                    UpdatedAt = m.UpdatedAt,
-                    CreatedBy = m.CreatedBy,
-                    UpdatedBy = m.UpdatedBy,
+			//var mails = await _context.Mail
+			//    .Where(m => m.EventId == eventId)
+			//    .Select(m => new EmailDto
+			//    {
+			//        MailId = m.MailId,
+			//        Subject = m.Subject,
+			//        Body = m.Body,
+			//        Recipients = m.Recipients,
+			//        ScheduledFor = m.ScheduledFor,
+			//        CreatedAt = m.CreatedAt,
+			//        UpdatedAt = m.UpdatedAt,
+			//        CreatedBy = m.CreatedBy,
+			//        UpdatedBy = m.UpdatedBy,
 
-                })
-                .AsNoTracking()
-                .ToListAsync();
-            return mails;
+			//    })
+			//    .AsNoTracking()
+			//    .ToListAsync();
+			//return mails;
+			throw new NotImplementedException();
         }
 
         public Task<IEnumerable<EmailDto>> GetMailTemplates(Guid orgId)
         {
-            throw new NotImplementedException();
+	        throw new NotImplementedException();
         }
     }
 }
