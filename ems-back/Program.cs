@@ -21,8 +21,8 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using System.Net;
-using ems_back.Repo.Repository.MailTemplate;
-using ems_back.Repo.Services.ems_back.Repo.Service.MailTemplate;
+using ems_back.Repo.Repositories;
+
 
 namespace ems_back
 {
