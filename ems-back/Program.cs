@@ -22,6 +22,7 @@ using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using System.Net;
 using ems_back.Repo.Repositories;
+using ems_back.Emails;
 
 
 namespace ems_back
@@ -110,7 +111,6 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
             builder.Services.AddScoped<IMailTemplateRepository, MailTemplateRepository>();
-            builder.Services.AddScoped<IMailRunService, MailRunService>();
 
 
             // Services
@@ -124,9 +124,14 @@ namespace ems_back
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+            builder.Services.AddScoped<IMailRunService, MailRunService>();
 
-			// Identity Configuration - supports GUIDs for users and roles
-			builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
+            builder.Services.AddScoped<MailService>();
+
+            // Identity Configuration - supports GUIDs for users and roles
+            builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;

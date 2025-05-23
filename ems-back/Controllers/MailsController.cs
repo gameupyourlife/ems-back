@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Exceptions;
+using System.Security.Claims;
 
 namespace ems_back.Controllers
 {
@@ -134,5 +135,65 @@ namespace ems_back.Controllers
 
 			return NoContent();
 		}
-	}
+
+        // POST: api/org/{orgId}/events/{eventId}/mails/{mailId}/send
+        [HttpPost("{mailId}/send")]
+        [Authorize(Roles = 
+			$"{nameof(UserRole.Admin)}, " +
+            $"{nameof(UserRole.Owner)}, " +
+            $"{nameof(UserRole.Organizer)}, " +
+            $"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<bool>> SendMail(Guid orgId, Guid eventId, Guid mailId)
+		{
+            try
+            {
+                await _mailService.SendMailAsync(orgId, eventId, mailId);
+				
+                return Ok();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending mail {MailId} for event {EventId}", mailId, eventId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        // POST: api/org/{orgId}/events/{eventId}/mails/sendManual
+        [HttpPost("sendManual")]
+        [Authorize(Roles = 
+			$"{nameof(UserRole.Admin)}, " +
+			$"{nameof(UserRole.Owner)}, " +
+			$"{nameof(UserRole.Organizer)}, " +
+			$"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<bool>> SendMailManual(
+			Guid orgId, 
+			Guid eventId, 
+			[FromBody] CreateMailDto sendMailManualDto)
+		{
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+            try
+            {
+                _mailService.SendMailManualAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
+                return Ok();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending mail manually for event {EventId}", eventId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+    }
 }

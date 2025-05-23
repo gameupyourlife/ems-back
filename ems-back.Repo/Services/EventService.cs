@@ -50,8 +50,10 @@ namespace ems_back.Repo.Services
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null) return false;
             if (user.Role == UserRole.Admin) return true;
-            if (user.Organization.Id != orgId) return false;
-   
+
+            var orgUser = await _organizationUserRepository.GetAsync(orgId, userId);
+            if (orgUser == null) return false;
+
             return true;
         }
 

@@ -215,7 +215,14 @@ namespace ems_back.Services
         {
             try
             {
-                if (await _userRepository.GetNumberOfOwnersAsync(id) <= 1)
+                var userInfo = await _userRepository.GetUserByIdAsync(id);
+                if (userInfo == null)
+                {
+                    _logger.LogWarning("Delete failed: User not found with ID: {UserId}", id);
+                    return false;
+                }
+
+                if (await _userRepository.GetNumberOfOwnersAsync(id) <= 1 && userInfo.Role == UserRole.Owner)
                 {
                     _logger.LogWarning("User {UserId} cannot be deleted because they are an owner", id);
                     throw new MissingRoleException("User cannot be deleted because they are an owner");

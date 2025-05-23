@@ -1,5 +1,4 @@
 ﻿using ems_back.Repo.DTOs.Email;
-using ems_back.Repo.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +9,7 @@ namespace ems_back.Repo.Interfaces.Repository
 {
     public interface IMailRepository
     {
+        Task<MailDto> GetMailByIdAsync(Guid orgId, Guid eventId, Guid mailId);
         Task<IEnumerable<MailDto>> GetMailsForEventAsync(Guid orgId, Guid eventId);
-        Task<bool> DeleteAsync(Guid id);
-        Task<bool> ExistsAsync(Guid id);
     }
 }

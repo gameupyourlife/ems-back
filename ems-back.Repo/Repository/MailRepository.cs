@@ -47,5 +47,26 @@ namespace ems_back.Repo.Repository
 
             return mails;
         }
+
+        public async Task<MailDto> GetMailByIdAsync(Guid orgId, Guid eventId, Guid mailId)
+        {
+            var mail = await _context.Mail
+                .Where(m => m.EventId == eventId && m.Id == mailId)
+                .Select(m => new MailDto
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Subject = m.Subject,
+                    Body = m.Body,
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    sendToAllParticipants = m.sendToAllParticipants,
+                    IsUserCreated = m.IsUserCreated,
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            return mail;
+        }
     }
 }

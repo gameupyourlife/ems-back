@@ -30,6 +30,8 @@ namespace ems_back.Repo.Models
         [Column(TypeName = "jsonb")]
 		public required string Details { get; set; }
 
+        // enthält mailtemplate id und bool sendToNewAttendee
+
 		[Required]
         public required DateTime CreatedAt { get; set; }
 
