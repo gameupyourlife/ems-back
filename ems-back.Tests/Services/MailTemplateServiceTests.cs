@@ -173,7 +173,6 @@ namespace ems_back.Repo.Services.Tests
 				Name = "", // Still invalid but satisfies 'required'
 				Subject = "", // Still invalid but satisfies 'required'
 				Body = "", // Still invalid but satisfies 'required'
-				IsUserCreated = true, // Required
 				sendToAllParticipants = false // Required
 			};
 			SetupUserWithPermission();
@@ -333,7 +332,6 @@ namespace ems_back.Repo.Services.Tests
 				Body = "<p>Test Body</p>",
 				Recipients = new List<Guid> { Guid.NewGuid() },
 				ScheduledFor = DateTime.UtcNow.AddDays(1),
-				IsUserCreated = true,
 				sendToAllParticipants = false
 			};
 		}

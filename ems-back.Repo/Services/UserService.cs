@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ems_back.Repo.Exceptions;
+using ems_back.Repo.Repository;
 
 namespace ems_back.Services
 {
@@ -48,6 +49,17 @@ namespace ems_back.Services
 			_logger = logger;
         }
 
+        public async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+            if (user.Role == UserRole.Admin) return true;
+
+            var orgUser = await _orgMembershipRepo.GetAsync(orgId, userId);
+            if (orgUser == null) return false;
+
+            return true;
+        }
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             try

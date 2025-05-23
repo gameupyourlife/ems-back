@@ -188,6 +188,7 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<CreateMailDto, Mail>();
 
 			CreateMap<MailDto, Mail>();
+			CreateMap<CreateMailDto, Mail>();
 
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()

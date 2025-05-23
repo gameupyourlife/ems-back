@@ -10,6 +10,7 @@ using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Exceptions;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace ems_back.Controllers
 {
@@ -41,9 +42,16 @@ namespace ems_back.Controllers
 			$"{nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<IEnumerable<MailDto>>> GetMailsForEvent(Guid orgId, Guid eventId)
 		{
-			try
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            try
 			{
-				var mails = await _mailService.GetMailsForEventAsync(orgId, eventId);
+				var mails = await _mailService.GetMailsForEventAsync(orgId, eventId, Guid.Parse(userId));
 				return Ok(mails);
 			}
             catch (NotFoundException ex)
@@ -57,43 +65,174 @@ namespace ems_back.Controllers
             }
         }
 
-        // GET: api/org/{orgId}/events/{eventId}/mails/{mailId}
-        [HttpGet("{mailId}")]
+		// GET: api/org/{orgId}/events/{eventId}/mails/{mailId}
+		[HttpGet("{mailId}")]
+		[Authorize(Roles =
+			$"{nameof(UserRole.Admin)}, " +
+			$"{nameof(UserRole.Owner)}, " +
+			$"{nameof(UserRole.Organizer)}, " +
+			$"{nameof(UserRole.EventOrganizer)}")]
+
 		public async Task<ActionResult<MailDto>> GetMail(Guid orgId, Guid eventId, Guid mailId)
 		{
-			var mail = await _mailService.GetMailByIdAsync(orgId, eventId, mailId);
-			if (mail == null)
-				return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
 
-			return Ok(mail);
+            try
+			{
+				var mail = await _mailService.GetMailByIdAsync(orgId, eventId, mailId, Guid.Parse(userId));
+				if (mail == null) return NotFound();
+				return Ok(mail);
+			}
+			catch (MismatchException ex)
+			{
+				return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+			{
+				return NotFound(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error retrieving mail {MailId} for event {EventId}", mailId, eventId);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
-        // POST: api/org/{orgId}/events/{eventId}/mails
-        [HttpPost]
-		public async Task<ActionResult<CreateMailDto>> CreateMail(Guid orgId, Guid eventId, CreateMailDto createMailDto)
+		// POST: api/org/{orgId}/events/{eventId}/mails
+		[HttpPost]
+		[Authorize(Roles =
+			$"{nameof(UserRole.Admin)}, " +
+			$"{nameof(UserRole.Owner)}, " +
+			$"{nameof(UserRole.Organizer)}, " +
+			$"{nameof(UserRole.EventOrganizer)}")]
+		public async Task<ActionResult<CreateMailDto>> CreateMail(
+			Guid orgId,
+			Guid eventId,
+			CreateMailDto createMailDto)
 		{
-			throw new NotImplementedException("CreateMail is not implemented yet.");
-        }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            try
+			{
+				var result = await _mailService.CreateMailAsync(orgId, eventId, createMailDto, Guid.Parse(userId));
+				if (result == null)
+				{
+                    _logger.LogWarning("Mail creation failed for event {EventId}", eventId);
+                    return BadRequest("Mail creation failed");
+                }
+				return Ok(result);
+
+            }
+			catch (DbUpdateException ex)
+			{
+				return BadRequest(ex.Message);
+            }
+			catch (MismatchException ex)
+			{
+				return BadRequest(ex.Message);
+            }
+			catch (NotFoundException ex)
+			{
+				return NotFound(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating mail for event {EventId}", eventId);
+				return StatusCode(500, "Internal server error");
+			}
+		}
 
 		[HttpPut("{mailId}")]
-		public async Task<IActionResult> UpdateMail(
+		public async Task<ActionResult<MailDto>> UpdateMail(
 			[FromRoute] Guid orgId,
-            [FromRoute] Guid eventId, 
+			[FromRoute] Guid eventId,
 			[FromRoute] Guid mailId,
 			[FromBody] CreateMailDto updateMailDto)
 		{
-			throw new NotImplementedException("UpdateMail is not implemented yet.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
+            try
+			{
+				var mail = await _mailService.UpdateMailAsync(orgId, eventId, mailId, updateMailDto, Guid.Parse(userId));
+				if (mail == null)
+				{
+					throw new NotFoundException("Mail not found");
+                }
+                return Ok(mail);
+            }
+			catch (MismatchException ex)
+			{
+				return BadRequest(ex.Message);
+			}
+			catch (DbUpdateException ex)
+			{
+				return BadRequest(ex.Message);
+			}
+			catch (NotFoundException ex)
+			{
+				return NotFound(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating mail {MailId} for event {EventId}", mailId, eventId);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
-        // DELETE: api/org/{orgId}/events/{eventId}/mails/{mailId}
-        [HttpDelete("{mailId}")]
-		public async Task<IActionResult> DeleteMail(Guid orgId, Guid eventId, Guid mailId)
+		// DELETE: api/org/{orgId}/events/{eventId}/mails/{mailId}
+		[HttpDelete("{mailId}")]
+        [Authorize(Roles =
+            $"{nameof(UserRole.Admin)}, " +
+            $"{nameof(UserRole.Owner)}, " +
+            $"{nameof(UserRole.Organizer)}, " +
+            $"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<IActionResult> DeleteMail(Guid orgId, Guid eventId, Guid mailId)
 		{
-			var result = await _mailService.DeleteMailAsync(orgId, eventId, mailId);
-			if (!result)
-				return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
 
-			return NoContent();
+            try
+			{
+				var success = await _mailService.DeleteMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
+				if (!success) return NotFound();
+				return Ok(success);
+			}
+			catch (MismatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+			{
+				return NotFound(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting mail {MailId} for event {EventId}", mailId, eventId);
+				return StatusCode(500, "Internal server error");
+			}
 		}
 
 		// === MAIL RUNS ===
@@ -145,9 +284,16 @@ namespace ems_back.Controllers
             $"{nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<bool>> SendMail(Guid orgId, Guid eventId, Guid mailId)
 		{
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
             try
             {
-                await _mailService.SendMailAsync(orgId, eventId, mailId);
+                await _mailService.SendMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
 				
                 return Ok();
             }

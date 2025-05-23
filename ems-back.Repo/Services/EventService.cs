@@ -26,35 +26,23 @@ namespace ems_back.Repo.Services
 	public class EventService : IEventService
 	{
 		private readonly IEventRepository _eventRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
         private readonly IOrganizationUserRepository _organizationUserRepository;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
 
         public EventService(
 			IEventRepository eventRepository,
-			IUserRepository userRepository,
+			IUserService userService,
             IOrganizationUserRepository organizationUserRepository,
             IOrganizationRepository organizationRepository,
             ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
-            _userRepository = userRepository;
+            _userService = userService;
             _organizationUserRepository = organizationUserRepository;
             _organizationRepository = organizationRepository;
             _logger = logger;
-        }
-
-        private async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
-        {
-            var user = await _userRepository.GetUserByIdAsync(userId);
-            if (user == null) return false;
-            if (user.Role == UserRole.Admin) return true;
-
-            var orgUser = await _organizationUserRepository.GetAsync(orgId, userId);
-            if (orgUser == null) return false;
-
-            return true;
         }
 
         public async Task<bool> ExistsOrg(Guid orgId)
@@ -71,7 +59,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsAsync(Guid orgId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -99,7 +87,7 @@ namespace ems_back.Repo.Services
 
         public async Task<EventInfoDto> CreateEventAsync(Guid orgId, EventCreateDto eventDto, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -110,13 +98,7 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
                 throw new InvalidOperationException("Event start date cannot be in the past");
             }
-
-            var user = await _userRepository.GetUserByIdAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("User with id {UserId} does not exist", userId);
-                throw new NotFoundException("User not found");
-            }
+            var user = await _userService.GetUserByIdAsync(userId);
 
             var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) != null;
 
@@ -158,7 +140,7 @@ namespace ems_back.Repo.Services
 
         public async Task<EventInfoDto> GetEventAsync(Guid orgId, Guid eventid, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -182,7 +164,7 @@ namespace ems_back.Repo.Services
             EventUpdateDto eventDto,
             Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -193,7 +175,7 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> DeleteEventAsync(Guid orgId, Guid eventId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -204,7 +186,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<EventAttendeeDto>> GetAllEventAttendeesAsync(Guid orgId, Guid eventId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", eventId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -228,7 +210,7 @@ namespace ems_back.Repo.Services
             EventAttendeeCreateDto attendeeDto,
             Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -279,7 +261,7 @@ namespace ems_back.Repo.Services
                 throw new DbUpdateException("Error adding attendee to event");
             }
 
-            var user = await _userRepository.GetUserByIdAsync(attendeeDto.UserId);
+            var user = await _userService.GetUserByIdAsync(attendeeDto.UserId);
             var attendeeInfo = new EventAttendeeDto
             {
                 UserId = attendee.UserId,
@@ -295,7 +277,7 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid attendeeId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -313,13 +295,13 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
             }
 
-            if (!await IsUserInOrgOrAdmin(orgId, organizerId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, organizerId))
             {
                 _logger.LogWarning("User with id {OrganizerId} is not a member of organization with id {OrgId}", organizerId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -348,7 +330,7 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -359,7 +341,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId, Guid userId)
 		{
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -393,7 +375,7 @@ namespace ems_back.Repo.Services
             AgendaEntryCreateDto agendaEntryDto,
             Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -423,11 +405,6 @@ namespace ems_back.Repo.Services
             };
 
             var agendaId = await _eventRepository.AddAgendaEntryToEventAsync(agendaEntry);
-            if (agendaId == null)
-            {
-                _logger.LogWarning("Failed to add agenda point to event with id {EventId}", eventId);
-                throw new NotFoundException("Failed to add agenda point");
-            }
 
             agendaEntry.Id = agendaId;
             _logger.LogInformation("Agenda point added to event with id {EventId}", eventId);
@@ -441,7 +418,7 @@ namespace ems_back.Repo.Services
             AgendaEntryCreateDto agendaEntryDto,
             Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -487,7 +464,7 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> DeleteAgendaEntryAsync(Guid orgId, Guid eventId, Guid agendaId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
@@ -526,7 +503,7 @@ namespace ems_back.Repo.Services
 
         public async Task<IEnumerable<EventOverviewDto>> GetAllEventsByCreatorAsync(Guid orgId, Guid creatorId, Guid userId)
         {
-            if (!await IsUserInOrgOrAdmin(orgId, userId))
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");

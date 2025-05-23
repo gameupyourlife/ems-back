@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using ems_back.Tests.Utilities;
 using ems_back.Repo.Services;
 using ems_back.Repo.Interfaces.Repository;
+using ems_back.Repo.Interfaces.Service;
 
 namespace ems_back.Tests.Services
 {
@@ -19,7 +20,7 @@ namespace ems_back.Tests.Services
 		private readonly Mock<IEventRepository> _eventRepoMock;
         private readonly Mock<IOrganizationUserRepository> _orgRepoMock;
         private readonly Mock<IOrganizationRepository> _org2RepoMock;
-        private readonly Mock<IUserRepository> _userRepoMock;
+        private readonly Mock<IUserService> _userRepoMock;
         private readonly EventService _eventService;
 
         public EventServiceTests(ITestOutputHelper output)
@@ -28,7 +29,7 @@ namespace ems_back.Tests.Services
             _eventRepoMock = new Mock<IEventRepository>();
             _orgRepoMock = new Mock<IOrganizationUserRepository>();
             _org2RepoMock = new Mock<IOrganizationRepository>();
-            _userRepoMock = new Mock<IUserRepository>();
+            _userRepoMock = new Mock<IUserService>();
             _eventService = new EventService(
                 _eventRepoMock.Object,
                 _userRepoMock.Object,
