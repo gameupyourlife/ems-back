@@ -182,7 +182,7 @@ namespace ems_back.Controllers
             }
             try
             {
-                _mailService.SendMailManualAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
+                await _mailService.SendMailManualAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
                 return Ok();
             }
             catch (NotFoundException ex)

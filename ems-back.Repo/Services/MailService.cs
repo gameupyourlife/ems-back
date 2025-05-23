@@ -122,55 +122,44 @@ namespace ems_back.Repo.Services
 
         public async Task SendMailManualAsync(Guid orgId, Guid eventId, CreateMailDto mail, Guid userId)
         {
-            // Empfänger bestimmen
-            IEnumerable<Guid> recipientIds = mail.sendToAllParticipants
-                ? (await _eventService.GetAllEventAttendeesAsync(orgId, eventId, userId)).Select(p => p.UserId)
-                : mail.Recipients ?? throw new NotFoundException("No recipients found");
+            var email = new MimeMessage();
+            email.From.Add(new MailboxAddress("NextGenDevelopment", _smtp.Username));
+            email.Subject = mail.Subject;
+            email.Body = new TextPart("plain") { Text = mail.Body };
 
-            if (!recipientIds.Any())
+            IEnumerable<Guid> recipientIds;
+            if (mail.sendToAllParticipants)
             {
-                _logger.LogWarning("No recipients found");
-                return;
+                var participants = await _eventService.GetAllEventAttendeesAsync(orgId, eventId, userId);
+                recipientIds = participants.Select(p => p.UserId);
             }
-
-            // SMTP-Client initialisieren (einmal pro Aufruf)
-            using var smtp = new SmtpClient();
-
-            // Sicherheitseinstellungen (in Produktion proper validieren!)
-            smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-            await smtp.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_smtp.Username, _smtp.Password);
-
-            try
+            else
             {
-                foreach (var recipientId in recipientIds)
+                if (mail.Recipients == null)
                 {
-                    try
-                    {
-                        var user = await _userService.GetUserByIdAsync(recipientId);
-                        if (user?.Email == null) continue;
-
-                        // Neue Nachricht für jeden Empfänger
-                        var email = new MimeMessage();
-                        email.From.Add(new MailboxAddress("NextGenDevelopment", _smtp.Username));
-                        email.To.Add(new MailboxAddress($"{user.FirstName} {user.LastName}", user.Email));
-                        email.Subject = mail.Subject;
-                        email.Body = new TextPart("plain") { Text = mail.Body };
-
-                        await smtp.SendAsync(email);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, $"Error sending to recipient {recipientId}");
-                        // Fortfahren mit nächstem Empfänger
-                    }
+                    _logger.LogWarning("No recipients found");
+                    throw new NotFoundException("No recipients found");
                 }
+                recipientIds = mail.Recipients;
             }
-            finally
+
+            foreach (var recipientId in recipientIds)
             {
-                await smtp.DisconnectAsync(true);
+                var user = await _userService.GetUserByIdAsync(recipientId);
+                email.To.Add(new MailboxAddress(user.FirstName + " " + user.LastName, user.Email));
+
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+
+                    smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtp.Connect(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls);
+
+                    smtp.Authenticate(_smtp.Username, _smtp.Password);
+
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
             }
         }
     }
