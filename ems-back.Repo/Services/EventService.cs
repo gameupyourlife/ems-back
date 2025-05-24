@@ -28,20 +28,17 @@ namespace ems_back.Repo.Services
 	{
 		private readonly IEventRepository _eventRepository;
         private readonly IUserService _userService;
-        private readonly IOrganizationUserRepository _organizationUserRepository;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
 
         public EventService(
 			IEventRepository eventRepository,
 			IUserService userService,
-            IOrganizationUserRepository organizationUserRepository,
             IOrganizationRepository organizationRepository,
             ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
             _userService = userService;
-            _organizationUserRepository = organizationUserRepository;
             _organizationRepository = organizationRepository;
             _logger = logger;
         }
