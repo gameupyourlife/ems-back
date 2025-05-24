@@ -260,7 +260,7 @@ namespace ems_back.Controllers
             {
                 await _mailService.SendMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
 				
-                return Ok();
+                return Ok(true);
             }
             catch (NotFoundException ex)
             {
@@ -294,7 +294,7 @@ namespace ems_back.Controllers
             try
             {
                 await _mailService.SendMailWithDtoAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
-                return Ok();
+                return Ok(true);
             }
             catch (NotFoundException ex)
             {

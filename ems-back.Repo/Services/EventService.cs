@@ -94,11 +94,24 @@ namespace ems_back.Repo.Services
                 throw new MismatchException("User is not member of org");
             }
 
-            if (eventDto.Start < DateTime.UtcNow || eventDto.Start > eventDto.End)
+            if (eventDto.Start < DateTime.UtcNow)
             {
                 _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
                 throw new InvalidOperationException("Event start date cannot be in the past");
             }
+
+            if (eventDto.Start > eventDto.End)
+            {
+                _logger.LogWarning("Event start date {StartDate} is after the end date {EndDate}", eventDto.Start, eventDto.End);
+                throw new InvalidOperationException("Event start date cannot be after the end date");
+            }
+
+            if (eventDto.Capacity <= 0)
+            {
+                _logger.LogWarning("Event capacity {Capacity} must be greater than zero", eventDto.Capacity);
+                throw new InvalidOperationException("Event capacity must be greater than zero");
+            }
+
             var user = await _userService.GetUserByIdAsync(userId);
 
             var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) != null;
@@ -169,6 +182,24 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
+            }
+
+            if (eventDto.Start < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
+                throw new InvalidOperationException("Event start date cannot be in the past");
+            }
+
+            if (eventDto.Start > eventDto.End)
+            {
+                _logger.LogWarning("Event start date {StartDate} is after the end date {EndDate}", eventDto.Start, eventDto.End);
+                throw new InvalidOperationException("Event start date cannot be after the end date");
+            }
+
+            if (eventDto.Capacity <= 0)
+            {
+                _logger.LogWarning("Event capacity {Capacity} must be greater than zero", eventDto.Capacity);
+                throw new InvalidOperationException("Event capacity must be greater than zero");
             }
 
             return await _eventRepository.UpdateEventAsync(orgId, eventId, eventDto, userId);
