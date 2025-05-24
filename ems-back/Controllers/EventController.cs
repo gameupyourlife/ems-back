@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Diagnostics.Eventing.Reader;
 using ems_back.Repo.Exceptions;
 using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ems_back.Controllers
 {
@@ -497,13 +498,13 @@ namespace ems_back.Controllers
                 return Ok(isCreated);
 
             }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (NotFoundException ex)
             {
                 return NotFound(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
             }
             catch (MismatchException ex)
             {

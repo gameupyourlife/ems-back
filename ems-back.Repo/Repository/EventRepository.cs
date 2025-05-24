@@ -214,7 +214,7 @@ namespace ems_back.Repo.Repository
                 UserId = organizerId
             };
 
-            eventEntity.Organizers.Add(eventOrganizer);
+            _context.Add(eventOrganizer);
             await _context.SaveChangesAsync();
             return true;
         }

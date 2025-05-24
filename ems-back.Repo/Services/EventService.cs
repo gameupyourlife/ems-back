@@ -1,6 +1,7 @@
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
+using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Exceptions;
 using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
@@ -93,11 +94,24 @@ namespace ems_back.Repo.Services
                 throw new MismatchException("User is not member of org");
             }
 
-            if (eventDto.Start < DateTime.UtcNow || eventDto.Start > eventDto.End)
+            if (eventDto.Start < DateTime.UtcNow)
             {
                 _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
                 throw new InvalidOperationException("Event start date cannot be in the past");
             }
+
+            if (eventDto.Start > eventDto.End)
+            {
+                _logger.LogWarning("Event start date {StartDate} is after the end date {EndDate}", eventDto.Start, eventDto.End);
+                throw new InvalidOperationException("Event start date cannot be after the end date");
+            }
+
+            if (eventDto.Capacity <= 0)
+            {
+                _logger.LogWarning("Event capacity {Capacity} must be greater than zero", eventDto.Capacity);
+                throw new InvalidOperationException("Event capacity must be greater than zero");
+            }
+
             var user = await _userService.GetUserByIdAsync(userId);
 
             var attends = await _eventRepository.GetEventAttendeeByIdAsync(orgId, userId) != null;
@@ -168,6 +182,24 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
                 throw new MismatchException("User is not member of org");
+            }
+
+            if (eventDto.Start < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Event start date {StartDate} is in the past", eventDto.Start);
+                throw new InvalidOperationException("Event start date cannot be in the past");
+            }
+
+            if (eventDto.Start > eventDto.End)
+            {
+                _logger.LogWarning("Event start date {StartDate} is after the end date {EndDate}", eventDto.Start, eventDto.End);
+                throw new InvalidOperationException("Event start date cannot be after the end date");
+            }
+
+            if (eventDto.Capacity <= 0)
+            {
+                _logger.LogWarning("Event capacity {Capacity} must be greater than zero", eventDto.Capacity);
+                throw new InvalidOperationException("Event capacity must be greater than zero");
             }
 
             return await _eventRepository.UpdateEventAsync(orgId, eventId, eventDto, userId);
@@ -320,12 +352,35 @@ namespace ems_back.Repo.Services
             }
 
             var organizer = await _eventRepository.GetEventOrganizerAsync(eventId, organizerId);
-            if (organizer != null) {
+            if (organizer != null)
+            {
                 _logger.LogWarning("Event organizer with id {OrganizerId} already exists for event with id {EventId}", organizerId, eventId);
                 throw new AlreadyExistsException("Event organizer already exists for this event");
             }
 
-            return await _eventRepository.AddEventOrganizerAsync(orgId, eventId, organizerId);
+            var isAdded = await _eventRepository.AddEventOrganizerAsync(orgId, eventId, organizerId);
+            if (!isAdded)
+            {
+                _logger.LogWarning("Event organizer with id {OrganizerId} could not be added to event with id {EventId}", organizerId, eventId);
+                throw new DbUpdateException("Event organizer could not be added");
+            }
+
+            var roleUpdate = new UserUpdateRoleDto
+            {
+                userId = organizerId,
+                OrganizationId = orgId,
+                newRole = UserRole.EventOrganizer
+            };
+
+            var isRoleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
+            if (!isRoleUpdated)
+            {
+                _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}", organizerId);
+                await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
+                throw new MismatchException("Event organizer role could not be updated");
+            }
+
+            return isRoleUpdated;
         }
 
         public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
@@ -336,7 +391,29 @@ namespace ems_back.Repo.Services
                 throw new MismatchException("User is not member of org");
             }
 
-            return await _eventRepository.RemoveEventOrganizerAsync(orgId, eventId, organizerId);
+            var isRemoved = await _eventRepository.RemoveEventOrganizerAsync(orgId, eventId, organizerId);
+            if (!isRemoved)
+            {
+                _logger.LogWarning("Organizer could not be removed");
+                throw new MismatchException("Organizer could not be removed");
+            }
+
+            var roleUpdate = new UserUpdateRoleDto
+            {
+                userId = organizerId,
+                OrganizationId = orgId,
+                newRole = UserRole.EventOrganizer
+            };
+
+            var isroleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
+            if (!isroleUpdated)
+            {
+                _logger.LogWarning("Event organizer role could not be updated");
+                await AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
+                throw new MismatchException("Event organizer role could not be updated");
+            }
+
+            return isroleUpdated;
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId, Guid userId)
