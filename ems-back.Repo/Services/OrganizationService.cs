@@ -154,7 +154,7 @@ namespace ems_back.Services
 					userId, organizationId);
 				throw new UnauthorizedAccessException("Insufficient permissions");
 			}
-			return await _organizationRepository.DeleteOrganizationAsync(userId, organizationId);
+			return await _organizationRepository.DeleteOrganizationAsync(organizationId, userId);
 		}
 		//admin,owner, 
 		public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId,Guid userId)

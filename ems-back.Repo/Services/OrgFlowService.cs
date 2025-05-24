@@ -26,12 +26,12 @@ namespace ems_back.Repo.Services
     {
         private readonly IOrgFlowRepository _orgFlowRepository;
         private readonly ILogger<EventService> _logger;
-        private IOrgFlowRepository @object;
         private readonly IMapper _mapper;
 
         public OrgFlowService(
             IOrgFlowRepository orgFlowRepository,
-            ILogger<EventService> logger, IMapper mapper)
+            ILogger<EventService> logger, 
+            IMapper mapper)
         {
             _orgFlowRepository = orgFlowRepository;
             _logger = logger;

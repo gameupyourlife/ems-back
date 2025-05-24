@@ -1,52 +1,59 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using ems_back.Repo.Models;
 
-public class Mail
+namespace ems_back.Repo.Models
 {
+    public class Mail
+    {
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Key]
-    public Guid MailId { get; set; } = Guid.NewGuid();
+        [Required]
+        [MaxLength(200)]
+        public required string Name { get; set; }
 
-    [Required]
-    [MaxLength(200)]
-    public required string Name { get; set; }
+        [Required]
+        [MaxLength(200)]
+        public required string Subject { get; set; }
 
-    [Required]
-    [MaxLength(200)]
-    public required string Subject { get; set; }
+        [Required]
+        [Column(TypeName = "text")]
+        public required string Body { get; set; }
 
-    [Required]
-    [Column(TypeName = "text")]
-    public required string Body { get; set; }
+        public string? Description { get; set; }
 
-    [Required]
-    public required IEnumerable<Guid> Recipients { get; set; }
+        [Required]
+        public required bool IsUserCreated { get; set; }
 
-    public DateTime? ScheduledFor { get; set; }
+        public IEnumerable<Guid>? Recipients { get; set; }
 
-    [Required]
-    public DateTime CreatedAt { get; set; }
+        [Required]
+        public required bool sendToAllParticipants { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+        public DateTime? ScheduledFor { get; set; }
 
-    [Required] 
-    public Guid CreatedBy { get; set; }
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Guid? UpdatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
-    [Required]
-    public Guid EventId { get; set; }
+        public Guid? CreatedBy { get; set; }
 
-    // for navigation:
+        public Guid? UpdatedBy { get; set; }
 
-    [ForeignKey("EventId")]
-    public virtual Event? Event { get; set; }
+        [Required]
+        public Guid EventId { get; set; }
 
-    [ForeignKey("CreatedBy")]
-    public virtual User? Creator { get; set; }
+        // for navigation:
 
-    [ForeignKey("UpdatedBy")]
-    public virtual User? Updater { get; set; }
-    public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
+        [ForeignKey("EventId")]
+        public virtual Event? Event { get; set; }
+
+        [ForeignKey("CreatedBy")]
+        public virtual User? Creator { get; set; }
+
+        [ForeignKey("UpdatedBy")]
+        public virtual User? Updater { get; set; }
+        public virtual ICollection<MailRun> MailRuns { get; set; } = new List<MailRun>();
+    }
 }

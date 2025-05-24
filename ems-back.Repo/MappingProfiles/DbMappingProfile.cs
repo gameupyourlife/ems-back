@@ -8,6 +8,7 @@ using AutoMapper;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.DTOs.Email;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowsRun;
@@ -88,14 +89,14 @@ namespace ems_back.Repo.MappingProfiles
 				.ForMember(dest => dest.OrganizationId, opt => opt.MapFrom(src => src.OrganizationId))
 				.ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
 
-            CreateMap<EventUpdateDto, Event>();
+			CreateMap<EventUpdateDto, Event>();
 
-            CreateMap<Event, EventOverviewDto>()
+			CreateMap<Event, EventOverviewDto>()
 				.ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count));
 
-            // Agenda mappings
+			// Agenda mappings
 
-            CreateMap<AgendaEntryDto, AgendaEntry>()
+			CreateMap<AgendaEntryDto, AgendaEntry>()
 				.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
@@ -172,6 +173,19 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<FlowTemplate, FlowTemplateResponseDto>();
 
+			//Mail-template Mappings
+			CreateMap<CreateMailDto, MailTemplate>();
+			CreateMap<MailTemplate, MailDto>()
+				.ForMember(dest => dest.IsUserCreated, opt => opt.MapFrom(src => src.isUserCreated));
+
+
+			//Mail Mappings
+
+			CreateMap<Mail, MailDto>();
+			CreateMap<CreateMailDto, Mail>();
+
+			CreateMap<MailDto, Mail>();
+			CreateMap<CreateMailDto, Mail>();
 
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()

@@ -42,12 +42,11 @@ namespace ems_back.Repo.Repository
                     Start = e.Start,
                     Location = e.Location,
                     Image = e.Image,
-                    AttendeeCount = e.Attendees.Count,
+                    AttendeeCount = e.AttendeeCount,
                     Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })
-
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -81,6 +80,7 @@ namespace ems_back.Repo.Repository
 		{
             var eventEntity = await _context.Events
                 .Where(e => e.OrganizationId == orgId && e.Id == eventId)
+
                 .Select(e => new EventInfoDto
                 {
 
@@ -187,6 +187,8 @@ namespace ems_back.Repo.Repository
             {
                 return false;
             }
+
+            await DecreaseAttendeeCount(eventId);
 
             _context.EventAttendees.Remove(attendee);
             await _context.SaveChangesAsync();
@@ -375,6 +377,19 @@ namespace ems_back.Repo.Repository
                 return false;
             }
             eventEntity.AttendeeCount++;
+            _context.Events.Update(eventEntity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private async Task<bool> DecreaseAttendeeCount(Guid eventId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+            eventEntity.AttendeeCount--;
             _context.Events.Update(eventEntity);
             await _context.SaveChangesAsync();
             return true;
