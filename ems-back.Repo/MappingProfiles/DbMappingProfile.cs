@@ -165,9 +165,6 @@ namespace ems_back.Repo.MappingProfiles
 
 
 			CreateMap<FlowsRun, FlowsRunResponseDto>();
-			CreateMap<FlowsRunCreateDto, FlowsRun>()
-				.ForMember(dest => dest.Status, opt => opt.MapFrom(src => FlowRunStatus.Pending))
-				.ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => DateTime.UtcNow));
 
 
 			CreateMap<FlowTemplateCreateDto, FlowTemplate>()
