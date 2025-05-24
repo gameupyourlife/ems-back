@@ -240,30 +240,6 @@ namespace ems_back.Controllers
 			}
 		}
 
-		[HttpGet("{mailId}/runs")]
-		public async Task<ActionResult<IEnumerable<MailRunDto>>> GetMailRunsForMail(Guid orgId, Guid eventId, Guid mailId)
-		{
-			throw new NotImplementedException("This endpoint is not implemented yet. Please implement it before using it.");
-        }
-
-		[HttpGet("{mailId}/runs/{runId}")]
-		public async Task<ActionResult<MailRunDto>> GetMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
-		{
-			throw new NotImplementedException("This endpoint is not implemented yet. Please implement it before using it.");
-        }
-
-		[HttpPost("{mailId}/runs")]
-		public async Task<ActionResult<MailRunDto>> CreateMailRun(Guid orgId, Guid eventId, Guid mailId, CreateMailRunDto createDto)
-		{
-			throw new NotImplementedException("This endpoint is not implemented yet");
-		}
-
-		[HttpDelete("{mailId}/runs/{runId}")]
-		public async Task<IActionResult> DeleteMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
-		{
-            throw new NotImplementedException("This endpoint is not implemented yet");
-        }
-
         // POST: api/org/{orgId}/events/{eventId}/mails/{mailId}/send
         [HttpPost("{mailId}/send")]
         [Authorize(Roles = 
@@ -297,8 +273,8 @@ namespace ems_back.Controllers
             }
         }
 
-        // POST: api/org/{orgId}/events/{eventId}/mails/sendManual
-        [HttpPost("sendManual")]
+        // POST: api/org/{orgId}/events/{eventId}/mails/send
+        [HttpPost("send")]
         [Authorize(Roles = 
 			$"{nameof(UserRole.Admin)}, " +
 			$"{nameof(UserRole.Owner)}, " +
@@ -317,7 +293,7 @@ namespace ems_back.Controllers
             }
             try
             {
-                await _mailService.SendMailManualAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
+                await _mailService.SendMailWithDtoAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
                 return Ok();
             }
             catch (NotFoundException ex)
