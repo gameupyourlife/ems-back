@@ -39,5 +39,6 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<bool> DeleteUserByIdOrEmailAsync(Guid? userId, string? email);
 
 		Task HandleAutomaticOrganizationMembership(string email);
-	}
+        Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId);
+    }
 }
