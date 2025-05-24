@@ -69,5 +69,15 @@ namespace ems_back.Repo.Repository
 				                ou.OrganizationId == organizationId &&
 				                ou.UserRole == UserRole.Owner);
 		}
+
+		public async Task UpdateAsync(OrganizationUser membership)
+		{
+			if (membership == null)
+				throw new ArgumentNullException(nameof(membership));
+
+			_context.OrganizationUsers.Update(membership);
+			await _context.SaveChangesAsync();
+
+		}
 	}
 }
