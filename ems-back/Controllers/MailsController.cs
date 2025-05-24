@@ -153,7 +153,12 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPut("{mailId}")]
-		public async Task<ActionResult<MailDto>> UpdateMail(
+        [Authorize(Roles =
+            $"{nameof(UserRole.Admin)}, " +
+            $"{nameof(UserRole.Owner)}, " +
+            $"{nameof(UserRole.Organizer)}, " +
+            $"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<MailDto>> UpdateMail(
 			[FromRoute] Guid orgId,
 			[FromRoute] Guid eventId,
 			[FromRoute] Guid mailId,
@@ -235,45 +240,29 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// === MAIL RUNS ===
-
 		[HttpGet("{mailId}/runs")]
 		public async Task<ActionResult<IEnumerable<MailRunDto>>> GetMailRunsForMail(Guid orgId, Guid eventId, Guid mailId)
 		{
-			var runs = await _mailRunService.GetMailRunsForMailAsync(orgId, eventId, mailId);
-			return Ok(runs);
-		}
+			throw new NotImplementedException("This endpoint is not implemented yet. Please implement it before using it.");
+        }
 
 		[HttpGet("{mailId}/runs/{runId}")]
 		public async Task<ActionResult<MailRunDto>> GetMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
 		{
-			var run = await _mailRunService.GetMailRunByIdAsync(orgId, eventId, mailId, runId);
-			if (run == null)
-				return NotFound();
-
-			return Ok(run);
-		}
+			throw new NotImplementedException("This endpoint is not implemented yet. Please implement it before using it.");
+        }
 
 		[HttpPost("{mailId}/runs")]
 		public async Task<ActionResult<MailRunDto>> CreateMailRun(Guid orgId, Guid eventId, Guid mailId, CreateMailRunDto createDto)
 		{
-			var result = await _mailRunService.CreateMailRunAsync(orgId, eventId, mailId, createDto);
-			return CreatedAtAction(
-				nameof(GetMailRun),
-				new { orgId, eventId, mailId, runId = result.MailRunId },
-				result
-			);
+			throw new NotImplementedException("This endpoint is not implemented yet");
 		}
 
 		[HttpDelete("{mailId}/runs/{runId}")]
 		public async Task<IActionResult> DeleteMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
 		{
-			var success = await _mailRunService.DeleteMailRunAsync(orgId, eventId, mailId, runId);
-			if (!success)
-				return NotFound();
-
-			return NoContent();
-		}
+            throw new NotImplementedException("This endpoint is not implemented yet");
+        }
 
         // POST: api/org/{orgId}/events/{eventId}/mails/{mailId}/send
         [HttpPost("{mailId}/send")]
