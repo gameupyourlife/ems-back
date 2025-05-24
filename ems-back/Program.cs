@@ -142,8 +142,8 @@ namespace ems_back
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+            });
+            /*.AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -166,10 +166,11 @@ namespace ems_back
                 options.AddPolicy("RequireEventOrganizerRole", policy => policy.RequireRole("EVENT-ORGANIZER"));
                 options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("ORGANIZER"));
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
-            });
+            });*/
 
             //FlowRuns related Stuff
             builder.Services.AddScoped<MapTriggers>();
+            builder.Services.AddScoped<CheckTriggers>();
 
             builder.Services.AddQuartz(opt =>
             {
@@ -226,8 +227,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.MapControllers();
 

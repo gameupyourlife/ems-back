@@ -8,11 +8,13 @@ namespace ems_back.Repo.Jobs
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly MapTriggers _mapTriggers;
+        private readonly CheckTriggers _checkTriggers;
 
-        public CheckFlowsJob(ApplicationDbContext dbContext, MapTriggers mapTriggers)
+        public CheckFlowsJob(ApplicationDbContext dbContext, MapTriggers mapTriggers, CheckTriggers checkTriggers)
         {
             _dbContext = dbContext;
             _mapTriggers = mapTriggers;
+            _checkTriggers = checkTriggers;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -20,8 +22,11 @@ namespace ems_back.Repo.Jobs
             try
             {
                 var mappedTriggers = await _mapTriggers.GetMappedTriggersAsync();
+                
+                // Log the number of triggers found
                 Console.WriteLine($"[Quartz] Anzahl gefundener Trigger: {mappedTriggers.Count}");
 
+                // Log the details of each trigger
                 foreach (var trigger in mappedTriggers)
                 {
                     Console.WriteLine($"Trigger ID: {trigger.Id}");
@@ -49,6 +54,9 @@ namespace ems_back.Repo.Jobs
 
                     Console.WriteLine(new string('-', 60));
                 }
+
+                // Check if trigger conditions are met
+                var checkedTriggers = await  _checkTriggers.CheckTriggersAsync(mappedTriggers);
             }
             catch (Exception ex)
             {
