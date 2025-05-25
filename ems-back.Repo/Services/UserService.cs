@@ -60,7 +60,21 @@ namespace ems_back.Services
 
             return true;
         }
-        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+
+		public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
+		{
+			try
+			{
+				return await _userRepository.GetUserByIdAsync(id);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting user by ID: {UserId}", id);
+				throw;
+			}
+		
+		}
+		public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             try
             {
@@ -145,14 +159,18 @@ namespace ems_back.Services
         {
             try
             {
-                // First update in repository
-                var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
+	            _logger.LogInformation("Starting user update for ID: {UserId}", id);
 
-                // Then update in Identity if needed
-                var user = await _userManager.FindByIdAsync(id.ToString());
+				// First update in repository
+				var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
+				_logger.LogDebug("Repository update completed for user ID: {UserId}", id);
+
+				// Then update in Identity if needed
+				var user = await _userManager.FindByIdAsync(id.ToString());
                 if (user != null)
                 {
-                    user.FirstName = userDto.FirstName ?? user.FirstName;
+	                _logger.LogDebug("Found Identity user for ID: {UserId}", id);
+					user.FirstName = userDto.FirstName ?? user.FirstName;
                     user.LastName = userDto.LastName ?? user.LastName;
                     user.ProfilePicture = userDto.ProfilePicture ?? user.ProfilePicture;
 
@@ -160,21 +178,27 @@ namespace ems_back.Services
                     var updateResult = await _userManager.UpdateAsync(user);
                     if (!updateResult.Succeeded)
                     {
-                        throw new InvalidOperationException(
-                            string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+	                    var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+	                    _logger.LogError("Identity update failed for user ID: {UserId}. Errors: {Errors}", id, errors);
+	                    throw new InvalidOperationException($"Identity update failed: {errors}");
                     }
 
-
+                    _logger.LogDebug("Identity update successful for user ID: {UserId}", id);
+                }
+                else
+                {
+	                _logger.LogWarning("User not found in Identity store for ID: {UserId}", id);
                 }
 
+                _logger.LogInformation("Successfully updated user with ID: {UserId}", id);
                 return updatedUser;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating user with ID: {UserId}", id);
-                throw;
+	            _logger.LogError(ex, "Error updating user with ID: {UserId}", id);
+	            throw;
             }
-        }
+		}
 
         //User Reset Password 
         public async Task ResetPasswordAsync(PasswordResetDto resetDto)

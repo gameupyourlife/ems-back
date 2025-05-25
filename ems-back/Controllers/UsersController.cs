@@ -55,7 +55,7 @@ namespace ems_back.Controllers
 
         // PUT: api/users/{userId}
         [Authorize]
-        [HttpPut("{userId}")]
+        [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try
