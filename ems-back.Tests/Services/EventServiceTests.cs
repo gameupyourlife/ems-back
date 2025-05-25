@@ -22,8 +22,9 @@ namespace ems_back.Tests.Services
         private readonly Mock<IUserService> _userServiceMock = new();
         private readonly Mock<ILogger<EventService>> _loggerMock = new();
         private readonly EventService _eventService;
+        private readonly Mock<IOrganizationService> _orgServiceMock = new();
 
-        public EventServiceTests(ITestOutputHelper output)
+		public EventServiceTests(ITestOutputHelper output)
         {
             _report = new TestReportGenerator(output);
 
@@ -31,7 +32,7 @@ namespace ems_back.Tests.Services
                 _eventRepoMock.Object,
                 _userServiceMock.Object,
                 _orgRepoMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,_orgServiceMock.Object
             );
         }
 
@@ -665,9 +666,15 @@ namespace ems_back.Tests.Services
 
             _eventRepoMock.Setup(r => r.AddEventOrganizerAsync(orgId, eventId, organizerId)).ReturnsAsync(true);
 
-            _userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
+			//_userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
+			_orgServiceMock.Setup(s => s.UpdateUserRoleAsync(
+					It.IsAny<Guid>(),  // currentUserId
+					It.IsAny<Guid>(),  // orgId
+					organizerId,       // targetUserId
+					UserRole.EventOrganizer))  // newRole
+				.ReturnsAsync(new RoleUpdateResult(true, "Role updated successfully"));
 
-            var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
+			var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
 
             Assert.True(result);
         }

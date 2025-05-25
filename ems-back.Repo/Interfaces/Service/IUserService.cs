@@ -20,18 +20,10 @@ namespace ems_back.Repo.Interfaces.Service
 		//specialized queries
 		Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId);
 
-
 		//Testing
 		Task<bool> PerformRestrictedAdminAction(Guid userId);
 
-
-
-
-
 		Task<UserResponseDto> GetUserByEmailAsync(string email);
-
-	
-
 
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
 
