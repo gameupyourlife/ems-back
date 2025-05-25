@@ -20,90 +20,41 @@ namespace ems_back.Repo.Jobs
         {
             var results = new List<(Guid FlowId, bool IsTriggered)>();
 
-            foreach (var trigger in triggers)
+            // Gruppiere nur Trigger mit gültiger FlowId
+            var groupedByFlow = triggers
+                .Where(t => t.FlowId.HasValue)
+                .GroupBy(t => t.FlowId!.Value); // FlowId ist hier garantiert nicht null
+
+            foreach (var group in groupedByFlow)
             {
-                //bool isTriggered = false;
+                bool allMet = true;
 
-                switch (trigger.TriggerType)
+                foreach (var trigger in group)
                 {
-                    case TriggerType.Date:
-                        if (trigger is DateTrigger dateTrigger)
-                        {
-                            if (IsDateTriggerMet(dateTrigger))
-                            {
-                                Console.WriteLine($"[DateTrigger] Flow {dateTrigger.FlowId} wird ausgelöst.");
-                                // TODO: Flow starten
-                            }
-                            else
-                            {
-                                Console.WriteLine($"[DateTrigger] Noch nicht erfüllt: {dateTrigger.FlowId}");
-                            }
-                        }
-                        break;
-                    case TriggerType.NumOfAttendees
-                    :
-                        Console.WriteLine($"[NumOfAttendeesTrigger] Flow {trigger.FlowId} wird ausgelöst.");
-                        break;
-                    case TriggerType.Status:
-                        Console.WriteLine($"[StatusTrigger] Flow {trigger.FlowId} wird ausgelöst.");
-                        break;
-                    case TriggerType.Registration:
-                        Console.WriteLine($"[RegistrationTrigger] Flow {trigger.FlowId} wird ausgelöst.");
-                        break;
+                    bool isMet = trigger.TriggerType switch
+                    {
+                        TriggerType.Date => trigger is DateTrigger dt && IsDateTriggerMet(dt),
+                        TriggerType.RelativeDate => trigger is RelativeDateTrigger rdt && await IsRelativeDateTriggerMetAsync(rdt),
+                        TriggerType.NumOfAttendees => trigger is NumOfAttendeesTrigger nat && await IsNumOfAttendeesTriggerMetAsync(nat),
+                        TriggerType.Status => trigger is StatusTrigger st && await IsStatusTriggerMetAsync(st),
+                        _ => false
+                    };
 
-                    case TriggerType.RelativeDate:
-                        if (trigger is RelativeDateTrigger relativeTrigger)
-                        {
-                            if (await IsRelativeDateTriggerMetAsync(relativeTrigger))
-                            {
-                                Console.WriteLine($"[RelativeDateTrigger] Flow {relativeTrigger.FlowId} wird ausgelöst.");
-                                // TODO: Flow starten
-                            }
-                            else
-                            {
-                                Console.WriteLine($"[RelativeDateTrigger] Noch nicht erfüllt: {relativeTrigger.FlowId}");
-                            }
-                        }
+                    if (!isMet)
+                    {
+                        allMet = false;
                         break;
-
-                    /*case TriggerType.NumOfAttendees:
-                        if (trigger is NumOfAttendeesTrigger numTrigger)
-                        {
-                            if (IsNumOfAttendeesTriggerMet(numTrigger))
-                            {
-                                Console.WriteLine($"[NumOfAttendeesTrigger] Flow {numTrigger.FlowId} wird ausgelöst.");
-                            }
-                            else
-                            {
-                                Console.WriteLine($"[NumOfAttendeesTrigger] Noch nicht erfüllt: {numTrigger.FlowId}");
-                            }
-                        }
-                        break;
-
-                    case TriggerType.Status:
-                        if (trigger is StatusTrigger statusTrigger)
-                        {
-                            if (IsStatusTriggerMet(statusTrigger))
-                            {
-                                Console.WriteLine($"[StatusTrigger] Flow {statusTrigger.FlowId} wird ausgelöst.");
-                            }
-                            else
-                            {
-                                Console.WriteLine($"[StatusTrigger] Noch nicht erfüllt: {statusTrigger.FlowId}");
-                            }
-                        }
-                        break;*/
-
-                    default:
-                        Console.WriteLine($"Unbekannter TriggerType: {trigger.TriggerType} für Trigger {trigger.Id}");
-                        break;
+                    }
                 }
+
+                results.Add((group.Key, allMet)); // group.Key ist vom Typ Guid
             }
-            return await Task.FromResult(results);
+
+            return results;
         }
 
 
-        // check if the trigger is met
+        //Methods to check if the triggers are met
         private static bool IsDateTriggerMet(DateTrigger trigger)
         {
             var now = DateTime.UtcNow; // oder DateTime.Now, je nach Kontext
@@ -119,7 +70,7 @@ namespace ems_back.Repo.Jobs
 
         private async Task<bool> IsRelativeDateTriggerMetAsync(RelativeDateTrigger trigger)
         {
-            if (trigger.Flow == null || trigger.Flow.EventId == null)
+            if (trigger.Flow == null)
                 throw new InvalidOperationException("Trigger.Flow oder EventId ist null.");
 
             var eventData = await _dbContext.Events
@@ -167,6 +118,65 @@ namespace ems_back.Repo.Jobs
             };
         }
 
+        private async Task<bool> IsNumOfAttendeesTriggerMetAsync(NumOfAttendeesTrigger trigger)
+        {
+            if (trigger.Flow == null)
+                throw new InvalidOperationException("Flow darf nicht null sein.");
+
+            var eventId = trigger.Flow.EventId;
+
+            var ev = await _dbContext.Events
+                .Where(e => e.Id == eventId)
+                .Select(e => new { e.AttendeeCount, e.Capacity })
+                .FirstOrDefaultAsync();
+
+            if (ev == null)
+                throw new InvalidOperationException("Event nicht gefunden.");
+
+            var attendeeCount = ev.AttendeeCount;
+            var capacity = ev.Capacity;
+
+            int comparisonValue = trigger.ValueType switch
+            {
+                NumOfAttendeesValueType.Absolute => trigger.Value,
+                NumOfAttendeesValueType.Percentage => (int)(capacity * trigger.Value / 100.0),
+                _ => throw new InvalidOperationException($"Unbekannter ValueType: {trigger.ValueType}")
+            };
+
+            return trigger.Operator switch
+            {
+                NumOfAttendeesOperator.GreaterThan => attendeeCount > comparisonValue,
+                NumOfAttendeesOperator.LessThan => attendeeCount < comparisonValue,
+                NumOfAttendeesOperator.EqualTo => attendeeCount == comparisonValue,
+                _ => throw new InvalidOperationException($"Unbekannter Operator: {trigger.Operator}")
+            };
+        }
+
+        private async Task<bool> IsStatusTriggerMetAsync(StatusTrigger trigger)
+        {
+            if (trigger.Flow == null)
+                throw new InvalidOperationException("Flow darf nicht null sein.");
+
+            var eventId = trigger.Flow.EventId;
+
+            // Hole den aktuellen Status des Events
+            var eventStatus = await _dbContext.Events
+                .Where(e => e.Id == eventId)
+                .Select(e => e.Status)
+                .FirstOrDefaultAsync();
+
+            // Überprüfe, ob der Event überhaupt existiert
+            if (!Enum.IsDefined(typeof(EventStatus), eventStatus))
+                throw new InvalidOperationException("Event nicht gefunden oder ungültiger Status.");
+
+            // Vergleiche gemäß Operator
+            return trigger.Operator switch
+            {
+                StausTriggerOperator.Is => (int)eventStatus == (int)trigger.Value,
+                StausTriggerOperator.IsNot => (int)eventStatus != (int)trigger.Value,
+                _ => throw new InvalidOperationException($"Unbekannter Operator: {trigger.Operator}")
+            };
+        }
 
     }
 }

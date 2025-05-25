@@ -25,9 +25,9 @@ namespace ems_back.Repo.Jobs.Trigger
     public class NumOfAttendeesTrigger : BaseTrigger
     {
         [JsonPropertyName("operator")]
-        public required String Operator { get; set; }
+        public required NumOfAttendeesOperator Operator { get; set; }
         [JsonPropertyName("valueType")]
-        public required String ValueType { get; set; }
+        public required NumOfAttendeesValueType ValueType { get; set; }
         [JsonPropertyName("value")]
         public required int Value { get; set; }
     }

@@ -23,10 +23,8 @@ namespace ems_back.Repo.Jobs
             {
                 var mappedTriggers = await _mapTriggers.GetMappedTriggersAsync();
                 
-                // Log the number of triggers found
-                Console.WriteLine($"[Quartz] Anzahl gefundener Trigger: {mappedTriggers.Count}");
-
                 // Log the details of each trigger
+                // Vor Abgabe noch alles entfernen, was nicht für die Produktion benötigt wird
                 foreach (var trigger in mappedTriggers)
                 {
                     Console.WriteLine($"Trigger ID: {trigger.Id}");
@@ -36,19 +34,19 @@ namespace ems_back.Repo.Jobs
                     switch (trigger)
                     {
                         case DateTrigger dt:
-                            Console.WriteLine($"→ DateTrigger: Operator={dt.Operator}, Value={dt.Value}");
+                            Console.WriteLine($"DateTrigger: Operator={dt.Operator}, Value={dt.Value}");
                             break;
                         case RelativeDateTrigger rdt:
-                            Console.WriteLine($"→ RelativeDateTrigger: Operator={rdt.Operator}, Value={rdt.Value}, ValueType={rdt.ValueType}, ValueRelativeTo={rdt.ValueRelativeTo}, ValueRelativeOperator={rdt.ValueRelativeOperator}");
+                            Console.WriteLine($"RelativeDateTrigger: Operator={rdt.Operator}, Value={rdt.Value}, ValueType={rdt.ValueType}, ValueRelativeTo={rdt.ValueRelativeTo}, ValueRelativeOperator={rdt.ValueRelativeOperator}");
                             break;
                         case NumOfAttendeesTrigger nat:
-                            Console.WriteLine($"→ NumOfAttendeesTrigger: Operator={nat.Operator}, ValueType={nat.ValueType}, Value={nat.Value}");
+                            Console.WriteLine($"NumOfAttendeesTrigger: Operator={nat.Operator}, ValueType={nat.ValueType}, Value={nat.Value}");
                             break;
                         case StatusTrigger st:
-                            Console.WriteLine($"→ StatusTrigger: Operator={st.Operator}, Value={st.Value}");
+                            Console.WriteLine($"StatusTrigger: Operator={st.Operator}, Value={st.Value}");
                             break;
                         default:
-                            Console.WriteLine("→ Unbekannter Trigger-Typ");
+                            Console.WriteLine("Unbekannter Trigger-Typ");
                             break;
                     }
 
@@ -56,7 +54,22 @@ namespace ems_back.Repo.Jobs
                 }
 
                 // Check if trigger conditions are met
-                var checkedTriggers = await  _checkTriggers.CheckTriggersAsync(mappedTriggers);
+                var triggerResults = await _checkTriggers.CheckTriggersAsync(mappedTriggers);
+
+                // Verarbeite nur getriggerte Flows
+                var triggeredFlows = triggerResults
+                    .Where(result => result.IsTriggered)
+                    .Select(result => result.FlowId)
+                    .ToList();
+
+                Console.WriteLine($"[Quartz] Getriggerte Flows: {triggeredFlows.Count}");
+
+                foreach (var flowId in triggeredFlows)
+                {
+                    Console.WriteLine($"Flow {flowId} wird ausgelöst.");
+
+                    // TODO: Flow ausführen/starten (z.B. via EventFlowService)
+                }
             }
             catch (Exception ex)
             {
