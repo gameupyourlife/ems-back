@@ -172,7 +172,6 @@ namespace ems_back.Controllers
             }
         }
 
-
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)
         {
