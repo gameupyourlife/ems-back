@@ -203,7 +203,7 @@ namespace ems_back.Repo.Data
 				.WithOne(ou => ou.User)
 				.HasForeignKey(ou => ou.UserId)
 				.OnDelete(DeleteBehavior
-					.Restrict); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Org gelöscht
+					.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Org gelöscht
 
 			modelBuilder.Entity<User>()
 				.HasMany(e => e.AttendedEvents)
@@ -287,6 +287,13 @@ namespace ems_back.Repo.Data
 
 			modelBuilder.Entity<OrganizationUser>()
 				.HasIndex(ou => new { ou.UserId, ou.OrganizationId, ou.UserRole }).IsUnique();
+
+			modelBuilder.Entity<OrganizationUser>()
+				.HasOne(ou => ou.Organization)
+				.WithMany(o => o.OrganizationUsers)
+				.HasForeignKey(ou => ou.OrganizationId)
+				.OnDelete(DeleteBehavior.Cascade);
+
 
 			// Configure composite key for EventAttendee
 			modelBuilder.Entity<EventAttendee>()
