@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using ems_back.Repo.Exceptions;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using ems_back.Repo.Services;
 
 namespace ems_back.Controllers
 {
@@ -49,6 +50,12 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
 				var mails = await _mailService.GetMailsForEventAsync(orgId, eventId, Guid.Parse(userId));
@@ -80,6 +87,12 @@ namespace ems_back.Controllers
             {
                 _logger.LogWarning("User ID not found in claims");
                 return BadRequest("User ID not found");
+            }
+
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
             }
 
             try
@@ -120,6 +133,12 @@ namespace ems_back.Controllers
             {
                 _logger.LogWarning("User ID not found in claims");
                 return BadRequest("User ID not found");
+            }
+
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
             }
 
             try
@@ -171,6 +190,12 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
 				var mail = await _mailService.UpdateMailAsync(orgId, eventId, mailId, updateMailDto, Guid.Parse(userId));
@@ -215,6 +240,12 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
 			{
 				var success = await _mailService.DeleteMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
@@ -256,6 +287,12 @@ namespace ems_back.Controllers
                 return BadRequest("User ID not found");
             }
 
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
                 await _mailService.SendMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
@@ -291,6 +328,13 @@ namespace ems_back.Controllers
                 _logger.LogWarning("User ID not found in claims");
                 return BadRequest("User ID not found");
             }
+
+            if (!await _mailService.ExistsOrg(orgId))
+            {
+                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
+                return BadRequest("Organization does not exist");
+            }
+
             try
             {
                 await _mailService.SendMailWithDtoAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));

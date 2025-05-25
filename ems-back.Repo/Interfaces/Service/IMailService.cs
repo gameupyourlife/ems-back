@@ -20,5 +20,6 @@ namespace ems_back.Repo.Interfaces.Service
         Task SendMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
         Task SendMailWithDtoAsync(Guid orgId, Guid eventId, CreateMailDto sendMailManualDto, Guid userId);
 		Task SendMailManualAsync(MailManualDto manualDto);
-	}
+        Task<bool> ExistsOrg(Guid orgId);
+    }
 }
