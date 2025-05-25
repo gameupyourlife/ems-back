@@ -121,7 +121,7 @@ namespace ems_back.Services
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error generating token for user: {UserId}", user.Id);
-				throw; // Re-throw as this is a critical failure
+				throw; 
 			}
 		}
     }

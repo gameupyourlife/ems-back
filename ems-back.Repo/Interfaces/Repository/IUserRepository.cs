@@ -16,6 +16,7 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto);
 		Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto);
 		Task<bool> DeleteUserAsync(Guid id);
+		Task SaveChangesAsync(); 
 
 		// Query methods
 		Task<UserResponseDto> GetUserByIdAsync(Guid id);
