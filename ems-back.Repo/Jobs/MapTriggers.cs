@@ -27,6 +27,8 @@ namespace ems_back.Repo.Jobs
                 .OrderBy(t => t.FlowId)
                 .ToListAsync();
 
+            Console.WriteLine($"[MapTriggers] Found {triggers.Count} triggers to map.");
+
             var result = new List<BaseTrigger>();
 
             foreach (var trigger in triggers)

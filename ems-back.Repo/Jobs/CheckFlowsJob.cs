@@ -1,5 +1,8 @@
 ﻿using ems_back.Repo.Data;
+using ems_back.Repo.Jobs.Actions.ActionModels;
 using ems_back.Repo.Jobs.Trigger;
+using ems_back.Repo.Models.Types;
+using ems_back.Repo.Models;
 using Quartz;
 
 namespace ems_back.Repo.Jobs
@@ -9,12 +12,17 @@ namespace ems_back.Repo.Jobs
         private readonly ApplicationDbContext _dbContext;
         private readonly MapTriggers _mapTriggers;
         private readonly CheckTriggers _checkTriggers;
+        private readonly MapActions _mapActions;
+        private readonly ProcessActionsForFlow _processActionsForFlow;
 
-        public CheckFlowsJob(ApplicationDbContext dbContext, MapTriggers mapTriggers, CheckTriggers checkTriggers)
+        public CheckFlowsJob(ApplicationDbContext dbContext, MapTriggers mapTriggers, CheckTriggers checkTriggers, 
+            MapActions mapActions, ProcessActionsForFlow processActionsForFlow)
         {
             _dbContext = dbContext;
             _mapTriggers = mapTriggers;
             _checkTriggers = checkTriggers;
+            _mapActions = mapActions;
+            _processActionsForFlow = processActionsForFlow;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -22,33 +30,29 @@ namespace ems_back.Repo.Jobs
             try
             {
                 var mappedTriggers = await _mapTriggers.GetMappedTriggersAsync();
-                
+
+                var mappedActions = await _mapActions.GetMappedActionsAsync();
+
                 // Log the details of each trigger
                 // Vor Abgabe noch alles entfernen, was nicht für die Produktion benötigt wird
                 foreach (var trigger in mappedTriggers)
                 {
+                    Console.WriteLine($"[Quartz] Trigger ID: {trigger.Id}");
                     Console.WriteLine($"Trigger ID: {trigger.Id}");
                     Console.WriteLine($"Typ: {trigger.TriggerType}");
                     Console.WriteLine($"FlowId: {trigger.FlowId}");
 
-                    switch (trigger)
-                    {
-                        case DateTrigger dt:
-                            Console.WriteLine($"DateTrigger: Operator={dt.Operator}, Value={dt.Value}");
-                            break;
-                        case RelativeDateTrigger rdt:
-                            Console.WriteLine($"RelativeDateTrigger: Operator={rdt.Operator}, Value={rdt.Value}, ValueType={rdt.ValueType}, ValueRelativeTo={rdt.ValueRelativeTo}, ValueRelativeOperator={rdt.ValueRelativeOperator}");
-                            break;
-                        case NumOfAttendeesTrigger nat:
-                            Console.WriteLine($"NumOfAttendeesTrigger: Operator={nat.Operator}, ValueType={nat.ValueType}, Value={nat.Value}");
-                            break;
-                        case StatusTrigger st:
-                            Console.WriteLine($"StatusTrigger: Operator={st.Operator}, Value={st.Value}");
-                            break;
-                        default:
-                            Console.WriteLine("Unbekannter Trigger-Typ");
-                            break;
-                    }
+                    Console.WriteLine(new string('-', 60));
+                }
+
+                // Log the details of each trigger
+                // Vor Abgabe noch alles entfernen, was nicht für die Produktion benötigt wird
+                foreach (var action in mappedActions)
+                {
+                    Console.WriteLine($"[Quartz] Action ID: {action.ActionId}");
+                    Console.WriteLine($"Trigger ID: {action.ActionId}");
+                    Console.WriteLine($"Typ: {action.ActionType}");
+                    Console.WriteLine($"FlowId: {action.FlowId}");
 
                     Console.WriteLine(new string('-', 60));
                 }
@@ -66,9 +70,22 @@ namespace ems_back.Repo.Jobs
 
                 foreach (var flowId in triggeredFlows)
                 {
-                    Console.WriteLine($"Flow {flowId} wird ausgelöst.");
+                    var flowRun = new FlowsRun
+                    {
+                        Id = Guid.NewGuid(),
+                        FlowId = flowId,
+                        Status = FlowRunStatus.Pending,
+                        Timestamp = DateTime.UtcNow,
+                        Logs = $"Flow [{flowId}] wurde um {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} der Flows-Queue hinzugefügt."
+                    };
 
-                    // TODO: Flow ausführen/starten (z.B. via EventFlowService)
+                    _dbContext.FlowsRun.Add(flowRun);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                foreach (var flowId in triggeredFlows)
+                {
+                    await _processActionsForFlow.ProcessActionsForFlowAsync(flowId, mappedActions);
                 }
             }
             catch (Exception ex)

@@ -60,7 +60,7 @@ namespace ems_back.Tests.Services
                     Location = "Test Location",
                     AttendeeCount = 0,
                     Capacity = 100,
-                    Status = EventStatus.ONGOING,
+                    Status = EventStatus.Ongoing,
                     Start = DateTime.UtcNow.AddDays(1),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -116,7 +116,7 @@ namespace ems_back.Tests.Services
                     Location = "Test Location",
                     Capacity = 100,
                     Image = "test-image.png",
-                    Status = EventStatus.ONGOING, // oder ein anderer gültiger Wert aus EventStatus
+                    Status = EventStatus.Ongoing, // oder ein anderer gültiger Wert aus EventStatus
                     Start = DateTime.UtcNow.AddDays(1),
                     End = DateTime.UtcNow.AddDays(2) 
                 };
@@ -130,7 +130,7 @@ namespace ems_back.Tests.Services
                     Location = "Test Location",
                     AttendeeCount = 0,
                     Capacity = 100,
-                    Status = EventStatus.ONGOING,
+                    Status = EventStatus.Ongoing,
                     Start = DateTime.UtcNow.AddDays(1),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,

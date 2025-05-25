@@ -70,7 +70,7 @@ namespace ems_back.Repo.Repository
                 CreatedBy = eventDto.CreatedBy,
                 OrganizationId = eventDto.OrganizationId,
                 AttendeeCount = 0,
-                Status = EventStatus.SCHEDULED,
+                Status = EventStatus.Scheduled,
             };
             _context.Events.Add(eventObject);
             await _context.SaveChangesAsync();

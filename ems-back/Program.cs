@@ -171,6 +171,8 @@ namespace ems_back
             //FlowRuns related Stuff
             builder.Services.AddScoped<MapTriggers>();
             builder.Services.AddScoped<CheckTriggers>();
+            builder.Services.AddScoped<MapActions>();
+            builder.Services.AddScoped<ProcessActionsForFlow>();
 
             builder.Services.AddQuartz(opt =>
             {
