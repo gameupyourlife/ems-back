@@ -1,4 +1,4 @@
-using ems_back.Repo.Data;
+﻿using ems_back.Repo.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
@@ -70,7 +70,6 @@ namespace ems_back.Repo.Repository
                 UpdatedBy = eventDto.UpdatedBy,
                 OrganizationId = eventDto.OrganizationId,
                 AttendeeCount = 0,
-                Status = EventStatus.Scheduled,
                 Status = EventStatus.SCHEDULED,
                 Image = eventDto.Image,
             };

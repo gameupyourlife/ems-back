@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ems_back.Repo.Models.Types;
 
 namespace ems_back.Repo.Jobs.Actions.ActionModels
 {
-    public class EmailActionModel : BaseAction
+    public class EmailActionModel : IActionModel
     {
-        [JsonPropertyName("mailId")]
-        public required Guid MailId { get; set; }
+        public ActionType ActionType => ActionType.SendEmail;
+        public required string MailId { get; set; }
     }
 }
