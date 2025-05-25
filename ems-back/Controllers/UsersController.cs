@@ -55,7 +55,7 @@ namespace ems_back.Controllers
 
         // PUT: api/users/{userId}
         [Authorize]
-        [HttpPut("{userId}")]
+        [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try
@@ -171,7 +171,6 @@ namespace ems_back.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)

@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Moq;
 using AutoMapper;
 using ems_back.Repo.DTOs.Email;
@@ -264,7 +264,7 @@ namespace ems_back.Repo.Services.Tests
 		#region Helper Methods
 		private void SetupUserWithPermission()
 		{
-			var user = new User { Id = _testUserId, FirstName = " ",LastName = " "};
+			var user = new User { Id = _testUserId, FirstName = " ", LastName = " " };
 			
 			_mockUserManager.Setup(u => u.FindByIdAsync(_testUserId.ToString()))
 				.ReturnsAsync(user);

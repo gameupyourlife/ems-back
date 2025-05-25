@@ -202,7 +202,10 @@ namespace ems_back.Repo.Data
 				.HasMany(e => e.OrganizationUsers)
 				.WithOne(ou => ou.User)
 				.HasForeignKey(ou => ou.UserId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior
+					.Cascade); 
+
+
 
 			modelBuilder.Entity<User>()
 				.HasMany(e => e.AttendedEvents)
@@ -284,6 +287,13 @@ namespace ems_back.Repo.Data
 
 			modelBuilder.Entity<OrganizationUser>()
 				.HasIndex(ou => new { ou.UserId, ou.OrganizationId, ou.UserRole }).IsUnique();
+
+			modelBuilder.Entity<OrganizationUser>()
+				.HasOne(ou => ou.Organization)
+				.WithMany(o => o.OrganizationUsers)
+				.HasForeignKey(ou => ou.OrganizationId)
+				.OnDelete(DeleteBehavior.Cascade);
+
 
 			// Configure composite key for EventAttendee
 			modelBuilder.Entity<EventAttendee>()
