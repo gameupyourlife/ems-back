@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.DTOs.Flow.FlowsRun
 {
-	public class FlowsRunResponseDto
+	public class FlowsRunCreateDto
 	{
-		public int Id { get; set; }
 		public Guid FlowId { get; set; }
-		public string Status { get; set; }
-		public DateTime Timestamp { get; set; }
 		public string Logs { get; set; }
 	}
 }

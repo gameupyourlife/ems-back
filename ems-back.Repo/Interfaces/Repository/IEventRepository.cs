@@ -27,6 +27,7 @@ public interface IEventRepository
     // Additional methods
 
     Task<IEnumerable<EventInfoDto>> GetUpcomingEventsAsync(int days = 30);
+	Task<IEnumerable<EventInfoDto>> GetEventsByCategoryAsync(int category);
 	Task<IEnumerable<EventInfoDto>> GetEventsByDateRangeAsync(DateTime start, DateTime end);
 	Task<EventInfoDto> UpdateEventStatusAsync(Guid eventId, EventInfoDto statusDto);
 	Task<int> GetAttendeeCountAsync(Guid eventId);

@@ -19,6 +19,5 @@ namespace ems_back.Repo.DTOs.Event
         public required int Capacity { get; set; }
         public required EventStatus Status { get; set; }
         public string? Description { get; set; }
-        public bool? isAttending { get; set; }
     }
 }

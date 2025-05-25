@@ -1,4 +1,4 @@
-using ems_back.Repo.Data;
+﻿using ems_back.Repo.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
@@ -42,11 +42,12 @@ namespace ems_back.Repo.Repository
                     Start = e.Start,
                     Location = e.Location,
                     Image = e.Image,
-                    AttendeeCount = e.AttendeeCount,
+                    AttendeeCount = e.Attendees.Count,
                     Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
                 })
+
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -67,12 +68,9 @@ namespace ems_back.Repo.Repository
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 CreatedBy = eventDto.CreatedBy,
-                UpdatedBy = eventDto.UpdatedBy,
                 OrganizationId = eventDto.OrganizationId,
                 AttendeeCount = 0,
                 Status = EventStatus.Scheduled,
-                Status = EventStatus.SCHEDULED,
-                Image = eventDto.Image,
             };
             _context.Events.Add(eventObject);
             await _context.SaveChangesAsync();
@@ -85,6 +83,7 @@ namespace ems_back.Repo.Repository
                 .Where(e => e.OrganizationId == orgId && e.Id == eventId)
                 .Select(e => new EventInfoDto
                 {
+
                     Id = e.Id,
                     Title = e.Title,
                     OrganizationId = e.OrganizationId,
@@ -156,11 +155,11 @@ namespace ems_back.Repo.Repository
         {
             var attendeesList = await _context.Events
                 .Where(e => e.OrganizationId == orgId && e.Id == eventId)
-                .SelectMany(e => e.Attendees!)
+                .SelectMany(e => e.Attendees)
                 .Select(a => new EventAttendeeDto
                 {
                     UserId = a.UserId,
-                    UserEmail = a.User!.Email!,
+                    UserEmail = a.User.Email,
                     UserName = a.User.FirstName + " " + a.User.LastName,
                     Status = a.Status,
                     RegisteredAt = a.RegisteredAt,
@@ -189,8 +188,6 @@ namespace ems_back.Repo.Repository
                 return false;
             }
 
-            await DecreaseAttendeeCount(eventId);
-
             _context.EventAttendees.Remove(attendee);
             await _context.SaveChangesAsync();
             return true;
@@ -215,7 +212,7 @@ namespace ems_back.Repo.Repository
                 UserId = organizerId
             };
 
-            _context.Add(eventOrganizer);
+            eventEntity.Organizers.Add(eventOrganizer);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -309,6 +306,11 @@ namespace ems_back.Repo.Repository
 			return _mapper.Map<IEnumerable<EventInfoDto>>(events);
 		}
 
+		public async Task<IEnumerable<EventInfoDto>> GetEventsByCategoryAsync(int category)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<IEnumerable<EventInfoDto>> GetEventsByDateRangeAsync(DateTime start, DateTime end)
 		{
 			var events = await _context.Events
@@ -354,7 +356,7 @@ namespace ems_back.Repo.Repository
                     Category = e.Category,
                     Start = e.Start,
                     Location = e.Location,
-                    AttendeeCount = e.Attendees!.Count,
+                    AttendeeCount = e.Attendees.Count,
                     Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description
@@ -378,19 +380,6 @@ namespace ems_back.Repo.Repository
             return true;
         }
 
-        private async Task<bool> DecreaseAttendeeCount(Guid eventId)
-        {
-            var eventEntity = await _context.Events.FindAsync(eventId);
-            if (eventEntity == null)
-            {
-                return false;
-            }
-            eventEntity.AttendeeCount--;
-            _context.Events.Update(eventEntity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
         public async Task<EventAttendeeDto> GetEventAttendeeByIdAsync(Guid eventId, Guid userId)
         {
             var attendee = await _context.EventAttendees
@@ -398,7 +387,7 @@ namespace ems_back.Repo.Repository
                 .Select(ea => new EventAttendeeDto
                 {
                     UserId = ea.UserId,
-                    UserEmail = ea.User!.Email!,
+                    UserEmail = ea.User.Email,
                     UserName = ea.User.FirstName + " " + ea.User.LastName,
                     Status = ea.Status,
                     RegisteredAt = ea.RegisteredAt,
@@ -437,7 +426,7 @@ namespace ems_back.Repo.Repository
                     Start = e.Start,
                     Location = e.Location,
                     Image = e.Image,
-                    AttendeeCount = e.Attendees!.Count,
+                    AttendeeCount = e.Attendees.Count,
                     Capacity = e.Capacity,
                     Status = e.Status,
                     Description = e.Description

@@ -2,27 +2,26 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace ems_back.Repo.Models
+public class MailRun
+
 {
-    public class MailRun
-    {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+    [Key]
 
-        [Required]
-        public required Guid MailId { get; set; }
+    public Guid MainRunId { get; set; } = Guid.NewGuid();
 
-        [Required]
-        public required MailRunStatus Status { get; set; }
+    [Required]
+    [MaxLength(50)]
+    public Guid MailId { get; set; }
 
-        [Required]
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    [Required]
+    public MailRunStatus Status { get; set; }
 
-        public string? Logs { get; set; }
+    [Required]
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        // for navigation:
+    public string? Logs { get; set; }
 
-        [ForeignKey("MailId")]
-        public virtual Mail? Mail { get; set; }
-    }
+    // for navigation:
+    [ForeignKey("MailId")]
+    public virtual Mail? Mail { get; set; }
 }
