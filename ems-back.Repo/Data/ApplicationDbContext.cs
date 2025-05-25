@@ -29,7 +29,7 @@ namespace ems_back.Repo.Data
 		public DbSet<OrganizationUser> OrganizationUsers { get; set; }
 		public DbSet<FlowsRun> FlowsRun { get; set; }
 		public DbSet<FlowTemplate> FlowTemplates { get; set; }
-
+		public DbSet<MailQueueEntry> MailQueueEntries { get; set; }
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<Mail> Mail { get; set; }
         public DbSet<MailRun> MailRun { get; set; }

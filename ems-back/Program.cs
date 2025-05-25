@@ -25,6 +25,7 @@ using Quartz;
 using ems_back.Repo.Jobs;
 using ems_back.Emails;
 using ems_back.Repo.Repositories;
+using ems_back.Repo.Jobs.Mail;
 
 
 namespace ems_back
@@ -126,11 +127,14 @@ namespace ems_back
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+            builder.Services.AddScoped<IMailQueueService, MailQueueService>();
             builder.Services.AddScoped<IMailRunService, MailRunService>();
 
 
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
             builder.Services.AddScoped<MailService>();
+
+            builder.Services.AddHostedService<MailQueueWorker>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>

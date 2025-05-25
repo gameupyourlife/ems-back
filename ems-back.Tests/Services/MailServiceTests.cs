@@ -25,6 +25,7 @@ namespace ems_back.Tests.Services
         private readonly Mock<ILogger<MailService>> _loggerMock = new();
         private readonly Mock<IUserService> _userServiceMock = new();
         private readonly Mock<IOrganizationRepository> _organizationRepoMock = new();
+        private readonly Mock<IMailQueueService> _mailQueueServiceMock = new();
         private readonly MailService _mailService;
 
 
@@ -37,6 +38,7 @@ namespace ems_back.Tests.Services
                 Port = 587,
                 Username = "donotreply@example.com",
                 Password = "test",
+                Company = "Test Company",
             };
             var smtpOptions = Options.Create(smtpSettings);
             _report = new TestReportGenerator(output);
@@ -47,7 +49,8 @@ namespace ems_back.Tests.Services
                 _eventServiceMock.Object,
                 _loggerMock.Object,
                 _userServiceMock.Object,
-                _organizationRepoMock.Object
+                _organizationRepoMock.Object,
+                _mailQueueServiceMock.Object
             );
         }
 
@@ -181,7 +184,7 @@ namespace ems_back.Tests.Services
                            .ReturnsAsync(false);
 
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                _mailService.SendMailAsync(orgId, eventId, mailId, userId));
+                _mailService.SendMailByIdAsync(orgId, eventId, mailId, userId));
         }
 
         [Fact]
@@ -199,7 +202,7 @@ namespace ems_back.Tests.Services
                            .ReturnsAsync((EventInfoDto)null!);
 
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                _mailService.SendMailAsync(orgId, eventId, mailId, userId));
+                _mailService.SendMailByIdAsync(orgId, eventId, mailId, userId));
         }
 
         [Fact]
@@ -235,7 +238,7 @@ namespace ems_back.Tests.Services
                            .ReturnsAsync((MailDto)null!);
 
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                _mailService.SendMailAsync(orgId, eventId, mailId, userId));
+                _mailService.SendMailByIdAsync(orgId, eventId, mailId, userId));
         }
 
         [Fact]
@@ -282,7 +285,7 @@ namespace ems_back.Tests.Services
                            .ReturnsAsync(mail);
 
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                _mailService.SendMailAsync(orgId, eventId, mailId, userId));
+                _mailService.SendMailByIdAsync(orgId, eventId, mailId, userId));
         }
 
         #endregion
