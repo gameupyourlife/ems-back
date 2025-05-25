@@ -91,7 +91,6 @@ namespace ems_back.Services
 			return await _organizationRepository.CreateOrganizationAsync(organizationDto);
 		}
 
-		//Admin or owner: done
 		public async Task<OrganizationResponseDto> UpdateOrganizationAsync(
 			Guid id,
 			OrganizationUpdateDto organizationDto,
@@ -144,10 +143,8 @@ namespace ems_back.Services
 			}
 		}
 
-		//only Admin
 	public async Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId)
 {
-    // First verify the user has permission
     var user = await _userManager.FindByIdAsync(userId.ToString());
     if (user == null)
     {
@@ -155,10 +152,8 @@ namespace ems_back.Services
         throw new UnauthorizedAccessException("User not found");
     }
 
-    // Check if user is ADMIN
     var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
 
-    // If not admin, check if user is OWNER of this organization
     if (!isAdmin)
     {
         _logger.LogWarning("User {UserId} lacks permission to update organization {OrganizationId}",
@@ -168,7 +163,6 @@ namespace ems_back.Services
     return await _organizationRepository.DeleteOrganizationAsync(organizationId, userId);
 }
 
-		//admin,owner, 
 		public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId, Guid userId)
 		{
 			_logger.LogInformation("Attempting to get all domains of {OrgId} by user {UserId}", organizationId, userId);
@@ -203,7 +197,6 @@ namespace ems_back.Services
 
 		}
 
-		//Admin or Owner
 		public async Task<bool> AddDomainToOrganizationAsync(
 			Guid organizationId,
 			string domain,
@@ -219,7 +212,7 @@ namespace ems_back.Services
 				return false;
 			}
 
-			// 2. Check user permissions
+	
 			var user = await _userManager.FindByIdAsync(userId.ToString());
 			if (user == null)
 			{
@@ -256,7 +249,6 @@ namespace ems_back.Services
 			return result;
 		}
 
-		//Owner or admin
 		public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
 		{
 			return await _userRepository.GetUsersByOrganizationAsync(organizationId);
