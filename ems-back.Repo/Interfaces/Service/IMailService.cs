@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.DTOs.Mail;
 
 namespace ems_back.Repo.Interfaces.Service
 {
@@ -17,6 +18,7 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<MailDto> UpdateMailAsync(Guid orgId, Guid eventId, Guid mailId, CreateMailDto updateMailDto, Guid userId);
 		Task<bool> DeleteMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
         Task SendMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
-        Task SendMailManualAsync(Guid orgId, Guid eventId, CreateMailDto sendMailManualDto, Guid userId);
-    }
+        Task SendMailWithDtoAsync(Guid orgId, Guid eventId, CreateMailDto sendMailManualDto, Guid userId);
+		Task SendMailManualAsync(MailManualDto manualDto);
+	}
 }

@@ -55,7 +55,7 @@ namespace ems_back.Services
             if (user == null) return false;
             if (user.Role == UserRole.Admin) return true;
 
-            var orgUser = await _orgMembershipRepo.GetAsync(orgId, userId);
+            var orgUser = await _orgMembershipRepo.GetAsync(userId, orgId);
             if (orgUser == null) return false;
 
             return true;

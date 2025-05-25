@@ -153,7 +153,12 @@ namespace ems_back.Controllers
 		}
 
 		[HttpPut("{mailId}")]
-		public async Task<ActionResult<MailDto>> UpdateMail(
+        [Authorize(Roles =
+            $"{nameof(UserRole.Admin)}, " +
+            $"{nameof(UserRole.Owner)}, " +
+            $"{nameof(UserRole.Organizer)}, " +
+            $"{nameof(UserRole.EventOrganizer)}")]
+        public async Task<ActionResult<MailDto>> UpdateMail(
 			[FromRoute] Guid orgId,
 			[FromRoute] Guid eventId,
 			[FromRoute] Guid mailId,
@@ -235,46 +240,6 @@ namespace ems_back.Controllers
 			}
 		}
 
-		// === MAIL RUNS ===
-
-		[HttpGet("{mailId}/runs")]
-		public async Task<ActionResult<IEnumerable<MailRunDto>>> GetMailRunsForMail(Guid orgId, Guid eventId, Guid mailId)
-		{
-			var runs = await _mailRunService.GetMailRunsForMailAsync(orgId, eventId, mailId);
-			return Ok(runs);
-		}
-
-		[HttpGet("{mailId}/runs/{runId}")]
-		public async Task<ActionResult<MailRunDto>> GetMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
-		{
-			var run = await _mailRunService.GetMailRunByIdAsync(orgId, eventId, mailId, runId);
-			if (run == null)
-				return NotFound();
-
-			return Ok(run);
-		}
-
-		[HttpPost("{mailId}/runs")]
-		public async Task<ActionResult<MailRunDto>> CreateMailRun(Guid orgId, Guid eventId, Guid mailId, CreateMailRunDto createDto)
-		{
-			var result = await _mailRunService.CreateMailRunAsync(orgId, eventId, mailId, createDto);
-			return CreatedAtAction(
-				nameof(GetMailRun),
-				new { orgId, eventId, mailId, runId = result.MailRunId },
-				result
-			);
-		}
-
-		[HttpDelete("{mailId}/runs/{runId}")]
-		public async Task<IActionResult> DeleteMailRun(Guid orgId, Guid eventId, Guid mailId, Guid runId)
-		{
-			var success = await _mailRunService.DeleteMailRunAsync(orgId, eventId, mailId, runId);
-			if (!success)
-				return NotFound();
-
-			return NoContent();
-		}
-
         // POST: api/org/{orgId}/events/{eventId}/mails/{mailId}/send
         [HttpPost("{mailId}/send")]
         [Authorize(Roles = 
@@ -295,7 +260,7 @@ namespace ems_back.Controllers
             {
                 await _mailService.SendMailAsync(orgId, eventId, mailId, Guid.Parse(userId));
 				
-                return Ok();
+                return Ok(true);
             }
             catch (NotFoundException ex)
             {
@@ -308,8 +273,8 @@ namespace ems_back.Controllers
             }
         }
 
-        // POST: api/org/{orgId}/events/{eventId}/mails/sendManual
-        [HttpPost("sendManual")]
+        // POST: api/org/{orgId}/events/{eventId}/mails/send
+        [HttpPost("send")]
         [Authorize(Roles = 
 			$"{nameof(UserRole.Admin)}, " +
 			$"{nameof(UserRole.Owner)}, " +
@@ -328,8 +293,8 @@ namespace ems_back.Controllers
             }
             try
             {
-                await _mailService.SendMailManualAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
-                return Ok();
+                await _mailService.SendMailWithDtoAsync(orgId, eventId, sendMailManualDto, Guid.Parse(userId));
+                return Ok(true);
             }
             catch (NotFoundException ex)
             {
