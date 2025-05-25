@@ -33,30 +33,6 @@ namespace ems_back.Repo.Jobs
 
                 var mappedActions = await _mapActions.GetMappedActionsAsync();
 
-                // Log the details of each trigger
-                // Vor Abgabe noch alles entfernen, was nicht für die Produktion benötigt wird
-                foreach (var trigger in mappedTriggers)
-                {
-                    Console.WriteLine($"[Quartz] Trigger ID: {trigger.Id}");
-                    Console.WriteLine($"Trigger ID: {trigger.Id}");
-                    Console.WriteLine($"Typ: {trigger.TriggerType}");
-                    Console.WriteLine($"FlowId: {trigger.FlowId}");
-
-                    Console.WriteLine(new string('-', 60));
-                }
-
-                // Log the details of each trigger
-                // Vor Abgabe noch alles entfernen, was nicht für die Produktion benötigt wird
-                foreach (var action in mappedActions)
-                {
-                    Console.WriteLine($"[Quartz] Action ID: {action.ActionId}");
-                    Console.WriteLine($"Trigger ID: {action.ActionId}");
-                    Console.WriteLine($"Typ: {action.ActionType}");
-                    Console.WriteLine($"FlowId: {action.FlowId}");
-
-                    Console.WriteLine(new string('-', 60));
-                }
-
                 // Check if trigger conditions are met
                 var triggerResults = await _checkTriggers.CheckTriggersAsync(mappedTriggers);
 
@@ -65,8 +41,6 @@ namespace ems_back.Repo.Jobs
                     .Where(result => result.IsTriggered)
                     .Select(result => result.FlowId)
                     .ToList();
-
-                Console.WriteLine($"[Quartz] Getriggerte Flows: {triggeredFlows.Count}");
 
                 foreach (var flowId in triggeredFlows)
                 {

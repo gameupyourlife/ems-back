@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ems_back.Repo.Data;
 using ems_back.Repo.Jobs.Actions.ActionModels;
+using ems_back.Repo.Jobs.ProcessActionMethods;
 using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -15,11 +16,23 @@ namespace ems_back.Repo.Jobs
     public class ProcessActionsForFlow
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ChangeDescriptionExecution _changeDescriptionExecution;
+        private readonly ChangeImageExecution _changeImageExecution;
+        private readonly ChangeStatusExecution _changeStatusExecution;
+        private readonly ChangeTitleExecution _changeTitleExecution;
+        private readonly SendEmailExecution _sendEmailExecution;
 
         // Constructor to initialize _dbContext
-        public ProcessActionsForFlow(ApplicationDbContext dbContext)
+        public ProcessActionsForFlow(ApplicationDbContext dbContext, ChangeImageExecution changeImageExecution, 
+            ChangeStatusExecution changeStatusExecution, ChangeTitleExecution changeTitleExecution, 
+            SendEmailExecution sendEmailExecution, ChangeDescriptionExecution changeDescriptionExecution)
         {
             _dbContext = dbContext;
+            _changeImageExecution = changeImageExecution;
+            _changeStatusExecution = changeStatusExecution;
+            _changeTitleExecution = changeTitleExecution;
+            _sendEmailExecution = sendEmailExecution;
+            _changeDescriptionExecution = changeDescriptionExecution;
         }
 
         public async Task ProcessActionsForFlowAsync(Guid flowId, List<BaseAction> allActions)
@@ -46,23 +59,23 @@ namespace ems_back.Repo.Jobs
                     switch (action.ActionType)
                     {
                         case ActionType.SendEmail:
-                            await HandleSendEmailActionAsync((EmailActionModel)action);
+                            await _sendEmailExecution.HandleSendEmailActionAsync((EmailActionModel)action);
                             break;
 
                         case ActionType.ChangeStatus:
-                            await HandleChangeStatusActionAsync((StatusChangeModel)action);
+                            await _changeStatusExecution.HandleChangeStatusActionAsync((StatusChangeModel)action);
                             break;
 
                         case ActionType.ChangeImage:
-                            await HandleChangeImageActionAsync((ImageChangeModel)action);
+                            await _changeImageExecution.HandleChangeImageActionAsync((ImageChangeModel)action);
                             break;
 
                         case ActionType.ChangeTitle:
-                            await HandleChangeTitleActionAsync((TitleChangeModel)action);
+                            await _changeTitleExecution.HandleChangeTitleActionAsync((TitleChangeModel)action);
                             break;
 
                         case ActionType.ChangeDescription:
-                            await HandleChangeDescriptionActionAsync((DescriptionChangeModel)action);
+                            await _changeDescriptionExecution.HandleChangeDescriptionActionAsync((DescriptionChangeModel)action);
                             break;
 
                         default:
@@ -99,157 +112,5 @@ namespace ems_back.Repo.Jobs
                 await _dbContext.SaveChangesAsync();
             }
         }
-
-        private Task HandleSendEmailActionAsync(EmailActionModel action)
-        {
-            Console.WriteLine($"[Action] Sende Email mit MailId: {action.MailId} für Flow {action.FlowId}");
-            // TODO: EmailService.SendMail(action.MailId);
-            return Task.CompletedTask;
-        }
-
-        private async Task HandleChangeStatusActionAsync(StatusChangeModel action)
-        {
-            try
-            {
-                var flow = await _dbContext.Flows
-                    .Include(f => f.Event)
-                    .FirstOrDefaultAsync(f => f.FlowId == action.FlowId);
-
-                if (flow == null)
-                {
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} wurde nicht gefunden.");
-                }
-
-                if (flow.Event == null)
-                {
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} hat kein zugeordnetes Event.");
-                }
-
-                flow.Event.Status = action.NewStatus;
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var run = new FlowsRun
-                {
-                    Id = Guid.NewGuid(),
-                    FlowId = action.FlowId,
-                    Status = FlowRunStatus.Failed,
-                    Timestamp = DateTime.UtcNow,
-                    Logs = ex.ToString()
-                };
-
-                _dbContext.FlowsRun.Add(run);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
-
-
-        private async Task HandleChangeDescriptionActionAsync(DescriptionChangeModel action)
-        {
-            try
-            {
-                var flow = await _dbContext.Flows
-                    .Include(f => f.Event)
-                    .FirstOrDefaultAsync(f => f.FlowId == action.FlowId);
-
-                if (flow == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} wurde nicht gefunden.");
-
-                if (flow.Event == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} hat kein zugeordnetes Event.");
-
-                flow.Event.Description = action.NewDescription;
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var run = new FlowsRun
-                {
-                    Id = Guid.NewGuid(),
-                    FlowId = action.FlowId,
-                    Status = FlowRunStatus.Failed,
-                    Timestamp = DateTime.UtcNow,
-                    Logs = ex.ToString()
-                };
-
-                _dbContext.FlowsRun.Add(run);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
-
-        private async Task HandleChangeImageActionAsync(ImageChangeModel action)
-        {
-            try
-            {
-                var flow = await _dbContext.Flows
-                    .Include(f => f.Event)
-                    .FirstOrDefaultAsync(f => f.FlowId == action.FlowId);
-
-                if (flow == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} wurde nicht gefunden.");
-
-                if (flow.Event == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} hat kein zugeordnetes Event.");
-
-                // Hier das Bild im Event aktualisieren (Property ggf. anpassen)
-                flow.Event.Image = action.NewImage;
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var run = new FlowsRun
-                {
-                    Id = Guid.NewGuid(),
-                    FlowId = action.FlowId,
-                    Status = FlowRunStatus.Failed,
-                    Timestamp = DateTime.UtcNow,
-                    Logs = ex.ToString()
-                };
-
-                _dbContext.FlowsRun.Add(run);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
-
-        private async Task HandleChangeTitleActionAsync(TitleChangeModel action)
-        {
-            try
-            {
-                var flow = await _dbContext.Flows
-                    .Include(f => f.Event)
-                    .FirstOrDefaultAsync(f => f.FlowId == action.FlowId);
-
-                if (flow == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} wurde nicht gefunden.");
-
-                if (flow.Event == null)
-                    throw new InvalidOperationException($"Flow mit ID {action.FlowId} hat kein zugeordnetes Event.");
-
-                flow.Event.Title = action.NewTitle;
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var run = new FlowsRun
-                {
-                    Id = Guid.NewGuid(),
-                    FlowId = action.FlowId,
-                    Status = FlowRunStatus.Failed,
-                    Timestamp = DateTime.UtcNow,
-                    Logs = ex.ToString()
-                };
-
-                _dbContext.FlowsRun.Add(run);
-                await _dbContext.SaveChangesAsync();
-
-                throw new ApplicationException($"Fehler beim Ändern des Titels für FlowId {action.FlowId}: {ex.Message}", ex);
-            }
-        }
-
     }
 }
