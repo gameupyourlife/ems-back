@@ -28,20 +28,17 @@ namespace ems_back.Repo.Services
 	{
 		private readonly IEventRepository _eventRepository;
         private readonly IUserService _userService;
-        private readonly IOrganizationUserRepository _organizationUserRepository;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
 
         public EventService(
 			IEventRepository eventRepository,
 			IUserService userService,
-            IOrganizationUserRepository organizationUserRepository,
             IOrganizationRepository organizationRepository,
             ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
             _userService = userService;
-            _organizationUserRepository = organizationUserRepository;
             _organizationRepository = organizationRepository;
             _logger = logger;
         }
@@ -345,11 +342,6 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
                 throw new NotFoundException("Event not found");
             }
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event with id {EventId} does not belong to organization with id {OrgId}", eventId, orgId);
-                throw new MismatchException("Given event is not in given organization");
-            }
 
             var organizer = await _eventRepository.GetEventOrganizerAsync(eventId, organizerId);
             if (organizer != null)
@@ -465,12 +457,6 @@ namespace ems_back.Repo.Services
                 throw new NotFoundException("Event not found");
             }
 
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event with id {EventId} does not belong to organization with id {OrgId}", eventId, orgId);
-                throw new MismatchException("Given event is not in given organization");
-            }
-
             var agendaEntry = new AgendaEntryDto
             {
                 Id = Guid.NewGuid(),
@@ -505,12 +491,6 @@ namespace ems_back.Repo.Services
             if (eventInfo == null) {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
                 throw new NotFoundException("Event not found");
-            }
-
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event with id {EventId} does not belong to organization with id {OrgId}", eventId, orgId);
-                throw new MismatchException("Given event is not in given organization");
             }
 
             if (await _eventRepository.GetAgendaEntryByIdAsync(agendaId) == null)
