@@ -360,12 +360,11 @@ namespace ems_back.Repo.Services
 				throw new DbUpdateException("Event organizer could not be added");
 			}
 
-			// Updated this section to match the interface
 			var roleUpdateResult = await _organizationService.UpdateUserRoleAsync(
-				currentUserId: userId,       // The user making the change
-				orgId: orgId,                // Organization ID
-				targetUserId: organizerId,   // User whose role is being changed
-				newRole: UserRole.EventOrganizer // New role
+				currentUserId: userId,       
+				orgId: orgId,               
+				targetUserId: organizerId,   
+				newRole: UserRole.EventOrganizer 
 			);
 
 			if (!roleUpdateResult.Success)
@@ -403,10 +402,10 @@ namespace ems_back.Repo.Services
 
 
 			var isroleUpdated = await _organizationService.UpdateUserRoleAsync(
-				currentUserId: userId,       // The user making the change
-				orgId: orgId,                // Organization ID
-				targetUserId: organizerId,   // User whose role is being changed
-				newRole: UserRole.User // New role as User(demotion)
+				currentUserId: userId,       
+				orgId: orgId,                
+				targetUserId: organizerId,   
+				newRole: UserRole.User 
 			);
 
 			if (!isroleUpdated.Success)
