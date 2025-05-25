@@ -23,6 +23,8 @@ using ems_back.Repo.Interfaces.Service;
 using System.Net;
 using Quartz;
 using ems_back.Repo.Jobs;
+using ems_back.Emails;
+using ems_back.Repo.Repositories;
 
 
 namespace ems_back
@@ -151,8 +153,8 @@ namespace ems_back
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            });
-            /*.AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -175,7 +177,7 @@ namespace ems_back
                 options.AddPolicy("RequireEventOrganizerRole", policy => policy.RequireRole("EVENT-ORGANIZER"));
                 options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("ORGANIZER"));
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
-            });*/
+            });
 
             //FlowRuns related Stuff
             builder.Services.AddScoped<MapTriggers>();
