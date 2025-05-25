@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.Data;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Trigger;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using ems_back.Repo.Models;
+using ems_back.Repo.Models.Types;
 using ems_back.Repo.Repository;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ems_back.Repo.Services
@@ -19,17 +22,20 @@ namespace ems_back.Repo.Services
         private readonly IEventFlowRepository _eventFlowRepository;
         private readonly IEventRepository _eventRepository;
         private readonly ILogger<EventFlowService> _logger;
+        private readonly ApplicationDbContext _dbContext;
         private readonly IAuthService _authService;
 
         public EventFlowService(
             IEventFlowRepository eventFlowRepository,
             IEventRepository eventRepository,
             ILogger<EventFlowService> logger,
+            ApplicationDbContext dbContext)
             IAuthService authService)
         {
             _eventFlowRepository = eventFlowRepository;
             _logger = logger;
             _eventRepository = eventRepository;
+            _dbContext = dbContext;
             _authService = authService;
         }
 
@@ -265,6 +271,17 @@ namespace ems_back.Repo.Services
                 Summary = dto.Description ?? string.Empty // ensure non-null value
             };
 
+            if (dto.Type == TriggerType.NumOfAttendees)
+            {
+                var flow = await _dbContext.Flows.FindAsync(flowId);
+                if (flow != null)
+                {
+                    flow.multipleRuns = true;
+                    _dbContext.Flows.Update(flow);
+                    await _dbContext.SaveChangesAsync(); // wichtig: vorher speichern, sonst Konflikte bei Trigger Save
+                }
+            }
+
             var createdTrigger = await _eventFlowRepository.CreateTriggerAsync(newAction);
             return createdTrigger;
         }
@@ -286,7 +303,17 @@ namespace ems_back.Repo.Services
             if (existing == null)
                 throw new KeyNotFoundException("Trigger not found");
 
-            // UpdateDto direkt ans Repository weitergeben
+            if (dto.Type == TriggerType.NumOfAttendees)
+            {
+                var flow = await _dbContext.Flows.FindAsync(flowId);
+                if (flow != null)
+                {
+                    flow.multipleRuns = true;
+                    _dbContext.Flows.Update(flow);
+                    await _dbContext.SaveChangesAsync(); // wichtig: vorher speichern, sonst Konflikte bei Trigger Save
+                }
+            }
+
             var updatedTrigger = await _eventFlowRepository.UpdateTriggerAsync(triggerId, dto);
 
             return updatedTrigger;

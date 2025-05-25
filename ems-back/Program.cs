@@ -23,10 +23,14 @@ using ems_back.Repo.Interfaces.Service;
 using System.Net;
 using Quartz;
 using ems_back.Repo.Jobs;
+using ems_back.Repo.Jobs.CheckTriggerMethods;
+using ems_back.Repo.Jobs.Trigger;
+using ems_back.Repo.Jobs.ProcessActionMethods;
+using ems_back.Repo.Jobs.Mapping;
+using ems_back.Repo.Jobs.Mapping.Actions;
 using ems_back.Emails;
 using ems_back.Repo.Repositories;
 using ems_back.Repo.Jobs.Mail;
-
 
 namespace ems_back
 {
@@ -185,9 +189,24 @@ namespace ems_back
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
             });
 
-            //FlowRuns related Stuff
+            //CheckFlowsJob related services
             builder.Services.AddScoped<MapTriggers>();
             builder.Services.AddScoped<CheckTriggers>();
+            builder.Services.AddScoped<MapActions>();
+            builder.Services.AddScoped<ProcessActionsForFlow>();
+
+            //Trigger Evaluators
+            builder.Services.AddScoped<DateTriggerEvaluator>();
+            builder.Services.AddScoped<NumOfAttendeesTriggerEvalator>();
+            builder.Services.AddScoped<RelativeDateTriggerEvaluator>();
+            builder.Services.AddScoped<StatusTriggerEvaluator>();
+
+            //Action Execution Services
+            builder.Services.AddScoped<ChangeTitleExecution>();
+            builder.Services.AddScoped<ChangeDescriptionExecution>();
+            builder.Services.AddScoped<ChangeImageExecution>();
+            builder.Services.AddScoped<ChangeStatusExecution>();
+            builder.Services.AddScoped<SendEmailExecution>();
 
             builder.Services.AddQuartz(opt =>
             {
@@ -244,8 +263,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 
