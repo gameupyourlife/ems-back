@@ -17,5 +17,7 @@ namespace ems_back.Repo.Interfaces.Repository
 		Task<bool> ExistsAsync(Guid userId, Guid organizationId);
 		Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId);
 		Task<bool> IsUserOrganizationOwner(Guid userId, Guid organizationId);
+		Task UpdateAsync(OrganizationUser membership);
+
 	}
 }
