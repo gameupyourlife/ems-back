@@ -43,7 +43,7 @@ namespace ems_back.Tests.Services
 		public async Task LoginAsync_ValidCredentials_ReturnsSuccess()
 		{
 			var testName = nameof(LoginAsync_ValidCredentials_ReturnsSuccess);
-			var startTime = DateTime.Now;
+			var startTime = DateTime.UtcNow;
 			bool testPassed = false;
 			string message = null;
 
@@ -81,7 +81,7 @@ namespace ems_back.Tests.Services
 			}
 			finally
 			{
-				var duration = DateTime.Now - startTime;
+				var duration = DateTime.UtcNow - startTime;
 				_report.AddTestResult(testName, testPassed, duration, message);
 			}
 		}
