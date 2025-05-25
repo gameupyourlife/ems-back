@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using ems_back.Repo.DTOs.Login;
 using ems_back.Repo.DTOs.Register;
 using ems_back.Repo.Interfaces.Service;
+using ems_back.Repo.Models.Types;
+using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Services
 {
@@ -19,17 +21,20 @@ namespace ems_back.Services
 		private readonly ITokenService _tokenService;
 		private readonly ILogger<AuthService> _logger;
 		private readonly IOrganizationService _organizationService;
-		public AuthService(
+        private readonly UserManager<User> _userManager;
+        public AuthService(
 			IUserService userService,
 			ITokenService tokenService,
 			IOrganizationService organizationService,
-			ILogger<AuthService> logger)
+			ILogger<AuthService> logger,
+			UserManager<User> userManager)
 		{
 			_userService = userService;
 			_tokenService = tokenService;
 			_logger = logger;
 			_organizationService = organizationService;
-		}
+            _userManager = userManager;
+        }
 
 		public async Task<AuthResult> LoginAsync(LoginRequest request)
 		{
@@ -116,8 +121,8 @@ namespace ems_back.Services
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error generating token for user: {UserId}", user.Id);
-				throw; // Re-throw as this is a critical failure
+				throw; 
 			}
 		}
-	}
+    }
 }

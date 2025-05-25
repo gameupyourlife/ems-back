@@ -95,89 +95,6 @@ namespace ems_back.Repo.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("Mail", b =>
-                {
-                    b.Property<Guid>("MailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.PrimitiveCollection<Guid[]>("Recipients")
-                        .IsRequired()
-                        .HasColumnType("uuid[]");
-
-                    b.Property<DateTime?>("ScheduledFor")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("MailId");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("Mail");
-                });
-
-            modelBuilder.Entity("MailRun", b =>
-                {
-                    b.Property<Guid>("MainRunId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Logs")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("MailId")
-                        .HasMaxLength(50)
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("MainRunId");
-
-                    b.HasIndex("MailId");
-
-                    b.ToTable("MailRun");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -551,6 +468,134 @@ namespace ems_back.Repo.Migrations
                     b.ToTable("FlowsRun");
                 });
 
+            modelBuilder.Entity("ems_back.Repo.Models.Mail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsUserCreated")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.PrimitiveCollection<Guid[]>("Recipients")
+                        .HasColumnType("uuid[]");
+
+                    b.Property<DateTime?>("ScheduledFor")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("sendToAllParticipants")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("Mail");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.MailQueueEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MailQueueEntries");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.MailRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Logs")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("MailId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailId");
+
+                    b.ToTable("MailRun");
+                });
+
             modelBuilder.Entity("ems_back.Repo.Models.MailTemplate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -561,26 +606,57 @@ namespace ems_back.Repo.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<Guid[]>("Recipients")
+                        .HasColumnType("uuid[]");
+
+                    b.Property<DateTime?>("ScheduledFor")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("SendToAllParticipants")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("isUserCreated")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedBy");
+
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("UpdatedBy");
 
                     b.ToTable("MailTemplates");
                 });
@@ -847,43 +923,6 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("Mail", b =>
-                {
-                    b.HasOne("ems_back.Repo.Models.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("Event", "Event")
-                        .WithMany("Mails")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ems_back.Repo.Models.User", "Updater")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Creator");
-
-                    b.Navigation("Event");
-
-                    b.Navigation("Updater");
-                });
-
-            modelBuilder.Entity("MailRun", b =>
-                {
-                    b.HasOne("Mail", "Mail")
-                        .WithMany("MailRuns")
-                        .HasForeignKey("MailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Mail");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -1069,15 +1108,63 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Flow");
                 });
 
+            modelBuilder.Entity("ems_back.Repo.Models.Mail", b =>
+                {
+                    b.HasOne("ems_back.Repo.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Event", "Event")
+                        .WithMany("Mails")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ems_back.Repo.Models.User", "Updater")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Updater");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.MailRun", b =>
+                {
+                    b.HasOne("ems_back.Repo.Models.Mail", "Mail")
+                        .WithMany("MailRuns")
+                        .HasForeignKey("MailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mail");
+                });
+
             modelBuilder.Entity("ems_back.Repo.Models.MailTemplate", b =>
                 {
+                    b.HasOne("ems_back.Repo.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy");
+
                     b.HasOne("ems_back.Repo.Models.Organization", "Organization")
                         .WithMany("MailTemplates")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ems_back.Repo.Models.User", "Updater")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy");
+
+                    b.Navigation("Creator");
+
                     b.Navigation("Organization");
+
+                    b.Navigation("Updater");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>
@@ -1120,7 +1207,7 @@ namespace ems_back.Repo.Migrations
                     b.HasOne("ems_back.Repo.Models.User", "User")
                         .WithMany("OrganizationUsers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -1158,11 +1245,6 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Organizers");
                 });
 
-            modelBuilder.Entity("Mail", b =>
-                {
-                    b.Navigation("MailRuns");
-                });
-
             modelBuilder.Entity("ems_back.Repo.Models.Flow", b =>
                 {
                     b.Navigation("Actions");
@@ -1179,6 +1261,11 @@ namespace ems_back.Repo.Migrations
                     b.Navigation("Flows");
 
                     b.Navigation("Triggers");
+                });
+
+            modelBuilder.Entity("ems_back.Repo.Models.Mail", b =>
+                {
+                    b.Navigation("MailRuns");
                 });
 
             modelBuilder.Entity("ems_back.Repo.Models.Organization", b =>

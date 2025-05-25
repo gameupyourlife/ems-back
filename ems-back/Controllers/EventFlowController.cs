@@ -7,6 +7,7 @@ using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ems_back.Controllers
 {
@@ -31,6 +32,13 @@ namespace ems_back.Controllers
         [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}, {nameof(UserRole.EventOrganizer)}")]
         public async Task<ActionResult<IEnumerable<FlowOverviewDto>>> GetFlows([FromRoute] Guid orgId, [FromRoute] Guid eventId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in claims");
+                return BadRequest("User ID not found");
+            }
+
             try
             {
                 var flows = await _eventFlowService.GetAllFlows(orgId, eventId);

@@ -26,22 +26,24 @@ namespace ems_back.Tests.Services
 		private readonly Mock<IOrganizationService> _organizationServiceMock = new();
 		private readonly Mock<ILogger<AuthService>> _loggerMock = new();
 		private readonly AuthService _authService;
+        private readonly Mock<UserManager<User>> _userManagerMock = new();
 
-		public AuthServiceTests(ITestOutputHelper output)
+        public AuthServiceTests(ITestOutputHelper output)
 		{
 			_report = new TestReportGenerator(output);
 			_authService = new AuthService(
 				_userServiceMock.Object,
 				_tokenServiceMock.Object,
 				_organizationServiceMock.Object,
-				_loggerMock.Object);
+				_loggerMock.Object,
+				_userManagerMock.Object);
 		}
 
 		[Fact]
 		public async Task LoginAsync_ValidCredentials_ReturnsSuccess()
 		{
 			var testName = nameof(LoginAsync_ValidCredentials_ReturnsSuccess);
-			var startTime = DateTime.Now;
+			var startTime = DateTime.UtcNow;
 			bool testPassed = false;
 			string message = null;
 
@@ -79,7 +81,7 @@ namespace ems_back.Tests.Services
 			}
 			finally
 			{
-				var duration = DateTime.Now - startTime;
+				var duration = DateTime.UtcNow - startTime;
 				_report.AddTestResult(testName, testPassed, duration, message);
 			}
 		}
