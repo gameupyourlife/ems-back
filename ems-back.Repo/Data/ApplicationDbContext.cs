@@ -201,19 +201,19 @@ namespace ems_back.Repo.Data
 				.HasMany(e => e.OrganizationUsers)
 				.WithOne(ou => ou.User)
 				.HasForeignKey(ou => ou.UserId)
-				.OnDelete(DeleteBehavior.Restrict); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Org gelöscht
+				.OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
 				.HasMany(e => e.AttendedEvents)
 				.WithOne(e => e.User)
 				.HasForeignKey(e => e.UserId)
-				.OnDelete(DeleteBehavior.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Event gelöscht
+				.OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
 				.HasMany(e => e.AssignedEvents)
                 .WithOne(e => e.User)
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung als Organizer gelöscht
+                .OnDelete(DeleteBehavior.Cascade);
 
 			// Organization relationships:
 
