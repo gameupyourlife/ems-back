@@ -21,8 +21,8 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using System.Net;
-using ems_back.Repo.Repositories;
-using ems_back.Emails;
+using Quartz;
+using ems_back.Repo.Jobs;
 
 
 namespace ems_back
@@ -151,8 +151,8 @@ namespace ems_back
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+            });
+            /*.AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -175,6 +175,46 @@ namespace ems_back
                 options.AddPolicy("RequireEventOrganizerRole", policy => policy.RequireRole("EVENT-ORGANIZER"));
                 options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("ORGANIZER"));
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
+            });*/
+
+            //FlowRuns related Stuff
+            builder.Services.AddScoped<MapTriggers>();
+            builder.Services.AddScoped<CheckTriggers>();
+
+            builder.Services.AddQuartz(opt =>
+            {
+                opt.SchedulerId = "Scheduler-1";
+                opt.SchedulerName = "QuartzScheduler";
+
+                opt.UsePersistentStore(storeOptions =>
+                {
+                    storeOptions.UseProperties = true;
+                    storeOptions.UseBinarySerializer();
+                    storeOptions.UsePostgres(postgres =>
+                    {
+                        postgres.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                    });
+                });
+
+                var jobKey = new JobKey("CheckFlowsJob");
+
+                opt.AddJob<CheckFlowsJob>(jobKey, j =>
+                {
+                    j.WithIdentity(jobKey)
+                     .StoreDurably(); // verhindert Duplikate
+                });
+
+                opt.AddTrigger(t =>
+                {
+                    t.ForJob(jobKey)
+                     .WithIdentity("CheckFlow", "Default")
+                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(30).RepeatForever());
+                });
+            });
+
+            builder.Services.AddQuartzHostedService(opt =>
+            {
+                opt.WaitForJobsToComplete = true;
             });
 
             var app = builder.Build();
@@ -196,8 +236,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.MapControllers();
 
