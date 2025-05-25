@@ -21,8 +21,11 @@ using ems_back.Repo.Interfaces;
 using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using System.Net;
-using ems_back.Repo.Repositories;
+using Quartz;
+using ems_back.Repo.Jobs;
 using ems_back.Emails;
+using ems_back.Repo.Repositories;
+using ems_back.Repo.Jobs.Mail;
 
 
 namespace ems_back
@@ -126,12 +129,14 @@ namespace ems_back
             builder.Services.AddScoped<IFlowRunService, FlowRunService>();
 
             builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+            builder.Services.AddScoped<IMailQueueService, MailQueueService>();
             builder.Services.AddScoped<IMailRunService, MailRunService>();
 
 
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
             builder.Services.AddScoped<MailService>();
 
+            builder.Services.AddHostedService<MailQueueWorker>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -180,6 +185,46 @@ namespace ems_back
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
             });
 
+            //FlowRuns related Stuff
+            builder.Services.AddScoped<MapTriggers>();
+            builder.Services.AddScoped<CheckTriggers>();
+
+            builder.Services.AddQuartz(opt =>
+            {
+                opt.SchedulerId = "Scheduler-1";
+                opt.SchedulerName = "QuartzScheduler";
+
+                opt.UsePersistentStore(storeOptions =>
+                {
+                    storeOptions.UseProperties = true;
+                    storeOptions.UseBinarySerializer();
+                    storeOptions.UsePostgres(postgres =>
+                    {
+                        postgres.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                    });
+                });
+
+                var jobKey = new JobKey("CheckFlowsJob");
+
+                opt.AddJob<CheckFlowsJob>(jobKey, j =>
+                {
+                    j.WithIdentity(jobKey)
+                     .StoreDurably(); // verhindert Duplikate
+                });
+
+                opt.AddTrigger(t =>
+                {
+                    t.ForJob(jobKey)
+                     .WithIdentity("CheckFlow", "Default")
+                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(30).RepeatForever());
+                });
+            });
+
+            builder.Services.AddQuartzHostedService(opt =>
+            {
+                opt.WaitForJobsToComplete = true;
+            });
+
             var app = builder.Build();
 
             // Initialize roles on startup
@@ -199,8 +244,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.MapControllers();
 

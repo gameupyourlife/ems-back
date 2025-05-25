@@ -29,10 +29,10 @@ namespace ems_back.Repo.Data
 		public DbSet<OrganizationUser> OrganizationUsers { get; set; }
 		public DbSet<FlowsRun> FlowsRun { get; set; }
 		public DbSet<FlowTemplate> FlowTemplates { get; set; }
-
-		public DbSet<MailTemplate> MailTemplates { get; set; }
-		public DbSet<Mail> Mail { get; set; }
-		public DbSet<MailRun> MailRun { get; set; }
+		public DbSet<MailQueueEntry> MailQueueEntries { get; set; }
+    public DbSet<MailTemplate> MailTemplates { get; set; }
+    public DbSet<Mail> Mail { get; set; }
+    public DbSet<MailRun> MailRun { get; set; }
 		public DbSet<EventOrganizer> EventOrganizers { get; set; }
 
 		public DbSet<OrganizationDomain> OrganizationDomain { get; set; }
@@ -203,21 +203,21 @@ namespace ems_back.Repo.Data
 				.WithOne(ou => ou.User)
 				.HasForeignKey(ou => ou.UserId)
 				.OnDelete(DeleteBehavior
-					.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Org gelöscht
+					.Cascade); 
+
+
 
 			modelBuilder.Entity<User>()
 				.HasMany(e => e.AttendedEvents)
 				.WithOne(e => e.User)
 				.HasForeignKey(e => e.UserId)
-				.OnDelete(DeleteBehavior
-					.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung zur Event gelöscht
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<User>()
 				.HasMany(e => e.AssignedEvents)
 				.WithOne(e => e.User)
 				.HasForeignKey(e => e.UserId)
-				.OnDelete(DeleteBehavior
-					.Cascade); // Wenn User gelöscht wird, wird auch die Verknüpfung als Organizer gelöscht
+				.OnDelete(DeleteBehavior.Cascade);
 
 			// Organization relationships:
 

@@ -32,6 +32,7 @@ namespace ems_back.Repo.Services
         private readonly SmtpSettings _smtp;
         private readonly IUserService _userService;
         private readonly IOrganizationRepository _organizationRepository;
+        private readonly IMailQueueService _mailQueueService;
 
         public MailService(
             IMailRepository emailRepository, 
@@ -39,7 +40,8 @@ namespace ems_back.Repo.Services
             IEventService eventService,
             ILogger<MailService> logger,
             IUserService userService,
-            IOrganizationRepository organizationRepository)
+            IOrganizationRepository organizationRepository,
+            IMailQueueService mailQueueService)
         {
             _mailRepository = emailRepository;
             _eventService = eventService;
@@ -47,6 +49,7 @@ namespace ems_back.Repo.Services
             _smtp = options.Value;
             _userService = userService;
             _organizationRepository = organizationRepository;
+            _mailQueueService = mailQueueService;
         }
 
         public async Task<bool> ExistsOrg(Guid orgId)
@@ -67,12 +70,6 @@ namespace ems_back.Repo.Services
             CreateMailDto createMailDto,
             Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", userId, orgId);
@@ -84,10 +81,6 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("Event with id {EventId} does not exist", eventId);
                 throw new NotFoundException("Event not found");
-            }
-            if (eventInfo.OrganizationId != orgId) {
-                _logger.LogWarning("Event is not in given org");
-                throw new MismatchException("Given event is not in given Org");
             }
 
             var mail = new MailDto
@@ -120,11 +113,6 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> DeleteMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
 
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
@@ -137,11 +125,6 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("Event with id {EventId} does not exist", eventId);
                 throw new NotFoundException("Event not found");
-            }
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event is not in given org");
-                throw new MismatchException("Given event is not in given Org");
             }
 
             var mail = await _mailRepository.GetMailByIdAsync(orgId, eventId, mailId);
@@ -162,12 +145,6 @@ namespace ems_back.Repo.Services
 
         public async Task<MailDto> GetMailByIdAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", mailId, orgId);
@@ -179,11 +156,6 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("Event with id {EventId} does not exist", eventId);
                 throw new NotFoundException("Event not found");
-            }
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event is not in given org");
-                throw new MismatchException("Given event is not in given Org");
             }
 
             var mail = await _mailRepository.GetMailByIdAsync(orgId, eventId, mailId);
@@ -201,12 +173,6 @@ namespace ems_back.Repo.Services
             Guid eventId, 
             Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", userId, orgId);
@@ -230,12 +196,6 @@ namespace ems_back.Repo.Services
             CreateMailDto mailDto,
             Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             var eventInfo = await _eventService.GetEventAsync(orgId, eventId, userId);
             if (eventInfo == null)
             {
@@ -257,14 +217,8 @@ namespace ems_back.Repo.Services
             return await _mailRepository.UpdateMailAsync(orgId, eventId, mailId, mailDto, userId);
         }
 
-        public async Task SendMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId)
+        public async Task SendMailByIdAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", userId, orgId);
@@ -276,11 +230,6 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("Event with id {EventId} does not exist", eventId);
                 throw new NotFoundException("Event not found");
-            }
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event is not in given org");
-                throw new MismatchException("Given event is not in given Org");
             }
 
             var mail = await GetMailByIdAsync(orgId, eventId, mailId, userId);
@@ -295,9 +244,7 @@ namespace ems_back.Repo.Services
             foreach (var recipientId in recipientIds)
             {
                 var user = await _userService.GetUserByIdAsync(recipientId);
-                var message = CreateMimeMessage(mail.Subject, mail.Body, user.Email, $"{user.FirstName} {user.LastName}");
-
-                await SendEmailAsync(message);
+                await _mailQueueService.EnqueueAsnyc(user.Email, user.FullName, mail.Subject, mail.Body);
             }
         }
 
@@ -306,6 +253,11 @@ namespace ems_back.Repo.Services
             if (mail.sendToAllParticipants)
             {
                 var participants = await _eventService.GetAllEventAttendeesAsync(orgId, eventId, userId);
+                if (participants == null || !participants.Any())
+                {
+                    _logger.LogWarning("No participants found for event with id {EventId}", eventId);
+                    throw new NotFoundException("No participants found for the event");
+                }
                 return participants.Select(p => p.UserId);
             }
 
@@ -318,36 +270,8 @@ namespace ems_back.Repo.Services
             return mail.Recipients;
         }
 
-        private MimeMessage CreateMimeMessage(string subject, string body, string recipientEmail, string recipientName)
-        {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("NextGenDevelopment", _smtp.Username));
-            message.To.Add(new MailboxAddress(recipientName, recipientEmail));
-            message.Subject = subject;
-            message.Body = new TextPart("html") { Text = body };
-            return message;
-        }
-
-        private async Task SendEmailAsync(MimeMessage message)
-        {
-            using var smtp = new SmtpClient();
-            smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-            await smtp.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_smtp.Username, _smtp.Password);
-            await smtp.SendAsync(message);
-            await smtp.DisconnectAsync(true);
-        }
-
         public async Task SendMailWithDtoAsync(Guid orgId, Guid eventId, CreateMailDto mail, Guid userId)
         {
-            if (!await ExistsOrg(orgId))
-            {
-                _logger.LogWarning("Organization with id {OrgId} does not exist", orgId);
-                throw new NotFoundException("Organization not found");
-            }
-
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", userId, orgId);
@@ -359,11 +283,6 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogWarning("Event with id {EventId} does not exist", eventId);
                 throw new NotFoundException("Event not found");
-            }
-            if (eventInfo.OrganizationId != orgId)
-            {
-                _logger.LogWarning("Event is not in given org");
-                throw new MismatchException("Given event is not in given Org");
             }
 
             var mailDto = new MailDto
@@ -381,39 +300,22 @@ namespace ems_back.Repo.Services
             foreach (var recipientId in recipientIds)
             {
                 var user = await _userService.GetUserByIdAsync(recipientId);
-                var message = CreateMimeMessage(
-                    mail.Subject,
-                    mail.Body,
-                    user.Email,
-                    $"{user.FirstName} {user.LastName}"
-                );
-
-                await SendEmailAsync(message);
+                await _mailQueueService.EnqueueAsnyc(user.Email, user.FullName, mailDto.Subject, mailDto.Body);
             }
         }
 
-        public async Task SendMailManualAsync(MailManualDto mailDto)
+        public async Task SendMailManualAsync(Guid orgId, MailManualDto mailDto, Guid userId)
         {
-
-            var email = new MimeMessage();
-            email.From.Add(new MailboxAddress("NextGenDevelopment", _smtp.Username));
-            email.Subject = mailDto.Subject;
-            email.Body = new TextPart("plain") { Text = mailDto.Body};
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
+            {
+                _logger.LogWarning("User with id {UserId} is not in organization {OrgId}", userId, orgId);
+                throw new NotFoundException("User not found in organization");
+            }
 
             foreach (var recipient in mailDto.recipentMails)
             {
-                email.To.Clear();
-                email.To.Add(MailboxAddress.Parse(recipient));
-
-                using (var smtp = new SmtpClient())
-                {
-                    smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-                    smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await smtp.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls);
-                    await smtp.AuthenticateAsync(_smtp.Username, _smtp.Password);
-                    await smtp.SendAsync(email);
-                    await smtp.DisconnectAsync(true);
-                }
+                _logger.LogInformation("Mail sent to {Recipient}", recipient);
+                await _mailQueueService.EnqueueAsnyc(recipient, "" , mailDto.Subject, mailDto.Body);
             }
         }
     }

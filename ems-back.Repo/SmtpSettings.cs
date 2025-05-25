@@ -7,6 +7,6 @@
         public bool EnableSsl { get; set; }
         public required string Username { get; set; }
         public required string Password { get; set; }
-        public required string From { get; set; }
+        public required string Company { get; set; }
     }
 }

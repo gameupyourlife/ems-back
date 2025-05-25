@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ems_back.Repo.Data;
@@ -11,9 +12,11 @@ using ems_back.Repo.Data;
 namespace ems_back.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250525152255_AddedMailQueueEntries")]
+    partial class AddedMailQueueEntries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -631,9 +634,6 @@ namespace ems_back.Repo.Migrations
                     b.Property<DateTime?>("ScheduledFor")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("SendToAllParticipants")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -648,6 +648,9 @@ namespace ems_back.Repo.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<bool>("isUserCreated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("sendToAllParticipants")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
@@ -1207,7 +1210,7 @@ namespace ems_back.Repo.Migrations
                     b.HasOne("ems_back.Repo.Models.User", "User")
                         .WithMany("OrganizationUsers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Organization");

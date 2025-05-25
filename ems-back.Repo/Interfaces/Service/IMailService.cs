@@ -17,8 +17,9 @@ namespace ems_back.Repo.Interfaces.Service
 		Task<MailDto> CreateMailAsync(Guid orgId, Guid eventId, CreateMailDto createMailDto, Guid userId);
 		Task<MailDto> UpdateMailAsync(Guid orgId, Guid eventId, Guid mailId, CreateMailDto updateMailDto, Guid userId);
 		Task<bool> DeleteMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
-        Task SendMailAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
+        Task SendMailByIdAsync(Guid orgId, Guid eventId, Guid mailId, Guid userId);
         Task SendMailWithDtoAsync(Guid orgId, Guid eventId, CreateMailDto sendMailManualDto, Guid userId);
-		Task SendMailManualAsync(MailManualDto manualDto);
-	}
+		Task SendMailManualAsync(Guid orgId, MailManualDto manualDto, Guid userId);
+        Task<bool> ExistsOrg(Guid orgId);
+    }
 }
