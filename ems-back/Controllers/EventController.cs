@@ -511,7 +511,7 @@ namespace ems_back.Controllers
             }
             catch (AlreadyExistsException ex)
             {
-                return BadRequest("Event organizer already exists");
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

@@ -145,30 +145,28 @@ namespace ems_back.Services
 		}
 
 		//only Admin
-		public async Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId)
-		{
-			// First verify the user has permission
-			var user = await _userManager.FindByIdAsync(userId.ToString());
-			if (user == null)
-			{
-				_logger.LogWarning("User {UserId} not found", userId);
-				throw new UnauthorizedAccessException("User not found");
-			}
+	public async Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId)
+{
+    // First verify the user has permission
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user == null)
+    {
+        _logger.LogWarning("User {UserId} not found", userId);
+        throw new UnauthorizedAccessException("User not found");
+    }
 
-			// Check if user is ADMIN
-			var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
+    // Check if user is ADMIN
+    var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
 
-			// If not admin, check if user is OWNER of this organization
-
-			if (!isAdmin)
-			{
-				_logger.LogWarning("User {UserId} lacks permission to update organization {OrganizationId}",
-					userId, organizationId);
-				throw new UnauthorizedAccessException("Insufficient permissions");
-			}
-
-			return await _organizationRepository.DeleteOrganizationAsync(userId, organizationId);
-		}
+    // If not admin, check if user is OWNER of this organization
+    if (!isAdmin)
+    {
+        _logger.LogWarning("User {UserId} lacks permission to update organization {OrganizationId}",
+            userId, organizationId);
+        throw new UnauthorizedAccessException("Insufficient permissions");
+    }
+    return await _organizationRepository.DeleteOrganizationAsync(organizationId, userId);
+}
 
 		//admin,owner, 
 		public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId, Guid userId)

@@ -22,6 +22,7 @@ using ems_back.Repo.Interfaces.Repository;
 using ems_back.Repo.Interfaces.Service;
 using System.Net;
 using ems_back.Repo.Repositories;
+using ems_back.Emails;
 
 
 namespace ems_back
@@ -100,7 +101,7 @@ namespace ems_back
 
             // Repositories
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-            builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+            builder.Services.AddScoped<IMailRepository, MailRepository>();
             builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
             builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -109,11 +110,12 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
+            builder.Services.AddScoped<IFlowRunRepository, FlowRunRepository>();
             builder.Services.AddScoped<IMailTemplateRepository, MailTemplateRepository>();
 
-			// Services
-			builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            // Services
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IMailService, Repo.Services.MailService>();
             builder.Services.AddScoped<IEventFlowService, EventFlowService>();
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IOrganizationService, OrganizationService>();
@@ -121,10 +123,18 @@ namespace ems_back
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
-            builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+            builder.Services.AddScoped<IFlowRunService, FlowRunService>();
 
-			// Identity Configuration - supports GUIDs for users and roles
-			builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+            builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+            builder.Services.AddScoped<IMailRunService, MailRunService>();
+
+
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
+            builder.Services.AddScoped<MailService>();
+
+
+            // Identity Configuration - supports GUIDs for users and roles
+            builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;

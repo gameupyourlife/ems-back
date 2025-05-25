@@ -165,9 +165,6 @@ namespace ems_back.Repo.MappingProfiles
 
 
 			CreateMap<FlowsRun, FlowsRunResponseDto>();
-			CreateMap<FlowsRunCreateDto, FlowsRun>()
-				.ForMember(dest => dest.Status, opt => opt.MapFrom(src => FlowRunStatus.Pending))
-				.ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => DateTime.UtcNow));
 
 
 			CreateMap<FlowTemplateCreateDto, FlowTemplate>()
@@ -187,6 +184,8 @@ namespace ems_back.Repo.MappingProfiles
 			CreateMap<Mail, MailDto>();
 			CreateMap<CreateMailDto, Mail>();
 
+			CreateMap<MailDto, Mail>();
+			CreateMap<CreateMailDto, Mail>();
 
 			// Add these mappings to your existing DbMappingProfile class
 			//CreateMap<OrganizationUser, OrganizationUserDto>()

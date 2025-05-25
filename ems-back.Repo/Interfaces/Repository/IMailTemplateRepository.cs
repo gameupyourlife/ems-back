@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Interfaces.Repository
 {
-	public interface IMailTemplateRepository
-	{
-		Task<MailTemplate> GetByIdAsync(Guid id);
-		Task<IEnumerable<MailTemplate>> GetByOrganizationAsync(Guid organizationId);
-		Task<MailTemplate> CreateAsync(MailTemplate template);
-		Task<MailTemplate> UpdateAsync(MailTemplate template);
-		Task<bool> DeleteAsync(Guid id);
-		Task<bool> ExistsAsync(Guid id);
-	}
+    public interface IMailTemplateRepository
+    {
+        Task<MailTemplate> GetByIdAsync(Guid id);
+        Task<IEnumerable<MailTemplate>> GetByOrganizationAsync(Guid organizationId);
+        Task<MailTemplate> CreateAsync(MailTemplate template);
+        Task<MailTemplate> UpdateAsync(MailTemplate template);
+        Task<bool> DeleteAsync(Guid id);
+        Task<bool> ExistsAsync(Guid id);
+    }
 }

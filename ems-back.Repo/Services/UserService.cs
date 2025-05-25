@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ems_back.Repo.Exceptions;
+using ems_back.Repo.Repository;
 
 namespace ems_back.Services
 {
@@ -47,7 +48,19 @@ namespace ems_back.Services
 
             _logger = logger;
         }
-		public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+
+        public async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+            if (user.Role == UserRole.Admin) return true;
+
+            var orgUser = await _orgMembershipRepo.GetAsync(orgId, userId);
+            if (orgUser == null) return false;
+
+            return true;
+        }
+        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             try
             {
@@ -56,18 +69,6 @@ namespace ems_back.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all users");
-                throw;
-            }
-        }
-		public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
-        {
-            try
-            {
-                return await _userRepository.GetUserByIdAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting user by ID: {UserId}", id);
                 throw;
             }
         }
@@ -209,7 +210,14 @@ namespace ems_back.Services
         {
             try
             {
-                if (await _userRepository.GetNumberOfOwnersAsync(id) <= 1)
+                var userInfo = await _userRepository.GetUserByIdAsync(id);
+                if (userInfo == null)
+                {
+                    _logger.LogWarning("Delete failed: User not found with ID: {UserId}", id);
+                    return false;
+                }
+
+                if (await _userRepository.GetNumberOfOwnersAsync(id) <= 1 && userInfo.Role == UserRole.Owner)
                 {
                     _logger.LogWarning("User {UserId} cannot be deleted because they are an owner", id);
                     throw new MissingRoleException("User cannot be deleted because they are an owner");

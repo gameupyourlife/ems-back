@@ -47,7 +47,6 @@ namespace ems_back.Repo.Repository
                     Status = e.Status,
                     Description = e.Description
                 })
-
                 .AsNoTracking()
                 .ToListAsync();
 
