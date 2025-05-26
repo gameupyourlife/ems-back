@@ -69,6 +69,11 @@ namespace ems_back.Repo.MappingProfiles
             CreateMap<MailTemplate, MailDto>()
                 .ForMember(dest => dest.IsUserCreated, opt => opt.MapFrom(src => src.isUserCreated));
 
+            CreateMap<Mail, MailDto>();
+            CreateMap<CreateMailDto, Mail>();
+
+            CreateMap<MailDto, Mail>();
+            CreateMap<CreateMailDto, Mail>();
 
             // Event mappings
 
