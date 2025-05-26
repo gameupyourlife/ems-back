@@ -8,6 +8,7 @@ using AutoMapper;
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Agenda;
+using ems_back.Repo.DTOs.Email;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Flow.FlowsRun;
@@ -64,9 +65,14 @@ namespace ems_back.Repo.MappingProfiles
 
 			CreateMap<Organization, OrganizationOverviewDto>();
 
-			// Event mappings
+            CreateMap<CreateMailDto, MailTemplate>();
+            CreateMap<MailTemplate, MailDto>()
+                .ForMember(dest => dest.IsUserCreated, opt => opt.MapFrom(src => src.isUserCreated));
 
-			CreateMap<EventCreateDto, Event>()
+
+            // Event mappings
+
+            CreateMap<EventCreateDto, Event>()
 				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
 				.ForMember(dest => dest.Attendees, opt => opt.Ignore());

@@ -30,6 +30,7 @@ using ems_back.Repo.Jobs.Mapping;
 using ems_back.Repo.Jobs.Mapping.Actions;
 using ems_back.Emails;
 using ems_back.Repo.Jobs.Mail;
+using ems_back.Repo.Repositories;
 
 namespace ems_back
 {
@@ -117,6 +118,7 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
             builder.Services.AddScoped<IMailRepository, MailRepository>();
+            builder.Services.AddScoped<IMailTemplateRepository, MailTemplateRepository>();
 
             // Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -131,6 +133,7 @@ namespace ems_back
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IMailRunService, MailRunService>();
+            builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
