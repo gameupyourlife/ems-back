@@ -27,7 +27,7 @@ namespace ems_back.Tests.Services
         private readonly Mock<IOrganizationRepository> _organizationRepoMock = new();
         private readonly Mock<IMailQueueService> _mailQueueServiceMock = new();
         private readonly MailService _mailService;
-
+        private readonly Mock<IEventRepository> _eventRepository;
 
 
         public MailServiceTests(ITestOutputHelper output)
@@ -50,7 +50,8 @@ namespace ems_back.Tests.Services
                 _loggerMock.Object,
                 _userServiceMock.Object,
                 _organizationRepoMock.Object,
-                _mailQueueServiceMock.Object
+                _mailQueueServiceMock.Object,
+                _eventRepository.Object
             );
         }
 
@@ -130,7 +131,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 10,
                 Capacity = 100,
                 Image = null,
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
@@ -221,7 +222,7 @@ namespace ems_back.Tests.Services
                 Category = "Sample Category",
                 AttendeeCount = 10,
                 Capacity = 100,
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow,
@@ -257,7 +258,7 @@ namespace ems_back.Tests.Services
                 Category = "Sample Category",
                 AttendeeCount = 10,
                 Capacity = 100,
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow,

@@ -11,20 +11,22 @@ using ems_back.Repo.Exceptions;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs.Agenda;
+using Quartz.Logging;
+using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Tests.Services
 {
 	public class EventServiceTests : IDisposable
 	{
-		private readonly TestReportGenerator _report;
-		private readonly Mock<IEventRepository> _eventRepoMock = new();
+        private readonly TestReportGenerator _report;
+        private readonly Mock<IEventRepository> _eventRepoMock = new();
         private readonly Mock<IOrganizationRepository> _orgRepoMock = new();
         private readonly Mock<IUserService> _userServiceMock = new();
         private readonly Mock<ILogger<EventService>> _loggerMock = new();
         private readonly EventService _eventService;
         private readonly Mock<IOrganizationService> _orgServiceMock = new();
 
-		public EventServiceTests(ITestOutputHelper output)
+        public EventServiceTests(ITestOutputHelper output)
         {
             _report = new TestReportGenerator(output);
 
@@ -32,8 +34,8 @@ namespace ems_back.Tests.Services
                 _eventRepoMock.Object,
                 _userServiceMock.Object,
                 _orgRepoMock.Object,
-                _loggerMock.Object,_orgServiceMock.Object
-            );
+                _loggerMock.Object
+        );
         }
 
         #region CreateEventTests
@@ -51,7 +53,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 100,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddDays(1),
                 End = DateTime.UtcNow.AddDays(2)
             };
@@ -74,7 +76,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 100,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddDays(-1),
                 End = DateTime.UtcNow.AddDays(1)
             };
@@ -97,7 +99,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 100,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(-1),
                 End = DateTime.UtcNow.AddHours(1)
             };
@@ -120,7 +122,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 0,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2)
             };
@@ -143,7 +145,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 100,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddDays(1),
                 End = DateTime.UtcNow.AddDays(2)
             };
@@ -196,7 +198,7 @@ namespace ems_back.Tests.Services
                 Location = "Test Location",
                 Capacity = 100,
                 Image = "test-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddDays(1),
                 End = DateTime.UtcNow.AddDays(2)
             };
@@ -243,7 +245,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(1), 
                 End = DateTime.UtcNow.AddHours(2), 
@@ -270,7 +272,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(-1),
                 End = DateTime.UtcNow.AddHours(1),
@@ -299,7 +301,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(2),
                 End = DateTime.UtcNow.AddHours(1),
@@ -326,7 +328,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
@@ -353,7 +355,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
@@ -368,7 +370,7 @@ namespace ems_back.Tests.Services
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
-                Status = EventStatus.DELAYED,
+                Status = EventStatus.Delayed,
                 Image = "test.png",
                 Start = DateTime.UtcNow.AddHours(-1),
                 End = DateTime.UtcNow.AddHours(1),
@@ -477,7 +479,7 @@ namespace ems_back.Tests.Services
                               OrganizationId = orgId,
                               Location = "Sample Location",
                               Category = "Sample Category",
-                              Status = EventStatus.ONGOING,
+                              Status = EventStatus.Ongoing,
                               Start = DateTime.UtcNow.AddHours(1),
                               CreatedAt = DateTime.UtcNow,
                               UpdatedAt = DateTime.UtcNow,
@@ -511,7 +513,7 @@ namespace ems_back.Tests.Services
                               OrganizationId = orgId,
                               Location = "Sample Location",
                               Category = "Sample Category",
-                              Status = EventStatus.ONGOING,
+                              Status = EventStatus.Ongoing,
                               Start = DateTime.UtcNow.AddHours(1),
                               CreatedAt = DateTime.UtcNow,
                               UpdatedAt = DateTime.UtcNow,
@@ -613,7 +615,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 0,
                 Capacity = 100,
                 Image = "sample-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
@@ -654,7 +656,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 0, 
                 Capacity = 100, 
                 Image = "sample-image.png",
-                Status = EventStatus.ONGOING, 
+                Status = EventStatus.Ongoing, 
                 Start = DateTime.UtcNow.AddHours(1), 
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1), 
@@ -666,15 +668,9 @@ namespace ems_back.Tests.Services
 
             _eventRepoMock.Setup(r => r.AddEventOrganizerAsync(orgId, eventId, organizerId)).ReturnsAsync(true);
 
-			//_userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
-			_orgServiceMock.Setup(s => s.UpdateUserRoleAsync(
-					It.IsAny<Guid>(),  // currentUserId
-					It.IsAny<Guid>(),  // orgId
-					organizerId,       // targetUserId
-					UserRole.EventOrganizer))  // newRole
-				.ReturnsAsync(new RoleUpdateResult(true, "Role updated successfully"));
+            _userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
 
-			var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
+            var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
 
             Assert.True(result);
         }
@@ -741,7 +737,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 0,
                 Capacity = 100,
                 Image = "sample-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
@@ -839,7 +835,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 0,
                 Capacity = 100,
                 Image = "sample-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
@@ -885,7 +881,7 @@ namespace ems_back.Tests.Services
                 AttendeeCount = 0,
                 Capacity = 100,
                 Image = "sample-image.png",
-                Status = EventStatus.ONGOING,
+                Status = EventStatus.Ongoing,
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),

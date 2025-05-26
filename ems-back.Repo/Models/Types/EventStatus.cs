@@ -8,12 +8,12 @@ namespace ems_back.Repo.Models.Types
 {
     public enum EventStatus
     {
-        SCHEDULED,
-        ONGOING,
-        COMPLETED,
-        CANCELLED,
-        POSTPONED,
-        DELAYED,
-        ARCHIVED
+        Scheduled,
+        Ongoing,
+        Completed,
+        Cancelled,
+        Postponed,
+        Delayed,
+        Archived
     }
 }

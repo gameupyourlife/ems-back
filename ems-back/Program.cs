@@ -23,10 +23,13 @@ using ems_back.Repo.Interfaces.Service;
 using System.Net;
 using Quartz;
 using ems_back.Repo.Jobs;
+using ems_back.Repo.Jobs.CheckTriggerMethods;
+using ems_back.Repo.Jobs.Trigger;
+using ems_back.Repo.Jobs.ProcessActionMethods;
+using ems_back.Repo.Jobs.Mapping;
+using ems_back.Repo.Jobs.Mapping.Actions;
 using ems_back.Emails;
-using ems_back.Repo.Repositories;
 using ems_back.Repo.Jobs.Mail;
-
 
 namespace ems_back
 {
@@ -104,7 +107,7 @@ namespace ems_back
 
             // Repositories
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-            builder.Services.AddScoped<IMailRepository, MailRepository>();
+            builder.Services.AddScoped<IEmailRepository, EmailRepository>();
             builder.Services.AddScoped<IEventFlowRepository, EventFlowRepository>();
             builder.Services.AddScoped<IOrgFlowRepository, OrgFlowRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -113,12 +116,13 @@ namespace ems_back
             builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             builder.Services.AddScoped<IOrganizationUserRepository, OrganizationUserRepository>();
             builder.Services.AddScoped<IOrganizationDomainRepository, OrganizationDomainRepository>();
-            builder.Services.AddScoped<IFlowRunRepository, FlowRunRepository>();
-            builder.Services.AddScoped<IMailTemplateRepository, MailTemplateRepository>();
+            builder.Services.AddScoped<IMailRepository, MailRepository>();
 
             // Services
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IMailService, Repo.Services.MailService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IMailService, MailService>();
+            builder.Services.AddScoped<IMailQueueService, MailQueueService>();
             builder.Services.AddScoped<IEventFlowService, EventFlowService>();
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IOrganizationService, OrganizationService>();
@@ -126,17 +130,6 @@ namespace ems_back
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
-            builder.Services.AddScoped<IFlowRunService, FlowRunService>();
-
-            builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
-            builder.Services.AddScoped<IMailQueueService, MailQueueService>();
-            builder.Services.AddScoped<IMailRunService, MailRunService>();
-
-
-            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
-            builder.Services.AddScoped<MailService>();
-
-            builder.Services.AddHostedService<MailQueueWorker>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -185,9 +178,24 @@ namespace ems_back
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("USER"));
             });
 
-            //FlowRuns related Stuff
+            //CheckFlowsJob related services
             builder.Services.AddScoped<MapTriggers>();
             builder.Services.AddScoped<CheckTriggers>();
+            builder.Services.AddScoped<MapActions>();
+            builder.Services.AddScoped<ProcessActionsForFlow>();
+
+            //Trigger Evaluators
+            builder.Services.AddScoped<DateTriggerEvaluator>();
+            builder.Services.AddScoped<NumOfAttendeesTriggerEvalator>();
+            builder.Services.AddScoped<RelativeDateTriggerEvaluator>();
+            builder.Services.AddScoped<StatusTriggerEvaluator>();
+
+            //Action Execution Services
+            builder.Services.AddScoped<ChangeTitleExecution>();
+            builder.Services.AddScoped<ChangeDescriptionExecution>();
+            builder.Services.AddScoped<ChangeImageExecution>();
+            builder.Services.AddScoped<ChangeStatusExecution>();
+            builder.Services.AddScoped<SendEmailExecution>();
 
             builder.Services.AddQuartz(opt =>
             {
@@ -225,6 +233,11 @@ namespace ems_back
                 opt.WaitForJobsToComplete = true;
             });
 
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Mail"));
+            builder.Services.AddScoped<MailService>();
+
+            builder.Services.AddHostedService<MailQueueWorker>();
+
             var app = builder.Build();
 
             // Initialize roles on startup
@@ -244,8 +257,8 @@ namespace ems_back
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 

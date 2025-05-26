@@ -172,12 +172,12 @@ namespace ems_back.Tests.Services
 			};
 
 			_userManagerMock.Setup(m => m.FindByEmailAsync(userDto.Email))
-				.ReturnsAsync(new User
-				{
+				.ReturnsAsync(new User 
+				{ 
 					Email = userDto.Email,
-					FirstName = userDto.FirstName,
-					LastName = userDto.LastName
-				});
+                    FirstName = userDto.FirstName,
+                    LastName = userDto.LastName
+                });
 
 			// Act
 			var act = async () => await _userService.CreateUserAsync(userDto);
@@ -186,58 +186,6 @@ namespace ems_back.Tests.Services
 			await act.Should().ThrowAsync<InvalidOperationException>()
 				.WithMessage($"*{userDto.Email}*");
 		}
-
-		[Fact]
-		public async Task RestrictedAction_ShouldThrow_WhenUserIsNotInRequiredRole()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var user = new User { Id = userId, FirstName = "Test ", LastName = "User ", Email = "test@user.com" };
-
-			_userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
-			_userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
-
-			// Act
-			var act = async () => await _userService.PerformRestrictedAdminAction(userId);
-
-			// Assert
-			await act.Should().ThrowAsync<UnauthorizedAccessException>()
-				.WithMessage("*nicht autorisiert*");
-		}
-
-		[Fact]
-		public async Task RestrictedAction_ShouldThrow_WhenUserDoesNotExist()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			_userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
-
-			// Act
-			var act = async () => await _userService.PerformRestrictedAdminAction(userId);
-
-			// Assert
-			await act.Should().ThrowAsync<InvalidOperationException>()
-				.WithMessage("*existiert nicht*");
-		}
-
-		[Fact]
-		public async Task RestrictedAction_ShouldSucceed_WhenUserIsInRequiredRole()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var user = new User { Id = userId, FirstName = "Admin",LastName = "Test",Email = "admin@user.com" };
-
-			_userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
-			_userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(true);
-
-			// Act
-			var result = await _userService.PerformRestrictedAdminAction(userId);
-
-			// Assert
-			result.Should().BeTrue(); // oder was immer die Methode zurückgibt
-		}
-
-
 
 		public void Dispose() => _report.Dispose();
 	}

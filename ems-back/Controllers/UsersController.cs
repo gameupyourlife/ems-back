@@ -25,13 +25,10 @@ namespace ems_back.Controllers
             _userService = userService;
             _logger = logger;
         }
-        private string? GetAuthenticatedUserId()
-        {
-	        return User.FindFirstValue(ClaimTypes.NameIdentifier);
-        }
 
-		// GET: api/users/{userId}
-		[HttpGet("{userId}")]
+        
+        // GET: api/users/{userId}
+        [HttpGet("{userId}")]
         public async Task<ActionResult<UserResponseDto>> GetUser(Guid userId)
         {
             try
@@ -55,7 +52,7 @@ namespace ems_back.Controllers
 
         // PUT: api/users/{userId}
         [Authorize]
-        [HttpPut]
+        [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try
@@ -82,9 +79,27 @@ namespace ems_back.Controllers
             }
         }
 
-		
-    
+        //PUT: api/users/roles/{userId}
+        [HttpPut("roles/{userId}")]
+        //[Authorize(Roles = "Organizer,Admin")]
+        public async Task<ActionResult> UpdateUserRole(Guid userId, [FromBody] UserUpdateRoleDto userDto)
+        {
+            try
+            {
+                var updatedUser = await _userService.UpdateUserRoleAsync(userId, userDto);
+                if (updatedUser == null)
+                {
+                    return NotFound();
+                }
 
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user role with id {UserId}", userId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
         // DELETE: api/users/{userId}
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
@@ -171,6 +186,7 @@ namespace ems_back.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)

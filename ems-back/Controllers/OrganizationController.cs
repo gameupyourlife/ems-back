@@ -29,8 +29,8 @@ namespace ems_back.Controllers
 		private string? GetAuthenticatedUserId()
 		{
 			return User.FindFirstValue(ClaimTypes.NameIdentifier);
-		}
-
+		} 
+		
 		// GET: api/orgs
 		[HttpGet]
 		[Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Owner)}")]
@@ -246,7 +246,7 @@ namespace ems_back.Controllers
 			Guid orgId,
 			[FromBody] AddDomainDto domainDto)
 		{
-
+			
 			try
 			{
 				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -288,33 +288,6 @@ namespace ems_back.Controllers
 				return StatusCode(500, "Internal server error");
 			}
 		}
-
-
-
-		[HttpPut("{orgId}/users/{userId}/role")]
-		[Authorize]
-		public async Task<IActionResult> UpdateUserRole(
-			Guid orgId,
-			Guid userId,
-			[FromBody] UserUpdateRoleDto dto)
-		{
-			var currentUserId = GetAuthenticatedUserId();
-			if (currentUserId == null)
-			{
-				return Unauthorized("User not authenticated.");
-			}
-
-			var result = await _organizationService.UpdateUserRoleAsync(
-				Guid.Parse(currentUserId),
-				orgId,
-				userId,
-				dto.newRole);
-
-			return result.Success
-				? NoContent()
-				: BadRequest(result.ErrorMessage);
-		}
-
 
 
 	}

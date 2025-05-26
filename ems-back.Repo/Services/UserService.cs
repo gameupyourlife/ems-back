@@ -31,13 +31,13 @@ namespace ems_back.Services
         private readonly IMapper _mapper;
 
 
-        public UserService(
+		public UserService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IUserRepository userRepository,
-               IOrganizationDomainRepository orgDomainRepo,
-               IOrganizationUserRepository orgMembershipRepo,
-            ILogger<UserService> logger, IMapper mapper)
+			   IOrganizationDomainRepository orgDomainRepo,
+			   IOrganizationUserRepository orgMembershipRepo,
+			ILogger<UserService> logger, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -46,7 +46,7 @@ namespace ems_back.Services
             _orgMembershipRepo = orgMembershipRepo;
             _mapper = mapper;
 
-            _logger = logger;
+			_logger = logger;
         }
 
         public async Task<bool> IsUserInOrgOrAdmin(Guid orgId, Guid userId)
@@ -60,21 +60,7 @@ namespace ems_back.Services
 
             return true;
         }
-
-		public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
-		{
-			try
-			{
-				return await _userRepository.GetUserByIdAsync(id);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting user by ID: {UserId}", id);
-				throw;
-			}
-		
-		}
-		public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             try
             {
@@ -83,6 +69,19 @@ namespace ems_back.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all users");
+                throw;
+            }
+        }
+
+        public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
+        {
+            try
+            {
+                return await _userRepository.GetUserByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by ID: {UserId}", id);
                 throw;
             }
         }
@@ -104,7 +103,7 @@ namespace ems_back.Services
                 if (existingUser != null)
                 {
                     _logger.LogWarning("Create user failed - email already exists: {Email}", userDto.Email);
-                    throw new InvalidOperationException($"Email '{userDto.Email}' is already registered, use another Email please.");
+                    throw new InvalidOperationException($"Email '{userDto.Email}' is already registered.");
                 }
 
                 // 2. Create user in Identity system
@@ -132,7 +131,10 @@ namespace ems_back.Services
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                };
+
+
+
+				};
 
                 var createdUser = await _userRepository.CreateUserAsync(repositoryDto);
 
@@ -146,12 +148,13 @@ namespace ems_back.Services
                     Role = UserRole.User
 
 
-                };
+					//Role = user.Role
+				};
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user with email: {Email}", userDto.Email);
-                throw;
+                throw; // Re-throw to let controller handle it
             }
         }
 
@@ -159,18 +162,14 @@ namespace ems_back.Services
         {
             try
             {
-	            _logger.LogInformation("Starting user update for ID: {UserId}", id);
+                // First update in repository
+                var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
 
-				// First update in repository
-				var updatedUser = await _userRepository.UpdateUserAsync(id, userDto);
-				_logger.LogDebug("Repository update completed for user ID: {UserId}", id);
-
-				// Then update in Identity if needed
-				var user = await _userManager.FindByIdAsync(id.ToString());
+                // Then update in Identity if needed
+                var user = await _userManager.FindByIdAsync(id.ToString());
                 if (user != null)
                 {
-	                _logger.LogDebug("Found Identity user for ID: {UserId}", id);
-					user.FirstName = userDto.FirstName ?? user.FirstName;
+                    user.FirstName = userDto.FirstName ?? user.FirstName;
                     user.LastName = userDto.LastName ?? user.LastName;
                     user.ProfilePicture = userDto.ProfilePicture ?? user.ProfilePicture;
 
@@ -178,27 +177,21 @@ namespace ems_back.Services
                     var updateResult = await _userManager.UpdateAsync(user);
                     if (!updateResult.Succeeded)
                     {
-	                    var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-	                    _logger.LogError("Identity update failed for user ID: {UserId}. Errors: {Errors}", id, errors);
-	                    throw new InvalidOperationException($"Identity update failed: {errors}");
+                        throw new InvalidOperationException(
+                            string.Join(", ", updateResult.Errors.Select(e => e.Description)));
                     }
 
-                    _logger.LogDebug("Identity update successful for user ID: {UserId}", id);
-                }
-                else
-                {
-	                _logger.LogWarning("User not found in Identity store for ID: {UserId}", id);
+
                 }
 
-                _logger.LogInformation("Successfully updated user with ID: {UserId}", id);
                 return updatedUser;
             }
             catch (Exception ex)
             {
-	            _logger.LogError(ex, "Error updating user with ID: {UserId}", id);
-	            throw;
+                _logger.LogError(ex, "Error updating user with ID: {UserId}", id);
+                throw;
             }
-		}
+        }
 
         //User Reset Password 
         public async Task ResetPasswordAsync(PasswordResetDto resetDto)
@@ -287,30 +280,30 @@ namespace ems_back.Services
 
         public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
         {
-            try
-            {
-                var organizations = await _userRepository.GetUserOrganizationsAsync(userId);
+	        try
+	        {
+		        var organizations = await _userRepository.GetUserOrganizationsAsync(userId);
 
-                if (!organizations.Any())
-                {
-                    _logger.LogWarning("No organizations found for user {UserId}", userId);
-                    return Enumerable.Empty<OrganizationDto>();
-                }
+		        if (!organizations.Any())
+		        {
+			        _logger.LogWarning("No organizations found for user {UserId}", userId);
+			        return Enumerable.Empty<OrganizationDto>();
+		        }
 
-                var result = _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
-                _logger.LogInformation("Retrieved {OrganizationCount} organizations for user {UserId}",
-                    result.Count(), userId);
+		        var result = _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
+		        _logger.LogInformation("Retrieved {OrganizationCount} organizations for user {UserId}",
+			        result.Count(), userId);
 
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving organizations for user {UserId}", userId);
-                throw;
-            }
+		        return result;
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error retrieving organizations for user {UserId}", userId);
+		        throw;
+	        }
         }
 
-
+        
 
         public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
         {
@@ -342,6 +335,22 @@ namespace ems_back.Services
             return await _userManager.AddToRoleAsync(user, role);
         }
 
+        public async Task<bool> UpdateUserRoleAsync(Guid userId, UserUpdateRoleDto userDto)
+        {
+            if (userId != userDto.userId)
+            {
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(UserRole), userDto.newRole))
+            {
+                return false;
+            }
+	        _logger.LogWarning("Upgraded (UserId: {userId}, to Role: {userDto})", userId, userDto);
+
+            return await _userRepository.UpdateUserRoleAsync(userDto) != null;
+
+		}
 
 		public async Task<SignInResult> CheckPasswordSignInAsync(User user, string password)
         {
@@ -352,16 +361,16 @@ namespace ems_back.Services
         {
             try
             {
-                UserResponseDto userEntity;
+                UserResponseDto userEntity; 
 
                 if (userId != null)
                 {
                     userEntity = await _userRepository.GetUserByIdAsync(userId.Value);
-
+                    
                 }
                 else
                 {
-                    userEntity = await _userRepository.GetUserByEmailAsync(email);
+                    userEntity = await _userRepository.GetUserByEmailAsync(email); 
                 }
 
                 var orgId = userEntity.Organization.Id;
@@ -371,7 +380,7 @@ namespace ems_back.Services
                     throw new MissingRoleException("User cannot be deleted because he is the last owner");
                 }
 
-                User? user = null;
+                User? user = null; // This 'user' variable remains unchanged
                 if (userId.HasValue)
                 {
                     user = await _userManager.FindByIdAsync(userId.Value.ToString());
@@ -404,93 +413,82 @@ namespace ems_back.Services
         }
 
 
-
+    
+        //todo: do not print Org Id instead print Org name
         public async Task HandleAutomaticOrganizationMembership(string email)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(email))
-                {
-                    _logger.LogWarning("Empty email provided");
-                    return;
-                }
+	        try
+	        {
+		        if (string.IsNullOrWhiteSpace(email))
+		        {
+			        _logger.LogWarning("Empty email provided");
+			        return;
+		        }
 
-                var domain = GetDomainFromEmail(email);
-                var organizationDomain = await _orgDomainRepo.GetByDomainAsync(domain);
+		        var domain = GetDomainFromEmail(email);
+		        var organizationDomain = await _orgDomainRepo.GetByDomainAsync(domain);
 
-                if (organizationDomain == null)
-                {
-                    _logger.LogInformation("No organization found for domain {Domain}", domain);
-                    return;
-                }
+		        if (organizationDomain == null)
+		        {
+			        _logger.LogInformation("No organization found for domain {Domain}", domain);
+			        return;
+		        }
 
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
-                {
-                    _logger.LogWarning("User with email {Email} not found", email);
-                    return;
-                }
+		        var user = await _userManager.FindByEmailAsync(email);
+		        if (user == null)
+		        {
+			        _logger.LogWarning("User with email {Email} not found", email);
+			        return;
+		        }
 
-                // Convert user.Id to Guid if needed
-                var userId = user.Id is Guid ? (Guid)user.Id : Guid.Parse(user.Id.ToString());
+		        // Convert user.Id to Guid if needed
+		        var userId = user.Id is Guid ? (Guid)user.Id : Guid.Parse(user.Id.ToString());
 
-                // Check if user is already a member for verification
-                if (await _orgMembershipRepo.ExistsAsync(userId, organizationDomain.OrganizationId))
-                {
-                    _logger.LogInformation("User {UserId} already member of organization {OrgId}",
-                        userId, organizationDomain.OrganizationId);
-                    return;
-                }
+		        // Check if user is already a member for verification
+		        if (await _orgMembershipRepo.ExistsAsync(userId, organizationDomain.OrganizationId))
+		        {
+			        _logger.LogInformation("User {UserId} already member of organization {OrgId}",
+				        userId, organizationDomain.OrganizationId);
+			        return;
+		        }
 
-                // Create new User with required UserRole
-                var newMembership = new OrganizationUser
-                {
-                    UserId = userId,
-                    OrganizationId = organizationDomain.OrganizationId,
-                    UserRole = UserRole.User,
-                    JoinedAt = DateTime.UtcNow
-                };
+		        // Create new User with required UserRole
+		        var newMembership = new OrganizationUser
+		        {
+			        UserId = userId,
+			        OrganizationId = organizationDomain.OrganizationId,
+			        UserRole = UserRole.User, 
+			        JoinedAt = DateTime.UtcNow
+		        };
 
-                await _orgMembershipRepo.AddAsync(newMembership);
-                _logger.LogInformation("Added user {UserId}  via domain {Domain} to organization {OrgId}",
-                    userId, domain, organizationDomain.OrganizationId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error handling automatic organization membership for email {Email}", email);
-                throw;
-            }
+		        await _orgMembershipRepo.AddAsync(newMembership);
+		        _logger.LogInformation("Added user {UserId}  via domain {Domain} to organization {OrgId}",
+			        userId, domain, organizationDomain.OrganizationId);
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error handling automatic organization membership for email {Email}", email);
+		        throw;
+	        }
         }
 
-        private string GetDomainFromEmail(string email)
-        {
-            try
-            {
-                var atIndex = email.IndexOf('@');
-                if (atIndex < 0 || atIndex == email.Length - 1)
-                {
-                    throw new ArgumentException("Invalid email format");
-                }
-                return email[(atIndex + 1)..].ToLower();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to extract domain from email {Email}", email);
-                throw;
-            }
-        }
-
-        public async Task<bool> PerformRestrictedAdminAction(Guid userId)
-        {
-	        var user = await _userManager.FindByIdAsync(userId.ToString())
-	                   ?? throw new InvalidOperationException($"User {userId} does not exist.");
-
-	        if (!await _userManager.IsInRoleAsync(user, "Admin"))
-		        throw new UnauthorizedAccessException("User is not autorised.");
-
-	        return true;
-        }
-
+		private string GetDomainFromEmail(string email)
+		{
+			try
+			{
+				var atIndex = email.IndexOf('@');
+				if (atIndex < 0 || atIndex == email.Length - 1)
+				{
+					throw new ArgumentException("Invalid email format");
+				}
+				return email[(atIndex + 1)..].ToLower();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to extract domain from email {Email}", email);
+				throw;
+			}
+		}
 
 	}
 }

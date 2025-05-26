@@ -30,21 +30,18 @@ namespace ems_back.Repo.Services
         private readonly IUserService _userService;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
-		private readonly IOrganizationService _organizationService;
 
-		public EventService(
+        public EventService(
 			IEventRepository eventRepository,
 			IUserService userService,
             IOrganizationRepository organizationRepository,
-            ILogger<EventService> logger, IOrganizationService organizationService)
-
+            ILogger<EventService> logger)
 		{
 			_eventRepository = eventRepository;
             _userService = userService;
             _organizationRepository = organizationRepository;
             _logger = logger;
-            _organizationService = organizationService;
-		}
+        }
 
         public async Task<bool> ExistsOrg(Guid orgId)
         {
@@ -325,60 +322,60 @@ namespace ems_back.Repo.Services
             return await _eventRepository.RemoveAttendeeFromEventAsync(eventId, attendeeId);
         }
 
-		public async Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
-		{
-			if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
-			{
-				_logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
-				throw new MismatchException("User is not member of org");
-			}
+        public async Task<bool> AddEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
+        {
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
+            {
+                _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
+                throw new MismatchException("User is not member of org");
+            }
 
-			if (!await _userService.IsUserInOrgOrAdmin(orgId, organizerId))
-			{
-				_logger.LogWarning("User with id {OrganizerId} is not a member of organization with id {OrgId}", organizerId, orgId);
-				throw new MismatchException("User is not member of org");
-			}
+            if (!await _userService.IsUserInOrgOrAdmin(orgId, organizerId))
+            {
+                _logger.LogWarning("User with id {OrganizerId} is not a member of organization with id {OrgId}", organizerId, orgId);
+                throw new MismatchException("User is not member of org");
+            }
 
-			var eventInfo = await _eventRepository.GetEventByIdAsync(orgId, eventId);
-			if (eventInfo == null)
-			{
-				_logger.LogWarning("Event with id {EventId} not found", eventId);
-				throw new NotFoundException("Event not found");
-			}
+            var eventInfo = await _eventRepository.GetEventByIdAsync(orgId, eventId);
+            if (eventInfo == null)
+            {
+                _logger.LogWarning("Event with id {EventId} not found", eventId);
+                throw new NotFoundException("Event not found");
+            }
 
-			var organizer = await _eventRepository.GetEventOrganizerAsync(eventId, organizerId);
-			if (organizer != null)
-			{
-				_logger.LogWarning("Event organizer with id {OrganizerId} already exists for event with id {EventId}", organizerId, eventId);
-				throw new AlreadyExistsException("Event organizer already exists for this event");
-			}
+            var organizer = await _eventRepository.GetEventOrganizerAsync(eventId, organizerId);
+            if (organizer != null)
+            {
+                _logger.LogWarning("Event organizer with id {OrganizerId} already exists for event with id {EventId}", organizerId, eventId);
+                throw new AlreadyExistsException("Event organizer already exists for this event");
+            }
 
-			var isAdded = await _eventRepository.AddEventOrganizerAsync(orgId, eventId, organizerId);
-			if (!isAdded)
-			{
-				_logger.LogWarning("Event organizer with id {OrganizerId} could not be added to event with id {EventId}", organizerId, eventId);
-				throw new DbUpdateException("Event organizer could not be added");
-			}
+            var isAdded = await _eventRepository.AddEventOrganizerAsync(orgId, eventId, organizerId);
+            if (!isAdded)
+            {
+                _logger.LogWarning("Event organizer with id {OrganizerId} could not be added to event with id {EventId}", organizerId, eventId);
+                throw new DbUpdateException("Event organizer could not be added");
+            }
 
-			var roleUpdateResult = await _organizationService.UpdateUserRoleAsync(
-				currentUserId: userId,       
-				orgId: orgId,               
-				targetUserId: organizerId,   
-				newRole: UserRole.EventOrganizer 
-			);
+            var roleUpdate = new UserUpdateRoleDto
+            {
+                userId = organizerId,
+                OrganizationId = orgId,
+                newRole = UserRole.EventOrganizer
+            };
 
-			if (!roleUpdateResult.Success)
-			{
-				_logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}: {Message}",
-					organizerId, roleUpdateResult);
-				await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
-				throw new MismatchException($"Event organizer role could not be updated: {roleUpdateResult}");
-			}
+            var isRoleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
+            if (!isRoleUpdated)
+            {
+                _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}", organizerId);
+                await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
+                throw new MismatchException("Event organizer role could not be updated");
+            }
 
-			return roleUpdateResult.Success;
-		}
+            return isRoleUpdated;
+        }
 
-		public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
+        public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
         {
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
@@ -400,22 +397,15 @@ namespace ems_back.Repo.Services
                 newRole = UserRole.EventOrganizer
             };
 
-
-			var isroleUpdated = await _organizationService.UpdateUserRoleAsync(
-				currentUserId: userId,       
-				orgId: orgId,                
-				targetUserId: organizerId,   
-				newRole: UserRole.User 
-			);
-
-			if (!isroleUpdated.Success)
+            var isroleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
+            if (!isroleUpdated)
             {
                 _logger.LogWarning("Event organizer role could not be updated");
                 await AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
                 throw new MismatchException("Event organizer role could not be updated");
             }
 
-            return isroleUpdated.Success;
+            return isroleUpdated;
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId, Guid userId)

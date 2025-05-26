@@ -56,24 +56,12 @@ namespace ems_back.Repo.Repository
 					Organization = organization
 				};
 
-				var orgUser = new OrganizationUser
-				{
-					UserId = organizationDto.CreatedBy,
-					OrganizationId = organization.Id,
-					UserRole = UserRole.Admin, 
-					JoinedAt = DateTime.UtcNow
-				};
-				await _context.OrganizationUsers.AddAsync(orgUser);
-
-
 				await _context.OrganizationDomain.AddAsync(domain);
-			
-
-				_logger.LogInformation("Organization created successfully with ID {OrganizationId}", organization.Id);
-				_logger.LogInformation("Welcome Admin {UserId}", organizationDto.CreatedBy);
 				await _context.SaveChangesAsync();
 
 				await transaction.CommitAsync();
+
+				_logger.LogInformation("Organization created successfully with ID {OrganizationId}", organization.Id);
 				return await GetOrganizationByIdAsync(organization.Id);
 			}
 			catch (Exception ex)

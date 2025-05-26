@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ems_back.Repo.Data;
 using ems_back.Repo.DTOs.Action;
 using ems_back.Repo.DTOs.Flow;
 using ems_back.Repo.DTOs.Trigger;
@@ -19,18 +20,18 @@ namespace ems_back.Repo.Services
         private readonly IEventFlowRepository _eventFlowRepository;
         private readonly IEventRepository _eventRepository;
         private readonly ILogger<EventFlowService> _logger;
-        private readonly IAuthService _authService;
+        private readonly ApplicationDbContext _dbContext;
 
         public EventFlowService(
             IEventFlowRepository eventFlowRepository,
             IEventRepository eventRepository,
             ILogger<EventFlowService> logger,
-            IAuthService authService)
+            ApplicationDbContext dbContext)
         {
             _eventFlowRepository = eventFlowRepository;
             _logger = logger;
             _eventRepository = eventRepository;
-            _authService = authService;
+            _dbContext = dbContext;
         }
 
         public async Task<IEnumerable<FlowOverviewDto>> GetAllFlows(Guid orgId, Guid eventId)

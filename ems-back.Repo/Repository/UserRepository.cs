@@ -20,27 +20,21 @@ namespace ems_back.Repo.Repository
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserRepository> _logger;
-        public UserRepository(
+		public UserRepository(
             ApplicationDbContext context,
             IMapper mapper,
-          ILogger<UserRepository> logger,
+		  ILogger<UserRepository> logger,
 
-            UserManager<User> userManager)
+			UserManager<User> userManager)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
             _logger = logger;
 
-        }
+		}
 
-        public async Task SaveChangesAsync()
-        {
-	        await _context.SaveChangesAsync();
-        }
-
-
-		public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto)
+        public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto)
         {
 	        var fullName = $"{userDto.FirstName} {userDto.LastName}";
             _logger.LogInformation("Starting user creation for {FullName} ({Email})", fullName, userDto.Email);
