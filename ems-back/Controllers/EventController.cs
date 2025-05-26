@@ -572,7 +572,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
-		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(
+		public async Task<ActionResult<List<AgendaEntryDto>>> GetAgendaByEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
 		{
@@ -612,7 +612,7 @@ namespace ems_back.Controllers
         // POST: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpPost("{eventId}/agenda")]
         [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
-        public async Task<ActionResult<EventInfoDto>> AddAgendaToEvent(
+        public async Task<ActionResult<AgendaEntryDto>> AddAgendaToEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId,
             [FromBody] AgendaEntryCreateDto createDto)
