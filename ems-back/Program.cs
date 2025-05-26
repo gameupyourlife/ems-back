@@ -130,6 +130,7 @@ namespace ems_back
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IMailRunService, MailRunService>();
 
             // Identity Configuration - supports GUIDs for users and roles
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
