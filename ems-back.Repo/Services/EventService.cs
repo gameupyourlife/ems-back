@@ -1,3 +1,4 @@
+
 using ems_back.Repo.DTOs;
 using ems_back.Repo.DTOs.Agenda;
 using ems_back.Repo.DTOs.Event;
@@ -24,23 +25,26 @@ using System.Threading.Tasks;
 
 namespace ems_back.Repo.Services
 {
-	public class EventService : IEventService
-	{
-		private readonly IEventRepository _eventRepository;
+    public class EventService : IEventService
+    {
+        private readonly IEventRepository _eventRepository;
         private readonly IUserService _userService;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly ILogger<EventService> _logger;
+        private readonly IOrganizationService _organizationService;
 
         public EventService(
-			IEventRepository eventRepository,
-			IUserService userService,
+            IEventRepository eventRepository,
+            IUserService userService,
             IOrganizationRepository organizationRepository,
-            ILogger<EventService> logger)
-		{
-			_eventRepository = eventRepository;
+            ILogger<EventService> logger, IOrganizationService organizationService)
+
+        {
+            _eventRepository = eventRepository;
             _userService = userService;
             _organizationRepository = organizationRepository;
             _logger = logger;
+            _organizationService = organizationService;
         }
 
         public async Task<bool> ExistsOrg(Guid orgId)
@@ -143,7 +147,7 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Event with title {Title} and start date {StartDate} already exists", eventInfo.Title, eventInfo.Start);
                 throw new AlreadyExistsException("Event with the same title and start date already exists");
             }
-            
+
             var eventId = await _eventRepository.CreateEventAsync(eventInfo);
             eventInfo.Id = eventId;
             return eventInfo;
@@ -170,8 +174,8 @@ namespace ems_back.Repo.Services
         }
 
         public async Task<EventInfoDto> UpdateEventAsync(
-            Guid orgId, 
-            Guid eventId, 
+            Guid orgId,
+            Guid eventId,
             EventUpdateDto eventDto,
             Guid userId)
         {
@@ -234,8 +238,8 @@ namespace ems_back.Repo.Services
         }
 
         public async Task<EventAttendeeDto> AddAttendeeToEventAsync(
-            Guid orgId, 
-            Guid eventId, 
+            Guid orgId,
+            Guid eventId,
             EventAttendeeCreateDto attendeeDto,
             Guid userId)
         {
@@ -256,7 +260,7 @@ namespace ems_back.Repo.Services
             if (eventInfo == null)
             {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
-                throw new NotFoundException("Event not found"); 
+                throw new NotFoundException("Event not found");
             }
 
             if (eventInfo.AttendeeCount >= eventInfo.Capacity)
@@ -357,22 +361,22 @@ namespace ems_back.Repo.Services
                 throw new DbUpdateException("Event organizer could not be added");
             }
 
-            var roleUpdate = new UserUpdateRoleDto
-            {
-                userId = organizerId,
-                OrganizationId = orgId,
-                newRole = UserRole.EventOrganizer
-            };
+            var roleUpdateResult = await _organizationService.UpdateUserRoleAsync(
+                currentUserId: userId,
+                orgId: orgId,
+                targetUserId: organizerId,
+                newRole: UserRole.EventOrganizer
+            );
 
-            var isRoleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
-            if (!isRoleUpdated)
+            if (!roleUpdateResult.Success)
             {
-                _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}", organizerId);
+                _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}: {Message}",
+                    organizerId, roleUpdateResult);
                 await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
-                throw new MismatchException("Event organizer role could not be updated");
+                throw new MismatchException($"Event organizer role could not be updated: {roleUpdateResult}");
             }
 
-            return isRoleUpdated;
+            return roleUpdateResult.Success;
         }
 
         public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
@@ -397,19 +401,26 @@ namespace ems_back.Repo.Services
                 newRole = UserRole.EventOrganizer
             };
 
-            var isroleUpdated = await _userService.UpdateUserRoleAsync(organizerId, roleUpdate);
-            if (!isroleUpdated)
+
+            var isroleUpdated = await _organizationService.UpdateUserRoleAsync(
+                currentUserId: userId,
+                orgId: orgId,
+                targetUserId: organizerId,
+                newRole: UserRole.User
+            );
+
+            if (!isroleUpdated.Success)
             {
                 _logger.LogWarning("Event organizer role could not be updated");
                 await AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
                 throw new MismatchException("Event organizer role could not be updated");
             }
 
-            return isroleUpdated;
+            return isroleUpdated.Success;
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId, Guid userId)
-		{
+        {
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
@@ -430,17 +441,17 @@ namespace ems_back.Repo.Services
             }
 
             var agenda = await _eventRepository.GetAgendaByEventIdAsync(eventId);
-			if (agenda == null)
-			{
-				_logger.LogWarning("No agenda found for event with id {EventId}", eventId);
+            if (agenda == null)
+            {
+                _logger.LogWarning("No agenda found for event with id {EventId}", eventId);
                 throw new NotFoundException("No agenda found");
             }
             return agenda;
         }
 
         public async Task<AgendaEntryDto> AddAgendaEntryToEventAsync(
-            Guid orgId, 
-            Guid eventId, 
+            Guid orgId,
+            Guid eventId,
             AgendaEntryCreateDto agendaEntryDto,
             Guid userId)
         {
@@ -475,9 +486,9 @@ namespace ems_back.Repo.Services
         }
 
         public async Task<AgendaEntryDto> UpdateAgendaEntryAsync(
-            Guid orgId, 
-            Guid eventId, 
-            Guid agendaId, 
+            Guid orgId,
+            Guid eventId,
+            Guid agendaId,
             AgendaEntryCreateDto agendaEntryDto,
             Guid userId)
         {
@@ -488,7 +499,8 @@ namespace ems_back.Repo.Services
             }
 
             var eventInfo = await _eventRepository.GetEventByIdAsync(orgId, eventId);
-            if (eventInfo == null) {
+            if (eventInfo == null)
+            {
                 _logger.LogWarning("Event with id {EventId} not found", eventId);
                 throw new NotFoundException("Event not found");
             }
@@ -514,7 +526,7 @@ namespace ems_back.Repo.Services
                 _logger.LogWarning("Failed to update agenda entry with id {AgendaId} for event with id {EventId}", agendaId, eventId);
                 throw new NotFoundException("Failed to update agenda entry");
             }
-            
+
             _logger.LogInformation("Agenda point with id {AgendaId} updated for event with id {EventId}", agendaId, eventId);
             return agendaEntry;
         }

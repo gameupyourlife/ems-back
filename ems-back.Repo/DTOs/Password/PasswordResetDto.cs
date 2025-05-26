@@ -21,5 +21,9 @@ namespace ems_back.Repo.DTOs.Password
 		[DataType(DataType.Password)]
 		[Compare("NewPassword", ErrorMessage = "Passwords don't match")]
 		public string ConfirmPassword { get; set; }
+
+
+		//Testing
+		public string token;
 	}
 }

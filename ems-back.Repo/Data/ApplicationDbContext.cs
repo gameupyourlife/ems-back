@@ -339,7 +339,24 @@ namespace ems_back.Repo.Data
 				((IHasTimestamps)entry.Entity).UpdatedAt = DateTime.UtcNow;
 			}
 
-			// Sync OrganizationUser data when User or Organization changes
+			// Detect updated OrganizationUsers where the UserRole was changed
+			var updatedOrgUsers = ChangeTracker.Entries<OrganizationUser>()
+				.Where(e => e.State == EntityState.Modified && e.Property(nameof(OrganizationUser.UserRole)).IsModified)
+				.ToList();
+
+			foreach (var entry in updatedOrgUsers)
+			{
+				var orgUser = entry.Entity;
+
+				// Fetch the associated User and update its Role
+				var user = Users.Find(orgUser.UserId);
+				if (user != null)
+				{
+					user.Role = orgUser.UserRole; // Sync top-level User.Role
+					Entry(user).State = EntityState.Modified;
+				}
+			}
+			// Track modified Users and Organizations for double-save behavior
 			var changedUsers = ChangeTracker.Entries<User>()
 				.Where(e => e.State == EntityState.Modified &&
 							(e.Property(nameof(User.FirstName)).IsModified ||

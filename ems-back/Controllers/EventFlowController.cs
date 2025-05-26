@@ -7,6 +7,7 @@ using ems_back.Repo.Models;
 using ems_back.Repo.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ems_back.Controllers
 {
@@ -123,6 +124,11 @@ namespace ems_back.Controllers
 
                 _logger.LogInformation("Flow {FlowId} updated for event {EventId}", flowId, eventId);
                 return Ok(updated);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

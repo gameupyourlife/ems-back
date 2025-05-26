@@ -1,4 +1,5 @@
-﻿using ems_back.Repo.DTOs.Event;
+﻿
+using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using Moq;
 using Xunit.Abstractions;
@@ -11,13 +12,11 @@ using ems_back.Repo.Exceptions;
 using ems_back.Repo.DTOs.User;
 using ems_back.Repo.Models;
 using ems_back.Repo.DTOs.Agenda;
-using Quartz.Logging;
-using Microsoft.AspNetCore.Identity;
 
 namespace ems_back.Tests.Services
 {
-	public class EventServiceTests : IDisposable
-	{
+    public class EventServiceTests : IDisposable
+    {
         private readonly TestReportGenerator _report;
         private readonly Mock<IEventRepository> _eventRepoMock = new();
         private readonly Mock<IOrganizationRepository> _orgRepoMock = new();
@@ -34,8 +33,8 @@ namespace ems_back.Tests.Services
                 _eventRepoMock.Object,
                 _userServiceMock.Object,
                 _orgRepoMock.Object,
-                _loggerMock.Object
-        );
+                _loggerMock.Object, _orgServiceMock.Object
+            );
         }
 
         #region CreateEventTests
@@ -57,7 +56,7 @@ namespace ems_back.Tests.Services
                 Start = DateTime.UtcNow.AddDays(1),
                 End = DateTime.UtcNow.AddDays(2)
             };
-            
+
             _userServiceMock.Setup(s => s.IsUserInOrgOrAdmin(orgId, userId)).ReturnsAsync(false);
 
             await Assert.ThrowsAsync<MismatchException>(() => _eventService.CreateEventAsync(orgId, eventDto, userId));
@@ -68,8 +67,8 @@ namespace ems_back.Tests.Services
         {
             var orgId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var eventDto = new EventCreateDto 
-            { 
+            var eventDto = new EventCreateDto
+            {
                 Title = "New Event",
                 Description = "Test Description",
                 Category = "Test Category",
@@ -239,17 +238,17 @@ namespace ems_back.Tests.Services
             var orgId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             var eventId = Guid.NewGuid();
-            var eventDto = new EventUpdateDto 
-            { 
+            var eventDto = new EventUpdateDto
+            {
                 Title = "Test",
                 Location = "Testlocation",
                 Description = "Test",
                 Category = "Test",
                 Status = EventStatus.Delayed,
                 Image = "test.png",
-                Start = DateTime.UtcNow.AddHours(1), 
-                End = DateTime.UtcNow.AddHours(2), 
-                Capacity = 10 
+                Start = DateTime.UtcNow.AddHours(1),
+                End = DateTime.UtcNow.AddHours(2),
+                Capacity = 10
             };
 
             _userServiceMock
@@ -266,7 +265,7 @@ namespace ems_back.Tests.Services
             var orgId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             var eventId = Guid.NewGuid();
-            var eventDto = new EventUpdateDto 
+            var eventDto = new EventUpdateDto
             {
                 Title = "Test",
                 Location = "Testlocation",
@@ -362,8 +361,8 @@ namespace ems_back.Tests.Services
                 Capacity = 10
             };
 
-            var expectedResult = new EventInfoDto 
-            { 
+            var expectedResult = new EventInfoDto
+            {
                 Id = eventId,
                 OrganizationId = orgId,
                 Title = "Test",
@@ -526,7 +525,7 @@ namespace ems_back.Tests.Services
                           .ReturnsAsync(true);
 
             _userServiceMock.Setup(s => s.GetUserByIdAsync(attendeeId))
-                            .ReturnsAsync(new UserResponseDto 
+                            .ReturnsAsync(new UserResponseDto
                             {
                                 FirstName = "John",
                                 LastName = "Doe",
@@ -622,7 +621,7 @@ namespace ems_back.Tests.Services
                 UpdatedAt = DateTime.UtcNow,
                 CreatorName = "Test Creator"
             });
-                
+
             _eventRepoMock.Setup(r => r.GetEventOrganizerAsync(eventId, organizerId)).ReturnsAsync(new EventOrganizer
             {
                 EventId = eventId,
@@ -652,23 +651,29 @@ namespace ems_back.Tests.Services
                 OrganizationId = orgId,
                 Location = "Sample Location",
                 Description = "Sample Description",
-                Category = "Sample Category", 
-                AttendeeCount = 0, 
-                Capacity = 100, 
+                Category = "Sample Category",
+                AttendeeCount = 0,
+                Capacity = 100,
                 Image = "sample-image.png",
-                Status = EventStatus.Ongoing, 
-                Start = DateTime.UtcNow.AddHours(1), 
+                Status = EventStatus.Ongoing,
+                Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2),
-                CreatedAt = DateTime.UtcNow.AddDays(-1), 
-                UpdatedAt = DateTime.UtcNow, 
-                CreatorName = "Test Creator" 
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow,
+                CreatorName = "Test Creator"
             });
 
             _eventRepoMock.Setup(r => r.GetEventOrganizerAsync(eventId, organizerId)).ReturnsAsync((EventOrganizer?)null!);
 
             _eventRepoMock.Setup(r => r.AddEventOrganizerAsync(orgId, eventId, organizerId)).ReturnsAsync(true);
 
-            _userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
+            //_userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
+            _orgServiceMock.Setup(s => s.UpdateUserRoleAsync(
+                    It.IsAny<Guid>(),  // currentUserId
+                    It.IsAny<Guid>(),  // orgId
+                    organizerId,       // targetUserId
+                    UserRole.EventOrganizer))  // newRole
+                .ReturnsAsync(new RoleUpdateResult(true, "Role updated successfully"));
 
             var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
 
@@ -797,7 +802,7 @@ namespace ems_back.Tests.Services
                 Description = "Updated Description",
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2)
-            }; 
+            };
 
             _userServiceMock.Setup(s => s.IsUserInOrgOrAdmin(orgId, userId)).ReturnsAsync(true);
 
@@ -820,10 +825,10 @@ namespace ems_back.Tests.Services
                 Description = "Updated Description",
                 Start = DateTime.UtcNow.AddHours(1),
                 End = DateTime.UtcNow.AddHours(2)
-            }; 
+            };
 
             _userServiceMock.Setup(s => s.IsUserInOrgOrAdmin(orgId, userId)).ReturnsAsync(true);
-            
+
             _eventRepoMock.Setup(r => r.GetEventByIdAsync(orgId, eventId)).ReturnsAsync(new EventInfoDto
             {
                 Id = eventId,
@@ -869,8 +874,8 @@ namespace ems_back.Tests.Services
 
             _userServiceMock.Setup(s => s.IsUserInOrgOrAdmin(orgId, userId)).ReturnsAsync(true);
 
-            
-            _eventRepoMock.Setup(r => r.GetEventByIdAsync(orgId, eventId)).ReturnsAsync(new EventInfoDto 
+
+            _eventRepoMock.Setup(r => r.GetEventByIdAsync(orgId, eventId)).ReturnsAsync(new EventInfoDto
             {
                 Id = eventId,
                 Title = "Sample Event",
@@ -912,5 +917,5 @@ namespace ems_back.Tests.Services
         #endregion
 
         public void Dispose() => _report.Dispose();
-	}
+    }
 }
