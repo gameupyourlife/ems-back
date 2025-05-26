@@ -84,7 +84,7 @@ namespace ems_back.Repo.Jobs.Mail
             smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
             smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await smtp.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.SslOnConnect);
+            await smtp.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_smtp.Username, _smtp.Password);
             await smtp.SendAsync(message);
             _logger.LogInformation("Email sent to {Email}", mail.ToEmail);

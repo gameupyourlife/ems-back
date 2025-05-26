@@ -293,7 +293,7 @@ namespace ems_back.Repo.Services.Tests
 				Recipients = new List<Guid> { Guid.NewGuid() },
 				ScheduledFor = DateTime.UtcNow.AddDays(1),
 				isUserCreated = true,
-				sendToAllParticipants = false,
+				SendToAllParticipants = false,
 				OrganizationId = _testOrgId,
 				CreatedBy = _testUserId,
 				CreatedAt = DateTime.UtcNow.AddDays(-1),
