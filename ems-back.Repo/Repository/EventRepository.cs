@@ -70,7 +70,7 @@ namespace ems_back.Repo.Repository
                 UpdatedBy = eventDto.UpdatedBy,
                 OrganizationId = eventDto.OrganizationId,
                 AttendeeCount = 0,
-                Status = EventStatus.SCHEDULED,
+                Status = EventStatus.Scheduled,
                 Image = eventDto.Image,
             };
             _context.Events.Add(eventObject);

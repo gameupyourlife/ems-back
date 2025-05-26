@@ -12,8 +12,6 @@ using ems_back.Repo.DTOs.Agenda;
 using System.Security.Claims;
 using System.Diagnostics.Eventing.Reader;
 using ems_back.Repo.Exceptions;
-using System.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace ems_back.Controllers
 {
@@ -498,13 +496,13 @@ namespace ems_back.Controllers
                 return Ok(isCreated);
 
             }
-            catch (DbUpdateException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (NotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (MismatchException ex)
             {
@@ -512,7 +510,7 @@ namespace ems_back.Controllers
             }
             catch (AlreadyExistsException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Event organizer already exists");
             }
             catch (Exception ex)
             {
@@ -570,7 +568,7 @@ namespace ems_back.Controllers
 
         // GET: api/orgs/{orgId}/events/{eventId}/agenda
         [HttpGet("{eventId}/agenda")]
-		public async Task<ActionResult<List<AgendaEntryDto>>> GetAgendaByEvent(
+		public async Task<ActionResult<List<AgendaEntry>>> GetAgendaByEvent(
             [FromRoute] Guid orgId, 
             [FromRoute] Guid eventId)
 		{

@@ -33,6 +33,7 @@ namespace ems_back.Repo.Services
         private readonly IUserService _userService;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly IMailQueueService _mailQueueService;
+        private readonly IEventRepository _eventRepository;
 
         public MailService(
             IMailRepository emailRepository, 
@@ -41,7 +42,8 @@ namespace ems_back.Repo.Services
             ILogger<MailService> logger,
             IUserService userService,
             IOrganizationRepository organizationRepository,
-            IMailQueueService mailQueueService)
+            IMailQueueService mailQueueService,
+            IEventRepository eventRepository)
         {
             _mailRepository = emailRepository;
             _eventService = eventService;
@@ -50,6 +52,7 @@ namespace ems_back.Repo.Services
             _userService = userService;
             _organizationRepository = organizationRepository;
             _mailQueueService = mailQueueService;
+            _eventRepository = eventRepository;
         }
 
         public async Task<bool> ExistsOrg(Guid orgId)
@@ -316,6 +319,44 @@ namespace ems_back.Repo.Services
             {
                 _logger.LogInformation("Mail sent to {Recipient}", recipient);
                 await _mailQueueService.EnqueueAsnyc(recipient, "" , mailDto.Subject, mailDto.Body);
+            }
+        }
+
+        public async Task SendMailByFlowAsync(Guid orgId, Guid eventId, Guid mailId)
+        {
+            var mail = await _mailRepository.GetMailByIdAsync(orgId, eventId, mailId);
+            IEnumerable<Guid>? selectedParticipants;
+
+            if (mail == null)
+            {
+                _logger.LogWarning("Mail with id {MailId} does not exist", mailId);
+                throw new NotFoundException("Mail not found");
+            }
+            if (mail.sendToAllParticipants)
+            {
+                var participants = await _eventRepository.GetAllEventAttendeesAsync(orgId, eventId);
+                if (participants == null || !participants.Any())
+                {
+                    _logger.LogWarning("No participants found for event with id {EventId}", eventId);
+                    throw new NotFoundException("No participants found for the event");
+                }
+                selectedParticipants = participants.Select(p => p.UserId);
+            }
+            else
+            {
+                selectedParticipants = mail.Recipients;
+            }
+
+            if (selectedParticipants == null || !selectedParticipants.Any())
+            {
+                _logger.LogWarning("No recipients found for mail with id {MailId}", mail.Id);
+                throw new NotFoundException("No recipients found for the mail");
+            }
+
+            foreach (var recipientId in selectedParticipants)
+            {
+                var user = await _userService.GetUserByIdAsync(recipientId);
+                await _mailQueueService.EnqueueAsnyc(user.Email, user.FullName, mail.Subject, mail.Body);
             }
         }
     }
