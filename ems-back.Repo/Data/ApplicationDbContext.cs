@@ -366,7 +366,6 @@ namespace ems_back.Repo.Data
 					Entry(user).State = EntityState.Modified;
 				}
 			}
-
 			// Track modified Users and Organizations for double-save behavior
 			var changedUsers = ChangeTracker.Entries<User>()
 				.Where(e => e.State == EntityState.Modified &&
