@@ -20,23 +20,28 @@ namespace ems_back.Repo.Repository
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserRepository> _logger;
-		public UserRepository(
+        public UserRepository(
             ApplicationDbContext context,
             IMapper mapper,
-		  ILogger<UserRepository> logger,
+          ILogger<UserRepository> logger,
 
-			UserManager<User> userManager)
+            UserManager<User> userManager)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
             _logger = logger;
 
-		}
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
 
         public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userDto)
         {
-	        var fullName = $"{userDto.FirstName} {userDto.LastName}";
+            var fullName = $"{userDto.FirstName} {userDto.LastName}";
             _logger.LogInformation("Starting user creation for {FullName} ({Email})", fullName, userDto.Email);
 
             var user = _mapper.Map<User>(userDto);
@@ -55,33 +60,33 @@ namespace ems_back.Repo.Repository
             _logger.LogInformation("User created successfully for {FullName} ({Email}), UserId: {UserId}", fullName, user.Email, user.Id);
 
 
-			return _mapper.Map<UserResponseDto>(user);
+            return _mapper.Map<UserResponseDto>(user);
         }
 
         public async Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userDto)
         {
-	        var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found for update.", userId);
                 return null;
             }
 
-			// Allow nulls or updates
-			user.ProfilePicture = userDto.ProfilePicture;
+            // Allow nulls or updates
+            user.ProfilePicture = userDto.ProfilePicture;
 
-			// Update only non-null properties
-			if (!string.IsNullOrEmpty(userDto.FirstName))
-		        user.FirstName = userDto.FirstName;
+            // Update only non-null properties
+            if (!string.IsNullOrEmpty(userDto.FirstName))
+                user.FirstName = userDto.FirstName;
 
-	        if (!string.IsNullOrEmpty(userDto.LastName))
-		        user.LastName = userDto.LastName;
+            if (!string.IsNullOrEmpty(userDto.LastName))
+                user.LastName = userDto.LastName;
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("User with ID {UserId} was successfully updated.", userId);
 
-			// Project to UserResponseDto without needing .Include(u => u.Organization)
-			return _mapper.Map<UserResponseDto>(user);
+            // Project to UserResponseDto without needing .Include(u => u.Organization)
+            return _mapper.Map<UserResponseDto>(user);
         }
 
         public async Task<UserResponseDto> UpdateUserRoleAsync(UserUpdateRoleDto userDto)
@@ -116,41 +121,41 @@ namespace ems_back.Repo.Repository
 
         public async Task<UserResponseDto> GetUserByIdAsync(Guid id)
         {
-	        try
-	        {
-		        var result = await _context.Users
-			        .AsNoTracking()
-			        .Where(u => u.Id == id)
-			        .ProjectTo<UserResponseDto>(_mapper.ConfigurationProvider)
-			        .FirstOrDefaultAsync();
+            try
+            {
+                var result = await _context.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == id)
+                    .ProjectTo<UserResponseDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
 
-		        if (result != null)
-		        {
-			        _logger.LogInformation("Successfully retrieved user with properties: " +
-			                               "Email: {Email}, " +
-			                               "FirstName: {FirstName}, " +
-			                               "LastName: {LastName}, " +
-			                               "FullName: {FullName}",
-				        result.Email,
-				        result.FirstName,
-				        result.LastName,
-				        $"{result.FirstName} {result.LastName}");
-		        }
-		        else
-		        {
-			        _logger.LogWarning("User with ID {UserId} not found", id);
-		        }
+                if (result != null)
+                {
+                    _logger.LogInformation("Successfully retrieved user with properties: " +
+                                           "Email: {Email}, " +
+                                           "FirstName: {FirstName}, " +
+                                           "LastName: {LastName}, " +
+                                           "FullName: {FullName}",
+                        result.Email,
+                        result.FirstName,
+                        result.LastName,
+                        $"{result.FirstName} {result.LastName}");
+                }
+                else
+                {
+                    _logger.LogWarning("User with ID {UserId} not found", id);
+                }
 
-		        return result;
-	        }
-	        catch (Exception ex)
-	        {
-		        _logger.LogError(ex, "Error retrieving user with ID {UserId}", id);
-		        throw; // Or return null if you prefer to handle errors gracefully
-	        }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user with ID {UserId}", id);
+                throw; // Or return null if you prefer to handle errors gracefully
+            }
         }
 
-		public async Task<UserResponseDto> GetUserByEmailAsync(string email)
+        public async Task<UserResponseDto> GetUserByEmailAsync(string email)
         {
             var user = await _context.Users
                .AsNoTracking()
@@ -245,29 +250,15 @@ namespace ems_back.Repo.Repository
         public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
         {
 
-	        return await _context.OrganizationUsers
-		        .Where(ou => ou.UserId == userId)
-		        .Select(ou => ou.Organization) // Get just the Organization
-		        .ProjectTo<OrganizationDto>(_mapper.ConfigurationProvider)
-		        .AsNoTracking()
-		        .ToListAsync();
-		}
+            return await _context.OrganizationUsers
+                .Where(ou => ou.UserId == userId)
+                .Select(ou => ou.Organization) // Get just the Organization
+                .ProjectTo<OrganizationDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
 
-		//public async Task<IEnumerable<OrganizationDto>> GetUserOrganizationsAsync(Guid userId)
-		//      {
-		//          var organizations = await _context.Users
-		//           .Where(u => u.Id == userId)
-		//           .SelectMany(u => _context.OrganizationUsers
-		//               .Where(ou => ou.UserId == u.Id)
-		//               .Select(ou => ou.Organization))
-		//           .Distinct()
-		//           .AsNoTracking()
-		//           .ToListAsync();
 
-		//          return _mapper.Map<IEnumerable<OrganizationDto>>(organizations);
-		//      }
-
-		
         // Internal methods for authentication
         public async Task<User> GetUserEntityByIdAsync(Guid id)
         {
@@ -282,15 +273,15 @@ namespace ems_back.Repo.Repository
 
         public async Task<int> GetNumberOfOwnersAsync(Guid orgId)
         {
-           var count = await _context.OrganizationUsers
-                .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Owner);
+            var count = await _context.OrganizationUsers
+                 .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Owner);
             return count;
         }
 
         public async Task<int> GetNumberOfOrganizersAsync(Guid orgId)
         {
-           var count = await _context.OrganizationUsers
-                .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Organizer);
+            var count = await _context.OrganizationUsers
+                 .CountAsync(ou => ou.OrganizationId == orgId && ou.UserRole == UserRole.Organizer);
             return count;
         }
     }

@@ -246,6 +246,10 @@ namespace ems_back.Controllers
                 }
                 return Ok(success);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (NotFoundException ex)
             {
                 return BadRequest(ex.Message);

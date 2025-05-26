@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using ems_back.Repo.DTOs.Event;
 using ems_back.Repo.Models.Types;
 using ems_back.Repo.DTOs.Organization;
@@ -25,8 +26,11 @@ namespace ems_back.Controllers
             _userService = userService;
             _logger = logger;
         }
+        private string? GetAuthenticatedUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
 
-        
         // GET: api/users/{userId}
         [HttpGet("{userId}")]
         public async Task<ActionResult<UserResponseDto>> GetUser(Guid userId)
@@ -52,7 +56,7 @@ namespace ems_back.Controllers
 
         // PUT: api/users/{userId}
         [Authorize]
-        [HttpPut("{userId}")]
+        [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userDto)
         {
             try
@@ -79,27 +83,9 @@ namespace ems_back.Controllers
             }
         }
 
-        //PUT: api/users/roles/{userId}
-        [HttpPut("roles/{userId}")]
-        //[Authorize(Roles = "Organizer,Admin")]
-        public async Task<ActionResult> UpdateUserRole(Guid userId, [FromBody] UserUpdateRoleDto userDto)
-        {
-            try
-            {
-                var updatedUser = await _userService.UpdateUserRoleAsync(userId, userDto);
-                if (updatedUser == null)
-                {
-                    return NotFound();
-                }
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating user role with id {UserId}", userId);
-                return StatusCode(500, "Internal server error");
-            }
-        }
+
+
         // DELETE: api/users/{userId}
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
@@ -126,43 +112,43 @@ namespace ems_back.Controllers
         }
 
         // GET: api/users/{userId}/orgs
-       
+
         [HttpGet("{userId}/orgs")]
         [ProducesResponseType(typeof(IEnumerable<OrganizationDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<OrganizationDto>>> GetUserOrganizations(Guid userId)
         {
-	        try
-	        {
-		        var organizations = await _userService.GetUserOrganizationsAsync(userId);
+            try
+            {
+                var organizations = await _userService.GetUserOrganizationsAsync(userId);
 
-		        if (organizations == null || !organizations.Any())
-		        {
-			        _logger.LogInformation("No organizations found for user {UserId}", userId);
-			        return NotFound($"No organizations found for user {userId}");
-		        }
+                if (organizations == null || !organizations.Any())
+                {
+                    _logger.LogInformation("No organizations found for user {UserId}", userId);
+                    return NotFound($"No organizations found for user {userId}");
+                }
 
-		        _logger.LogInformation("Successfully retrieved {OrganizationCount} organizations for user {UserId}",
-			        organizations.Count(), userId);
-		        return Ok(organizations);
-	        }
-	        catch (KeyNotFoundException ex)
-	        {
-		        _logger.LogWarning(ex, "User not found: {UserId}", userId);
-		        return NotFound(ex.Message);
-	        }
-	        catch (Exception ex)
-	        {
-		        _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
-		        return StatusCode(500, "Internal server error while processing your request");
-	        }
+                _logger.LogInformation("Successfully retrieved {OrganizationCount} organizations for user {UserId}",
+                    organizations.Count(), userId);
+                return Ok(organizations);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "User not found: {UserId}", userId);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting organizations for user {UserId}", userId);
+                return StatusCode(500, "Internal server error while processing your request");
+            }
         }
 
 
 
-		// DELETE: api/users/{userId}/admin-delete
-		[HttpDelete("UserAccount/delete")]
+        // DELETE: api/users/{userId}/admin-delete
+        [HttpDelete("UserAccount/delete")]
         public async Task<IActionResult> AdminDeleteUser([FromQuery] Guid? userId, [FromQuery] string? email)
         {
             try
@@ -187,31 +173,30 @@ namespace ems_back.Controllers
             }
         }
 
-
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto resetDto)
         {
-	        try
-	        {
-		        await _userService.ResetPasswordAsync(resetDto);
-		        return Ok(new { Message = "Password reset successful" });
-	        }
-	        catch (KeyNotFoundException ex)
-	        {
-		        return NotFound(new { Error = ex.Message });
-	        }
-	        catch (ArgumentException ex)
-	        {
-		        return BadRequest(new { Error = ex.Message });
-	        }
-	        catch (InvalidOperationException ex)
-	        {
-		        return BadRequest(new { Error = ex.Message });
-	        }
-	        catch (Exception ex)
-	        {
-		        return StatusCode(500, new { Error = "An unexpected error occurred" });
-	        }
+            try
+            {
+                await _userService.ResetPasswordAsync(resetDto);
+                return Ok(new { Message = "Password reset successful" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An unexpected error occurred" });
+            }
         }
-	}
+    }
 }
