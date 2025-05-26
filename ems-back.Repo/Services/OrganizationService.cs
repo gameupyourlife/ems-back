@@ -92,19 +92,18 @@ namespace ems_back.Services
             return await _organizationRepository.CreateOrganizationAsync(organizationDto);
         }
 
-        //Admin or owner: done
-        public async Task<OrganizationResponseDto> UpdateOrganizationAsync(
-            Guid id,
-            OrganizationUpdateDto organizationDto,
-            Guid updatedByUserId)
-        {
-            // First verify the user has permission
-            var user = await _userManager.FindByIdAsync(updatedByUserId.ToString());
-            if (user == null)
-            {
-                _logger.LogWarning("User {UserId} not found", updatedByUserId);
-                throw new UnauthorizedAccessException("User not found");
-            }
+		public async Task<OrganizationResponseDto> UpdateOrganizationAsync(
+			Guid id,
+			OrganizationUpdateDto organizationDto,
+			Guid updatedByUserId)
+		{
+			// First verify the user has permission
+			var user = await _userManager.FindByIdAsync(updatedByUserId.ToString());
+			if (user == null)
+			{
+				_logger.LogWarning("User {UserId} not found", updatedByUserId);
+				throw new UnauthorizedAccessException("User not found");
+			}
 
             // Check if user is ADMIN
             var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
@@ -145,35 +144,30 @@ namespace ems_back.Services
             }
         }
 
-        //only Admin
-        public async Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId)
-        {
-            // First verify the user has permission
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-            {
-                _logger.LogWarning("User {UserId} not found", userId);
-                throw new UnauthorizedAccessException("User not found");
-            }
+	public async Task<bool> DeleteOrganizationAsync(Guid userId, Guid organizationId)
+{
+    var user = await _userManager.FindByIdAsync(userId.ToString());
+    if (user == null)
+    {
+        _logger.LogWarning("User {UserId} not found", userId);
+        throw new UnauthorizedAccessException("User not found");
+    }
 
-            // Check if user is ADMIN
-            var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
+    var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
 
-            // If not admin, check if user is OWNER of this organization
-            if (!isAdmin)
-            {
-                _logger.LogWarning("User {UserId} lacks permission to update organization {OrganizationId}",
-                    userId, organizationId);
-                throw new UnauthorizedAccessException("Insufficient permissions");
-            }
-            return await _organizationRepository.DeleteOrganizationAsync(organizationId, userId);
-        }
+    if (!isAdmin)
+    {
+        _logger.LogWarning("User {UserId} lacks permission to update organization {OrganizationId}",
+            userId, organizationId);
+        throw new UnauthorizedAccessException("Insufficient permissions");
+    }
+    return await _organizationRepository.DeleteOrganizationAsync(organizationId, userId);
+}
 
-        //admin,owner, 
-        public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId, Guid userId)
-        {
-            _logger.LogInformation("Attempting to get all domains of {OrgId} by user {UserId}", organizationId, userId);
-            if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
+		public async Task<IEnumerable<string>> GetOrganizationDomainsAsync(Guid organizationId, Guid userId)
+		{
+			_logger.LogInformation("Attempting to get all domains of {OrgId} by user {UserId}", organizationId, userId);
+			if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
 
             {
                 _logger.LogWarning("Organization {OrganizationId} not found", organizationId);
@@ -204,14 +198,13 @@ namespace ems_back.Services
 
         }
 
-        //Admin or Owner
-        public async Task<bool> AddDomainToOrganizationAsync(
-            Guid organizationId,
-            string domain,
-            Guid userId)
-        {
-            _logger.LogInformation("Attempting to add domain {Domain} to org {OrgId} by user {UserId}",
-                domain, organizationId, userId);
+		public async Task<bool> AddDomainToOrganizationAsync(
+			Guid organizationId,
+			string domain,
+			Guid userId)
+		{
+			_logger.LogInformation("Attempting to add domain {Domain} to org {OrgId} by user {UserId}",
+				domain, organizationId, userId);
 
             // 1. Verify organization exists
             if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
@@ -220,13 +213,13 @@ namespace ems_back.Services
                 return false;
             }
 
-            // 2. Check user permissions
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-            {
-                _logger.LogWarning("User {UserId} not found", userId);
-                throw new UnauthorizedAccessException();
-            }
+	
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+			if (user == null)
+			{
+				_logger.LogWarning("User {UserId} not found", userId);
+				throw new UnauthorizedAccessException();
+			}
 
             var isAdmin = await _userManager.IsInRoleAsync(user, nameof(UserRole.Admin));
             var isOwner = await _orgUserRepository.IsUserOrganizationOwner(userId, organizationId);
@@ -257,11 +250,10 @@ namespace ems_back.Services
             return result;
         }
 
-        //Owner or admin
-        public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
-        {
-            return await _userRepository.GetUsersByOrganizationAsync(organizationId);
-        }
+		public async Task<IEnumerable<UserResponseDto>> GetUsersByOrganizationAsync(Guid organizationId)
+		{
+			return await _userRepository.GetUsersByOrganizationAsync(organizationId);
+		}
 
         public async Task HandleAutomaticOrganizationMembership(string email)
         {
