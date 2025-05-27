@@ -131,8 +131,6 @@ namespace ems_back.Controllers
 
             try
             {
-                
-
                 var createdEvent = await _eventService.CreateEventAsync(orgId, eventDto, Guid.Parse(userId));
                 if (createdEvent == null)
                 {
