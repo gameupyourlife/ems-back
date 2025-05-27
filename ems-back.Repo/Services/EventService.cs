@@ -243,6 +243,20 @@ namespace ems_back.Repo.Services
             EventAttendeeCreateDto attendeeDto,
             Guid userId)
         {
+            var user = await _userService.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} not found", attendeeDto.UserId);
+                throw new NotFoundException("Active user not found");
+            }
+
+            if (user.Role == UserRole.User && user.Id != attendeeDto.UserId)
+            {
+                _logger.LogWarning("User with id {UserId} is not allowed to register for events on behalf of other users", userId);
+                throw new UnauthorizedAccessException("User is not allowed to register other users for events");
+            }
+
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
@@ -294,12 +308,12 @@ namespace ems_back.Repo.Services
                 throw new DbUpdateException("Error adding attendee to event");
             }
 
-            var user = await _userService.GetUserByIdAsync(attendeeDto.UserId);
+            var newUser = await _userService.GetUserByIdAsync(attendeeDto.UserId);
             var attendeeInfo = new EventAttendeeDto
             {
                 UserId = attendee.UserId,
-                UserEmail = user.Email,
-                UserName = user.FullName,
+                UserEmail = newUser.Email,
+                UserName = newUser.FullName,
                 Status = attendee.Status,
                 RegisteredAt = attendee.RegisteredAt
             };
@@ -310,6 +324,19 @@ namespace ems_back.Repo.Services
 
         public async Task<bool> RemoveAttendeeFromEventAsync(Guid orgId, Guid eventId, Guid attendeeId, Guid userId)
         {
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with id {UserId} not found", attendeeId);
+                throw new NotFoundException("User not found");
+            }
+
+            if (user.Role == UserRole.User && user.Id != attendeeId)
+            {
+                _logger.LogWarning("User is not allowed to unsubscribe others from events");
+                throw new UnauthorizedAccessException("User is only allowed to unsubscribe others from events");
+            }
+
             if (!await _userService.IsUserInOrgOrAdmin(orgId, userId))
             {
                 _logger.LogWarning("User with id {UserId} is not a member of organization with id {OrgId}", userId, orgId);
