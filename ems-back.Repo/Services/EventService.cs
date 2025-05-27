@@ -361,22 +361,29 @@ namespace ems_back.Repo.Services
                 throw new DbUpdateException("Event organizer could not be added");
             }
 
-            var roleUpdateResult = await _organizationService.UpdateUserRoleAsync(
-                currentUserId: userId,
-                orgId: orgId,
-                targetUserId: organizerId,
-                newRole: UserRole.EventOrganizer
-            );
+            var user = await _userService.GetUserByIdAsync(organizerId);
 
-            if (!roleUpdateResult.Success)
+            if (user.Role == UserRole.User)
             {
-                _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}: {Message}",
-                    organizerId, roleUpdateResult);
-                await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
-                throw new MismatchException($"Event organizer role could not be updated: {roleUpdateResult}");
+                var roleUpdateResult = await _organizationService.UpdateUserRoleAsync(
+                    currentUserId: userId,
+                    orgId: orgId,
+                    targetUserId: organizerId,
+                    newRole: UserRole.EventOrganizer
+                );
+
+                if (!roleUpdateResult.Success)
+                {
+                    _logger.LogWarning("Event organizer role could not be updated for user with id {OrganizerId}: {Message}",
+                        organizerId, roleUpdateResult);
+                    await RemoveEventOrganizerAsync(orgId, eventId, organizerId, userId);
+                    throw new MismatchException($"Event organizer role could not be updated: {roleUpdateResult}");
+                }
+
+                return roleUpdateResult.Success;
             }
 
-            return roleUpdateResult.Success;
+            return isAdded;            
         }
 
         public async Task<bool> RemoveEventOrganizerAsync(Guid orgId, Guid eventId, Guid organizerId, Guid userId)
@@ -394,29 +401,36 @@ namespace ems_back.Repo.Services
                 throw new MismatchException("Organizer could not be removed");
             }
 
-            var roleUpdate = new UserUpdateRoleDto
+            
+            var attend = _eventRepository.GetAllOrganizer(orgId, eventId, organizerId);
+            var user = await _userService.GetUserByIdAsync(organizerId);
+
+            if (user.Role == UserRole.EventOrganizer && attend != null)
             {
-                userId = organizerId,
-                OrganizationId = orgId,
-                newRole = UserRole.EventOrganizer
-            };
+                var roleUpdate = new UserUpdateRoleDto
+                {
+                    userId = organizerId,
+                    OrganizationId = orgId,
+                    newRole = UserRole.EventOrganizer
+                };
 
+                var isroleUpdated = await _organizationService.UpdateUserRoleAsync(
+                    currentUserId: userId,
+                    orgId: orgId,
+                    targetUserId: organizerId,
+                    newRole: UserRole.User
+                );
 
-            var isroleUpdated = await _organizationService.UpdateUserRoleAsync(
-                currentUserId: userId,
-                orgId: orgId,
-                targetUserId: organizerId,
-                newRole: UserRole.User
-            );
+                if (!isroleUpdated.Success)
+                {
+                    _logger.LogWarning("Event organizer role could not be updated");
+                    await AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
+                    throw new MismatchException("Event organizer role could not be updated");
+                }
 
-            if (!isroleUpdated.Success)
-            {
-                _logger.LogWarning("Event organizer role could not be updated");
-                await AddEventOrganizerAsync(orgId, eventId, organizerId, userId);
-                throw new MismatchException("Event organizer role could not be updated");
+                return isroleUpdated.Success;
             }
-
-            return isroleUpdated.Success;
+            return isRemoved;           
         }
 
         public async Task<IEnumerable<AgendaEntryDto>> GetAgendaAsync(Guid orgId, Guid eventId, Guid userId)

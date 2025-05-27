@@ -667,12 +667,16 @@ namespace ems_back.Tests.Services
 
             _eventRepoMock.Setup(r => r.AddEventOrganizerAsync(orgId, eventId, organizerId)).ReturnsAsync(true);
 
-            //_userServiceMock.Setup(s => s.UpdateUserRoleAsync(organizerId, It.IsAny<UserUpdateRoleDto>())).ReturnsAsync(true);
+            _userServiceMock.Setup(r => r.GetUserByIdAsync(organizerId)).ReturnsAsync(new UserResponseDto
+            {
+
+            });
+
             _orgServiceMock.Setup(s => s.UpdateUserRoleAsync(
-                    It.IsAny<Guid>(),  // currentUserId
-                    It.IsAny<Guid>(),  // orgId
-                    organizerId,       // targetUserId
-                    UserRole.EventOrganizer))  // newRole
+                    userId,
+                    orgId,
+                    organizerId,
+                    UserRole.EventOrganizer))
                 .ReturnsAsync(new RoleUpdateResult(true, "Role updated successfully"));
 
             var result = await _eventService.AddEventOrganizerAsync(orgId, eventId, organizerId, userId);

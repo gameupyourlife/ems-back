@@ -450,5 +450,15 @@ namespace ems_back.Repo.Repository
 
             return events;
         }
+
+        public async Task<IEnumerable<EventOrganizer>> GetAllOrganizer(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var organizer = await _context.EventOrganizers
+                .Where(e => e.EventId == eventId && e.UserId == organizerId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return organizer;
+        }
     }
 }

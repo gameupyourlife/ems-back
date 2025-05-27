@@ -34,5 +34,6 @@ public interface IEventRepository
 	Task<EventAttendeeDto> GetEventAttendeeByIdAsync(Guid eventId, Guid userId);
 	Task<EventOrganizer> GetEventOrganizerAsync(Guid eventId, Guid organizerId);
 	Task<AgendaEntry> GetAgendaEntryByIdAsync(Guid agendaId);
+    Task<IEnumerable<EventOrganizer>> GetAllOrganizer(Guid orgId, Guid eventId, Guid organizerId);
 }
 
