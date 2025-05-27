@@ -71,6 +71,8 @@ namespace ems_back.Repo.Repository
                 OrganizationId = eventDto.OrganizationId,
                 AttendeeCount = 0,
                 Status = EventStatus.Scheduled,
+                Image = eventDto.Image,
+                UpdatedBy = eventDto.UpdatedBy
             };
             _context.Events.Add(eventObject);
             await _context.SaveChangesAsync();
@@ -95,7 +97,7 @@ namespace ems_back.Repo.Repository
                     Description = e.Description,
                     Status = e.Status,
                     CreatedAt = e.CreatedAt,
-                    UpdatedAt = e.UpdatedAt,
+                    UpdatedAt = DateTime.UtcNow,
                     CreatedBy = e.CreatedBy,
                     CreatorName = e.Creator!.FullName,
                     UpdatedBy = e.UpdatedBy,
@@ -447,6 +449,16 @@ namespace ems_back.Repo.Repository
                 .ToListAsync();
 
             return events;
+        }
+
+        public async Task<IEnumerable<EventOrganizer>> GetAllOrganizer(Guid orgId, Guid eventId, Guid organizerId)
+        {
+            var organizer = await _context.EventOrganizers
+                .Where(e => e.EventId == eventId && e.UserId == organizerId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return organizer;
         }
     }
 }
