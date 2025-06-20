@@ -360,7 +360,6 @@ namespace ems_back.Controllers
 
         // POST: api/orgs/{orgId}/events/{eventId}/attendees
         [HttpPost("{eventId}/attendees")]
-        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<EventAttendeeDto>> AddAttendeeToEvent(
 			[FromRoute] Guid orgId ,
 			[FromRoute] Guid eventId,
@@ -415,7 +414,6 @@ namespace ems_back.Controllers
 
         // DELETE: api/orgs/{orgId}/events/{eventId}/attendees/{userId}
         [HttpDelete("{eventId}/attendees/{attendeeId}")]
-        [Authorize(Roles = $"{nameof(UserRole.Admin)}, {nameof(UserRole.Owner)}, {nameof(UserRole.Organizer)}")]
         public async Task<ActionResult<bool>> RemoveAttendeeFromEvent(
             [FromRoute] Guid orgId,
             [FromRoute] Guid eventId, 
